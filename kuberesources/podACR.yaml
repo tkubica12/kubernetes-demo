@@ -1,0 +1,14 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: acr-app
+spec:
+  containers:
+    - name: acr-app
+      image: tomascontainers.azurecr.io/private/web:1
+      imagePullPolicy: Always
+  # imagePullSecrets:
+  # - name: nonexisting
+  nodeSelector:
+    agentpool: linuxpool
+  automountServiceAccountToken: false

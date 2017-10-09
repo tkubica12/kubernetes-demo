@@ -1,0 +1,12 @@
+.secrets
+_output/
+myKubeACS.json
+myKubeAzureNet.json
+myKubeCalico.json
+rbacConfig
+translations/
+helm/
+draft/
+kuberesources/aciConnector.yaml
+kuberesources/deamonSetOMS.yaml
+kuberesources/rbacConfig

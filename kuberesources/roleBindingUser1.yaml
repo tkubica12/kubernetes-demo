@@ -1,0 +1,14 @@
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: tomas-cluster-read-only
+  namespace: rbac
+subjects:
+  - kind: User # May be "User", "Group" or "ServiceAccount"
+#    name: 'https://sts.windows.net/d1723ffd-a0ee-43d5-b890-f3e1395bcafd/#user1@tomaskubica.cz'
+    name: 'https://sts.windows.net/d1723ffd-a0ee-43d5-b890-f3e1395bcafd/#6a3222f1-3202-4662-9416-9088f2ec9952'
+    apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: myrole
+  apiGroup: rbac.authorization.k8s.io

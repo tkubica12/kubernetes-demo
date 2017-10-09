@@ -1,0 +1,56 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgresql
+  labels:
+    app: postgresql
+spec:
+  ports:
+  - port: 5432
+    name: postgresql-port
+  clusterIP: None
+  selector:
+    app: postgresql
+---    
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  name: postgresql
+spec:
+  selector:
+    matchLabels:
+      app: postgresql
+  serviceName: "postgresql"
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: postgresql
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: postgresql-pv-container
+        image: postgres
+        env:
+        - name: POSTGRES_PASSWORD
+          value: Azure12345678
+        - name: PGDATA
+          value: "/var/lib/postgresql/data/pgdata"
+        ports:
+          - containerPort: 5432
+            name: postgresql
+        volumeMounts:
+        - mountPath: "/var/lib/postgresql/data"
+          name: postgresql-volume-claim
+      nodeSelector:
+        agentpool: linuxpool
+  volumeClaimTemplates:
+  - metadata:
+      name: postgresql-volume-claim
+    spec:
+      storageClassName: managed-standard
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 32Gi

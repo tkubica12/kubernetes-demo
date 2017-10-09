@@ -1,0 +1,14 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: net-web
+  labels:
+    netClass: web
+spec:
+  containers:
+    - name: net-web
+      image: imega/mysql-client
+      command: ["tail"]
+      args: ["-f", "/dev/null"]
+  nodeSelector:
+    agentpool: linuxpool

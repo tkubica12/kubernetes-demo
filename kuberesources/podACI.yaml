@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: super-mario
+  namespace: default
+spec:
+  containers:
+  - image: pengbai/docker-supermario
+    imagePullPolicy: Always
+    name: super-mario
+    ports:
+      - containerPort: 8080
+  dnsPolicy: ClusterFirst
+  nodeName: aci-connector

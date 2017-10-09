@@ -1,0 +1,29 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: aci-connector
+  namespace: default
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: aci-connector
+    spec:
+      containers:
+      - name: aci-connector
+        image: microsoft/aci-connector-k8s:latest
+        imagePullPolicy: Always
+        env:
+        - name: AZURE_CLIENT_ID
+          value: "xxx-xxx"
+        - name: AZURE_CLIENT_KEY
+          value: "xxx-xxx"
+        - name: AZURE_TENANT_ID
+          value: "xxx-xxx"
+        - name: AZURE_SUBSCRIPTION_ID
+          value: "xxx-xxx"
+        - name: ACI_RESOURCE_GROUP
+          value: aci-connect
+      nodeSelector:
+        agentpool: linuxpool

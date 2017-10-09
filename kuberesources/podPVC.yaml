@@ -1,0 +1,26 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: postgresql-pv
+spec:
+  volumes:
+    - name: postgresql-pv-storage
+      persistentVolumeClaim:
+       claimName: postgresql-pv-claim
+
+  containers:
+    - name: postgresql-pv-container
+      image: postgres
+      env:
+      - name: POSTGRES_PASSWORD
+        value: Azure12345678
+      - name: PGDATA
+        value: "/var/lib/postgresql/data/pgdata"
+      ports:
+        - containerPort: 5432
+          name: postgresql
+      volumeMounts:
+      - mountPath: "/var/lib/postgresql/data"
+        name: postgresql-pv-storage
+  nodeSelector:
+    agentpool: linuxpool

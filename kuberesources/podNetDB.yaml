@@ -1,0 +1,15 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: net-db
+  labels:
+    netClass: db
+spec:
+  containers:
+    - name: net-db
+      image: mysql
+      env:
+      - name: MYSQL_ROOT_PASSWORD
+        value: Azure12345678
+  nodeSelector:
+    agentpool: linuxpool

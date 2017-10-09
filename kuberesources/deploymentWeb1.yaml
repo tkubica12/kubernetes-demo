@@ -1,0 +1,21 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: myweb-deployment
+spec:
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: myweb
+    spec:
+      containers:
+      - name: myweb
+        image: tkubica/web:1
+        env:
+        - name: PORT
+          value: "80"
+        ports:
+        - containerPort: 80
+      nodeSelector:
+        agentpool: linuxpool

@@ -1,0 +1,32 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: myiis-service-ext
+spec:
+  selector:
+    app: myiis
+  type: LoadBalancer
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: myiis-deployment
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: myiis
+    spec:
+      containers:
+      - name: myiis
+        image: microsoft/iis:nanoserver
+        ports:
+        - containerPort: 80
+      nodeSelector:
+#        agentpool: windowspool
+        beta.kubernetes.io/os: windows
