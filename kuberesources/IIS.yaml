@@ -28,5 +28,4 @@ spec:
         ports:
         - containerPort: 80
       nodeSelector:
-#        agentpool: windowspool
         beta.kubernetes.io/os: windows

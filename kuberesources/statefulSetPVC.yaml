@@ -43,7 +43,7 @@ spec:
         - mountPath: "/var/lib/postgresql/data"
           name: postgresql-volume-claim
       nodeSelector:
-        agentpool: linuxpool
+        beta.kubernetes.io/os: linux
   volumeClaimTemplates:
   - metadata:
       name: postgresql-volume-claim

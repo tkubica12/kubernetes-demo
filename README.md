@@ -81,6 +81,8 @@ This repo contains my Kubernetes demo in Azure.
 - [Author](#author)
 
 # Azure Container Instance demo
+Before we start with Kubernetes let see Azure Container Instances. This is top level resource in Azure so you don't have to create (and pay for) any VM, just create container directly and pay by second. In this demo we will deploy Microsoft SQL Server in Linux container.
+
 ## Create resource group
 ```
 az group create -n aci-group -l westeurope
@@ -105,15 +107,21 @@ az group delete -n aci-group -y
 ```
 
 # Building custom ACS cluster
+Azure Container Instance is deployment, upgrade and scaling tool to get open source orchestrators up and running in Azure quickly. ACS as native embedded Azure offering (in GUI, CLI etc.) is production-grade version of open source acs-engine (deployment tool). In order to get latest features we will download acs-engine so we are able to tweek some of its parameters that are not yet available in version embedded in ACS.
+
 ## Download ACS engine
 ```
-wget https://github.com/Azure/acs-engine/releases/download/v0.7.0/acs-engine-v0.7.0-linux-amd64.zip
-unzip acs-engine-v0.7.0-linux-amd64.zip
-mv acs-engine-v0.7.0-linux-amd64/acs-engine .
+wget https://github.com/Azure/acs-engine/releases/download/v0.8.0/acs-engine-v0.8.0-linux-amd64.zip
+unzip acs-engine-v0.8.0-linux-amd64.zip
+mv acs-engine-v0.8.0-linux-amd64/acs-engine .
 ```
 
 ## Build cluster and copy kubectl configuratio file
+We will build multiple clusters to show some additional options, but majority of this demo runs on first one.
+
 ### Mixed cluster with standard ACS networking
+Our first cluster will be hybrid Linux and Windows agents, with RBAC enabled and with support for Azure Managed Disks as persistent volumes in Kubernetes. Basic networking will be used with integration to Azure Load Balancer (for Kubernetes LodaBalancer Service).
+
 ```
 ./acs-engine generate myKubeACS.json
 cd _output/myKubeACS/
@@ -123,6 +131,8 @@ scp tomas@mykubeacs.westeurope.cloudapp.azure.com:.kube/config ~/.kube/config
 ```
 
 ### Cluster with Azure Networking CNI
+In this cluster we will use Azure Networkin CNI plugin. This allows pods to use directly IP addresses from Azure VNET and allows for Azure Networking features to be used with pods - for example Network Security Groups or direct communication between pods in cluster and VMs in the same VNET.
+
 ```
 ./acs-engine generate myKubeAzureNet.json
 cd _output/myKubeAzureNet/
@@ -132,6 +142,8 @@ scp tomas@mykubeazurenet.westeurope.cloudapp.azure.com:.kube/config ~/.kube/conf
 ```
 
 ### Cluster with Calico networking policy
+In this cluster we deploy Calico to implement networking policy. This is Kubernetes option to handle microsegmentation - L4 firewalling between pods.
+
 ```
 ./acs-engine generate myKubeCalico.json 
 cd _output/myKubeCalico/
@@ -155,6 +167,8 @@ kubectl proxy
 ```
 
 # Using stateless app farms in mixed environment
+This set of demos focus on stateless applications like APIs or web frontend. We will deploy application, balance it internally and externally, do rolling upgrade, deploy both Linux and Windows containers and make sure they can access each other.
+
 ## Deploy multiple pods with Deployment
 ```
 kubectl create -f deploymentWeb1.yaml
@@ -192,7 +206,6 @@ kubectl get service
 kubectl exec ubuntu -- curl -s myiis-service-ext
 ```
 
-
 ## Clean up
 ```
 kubectl delete -f serviceWebExt.yaml
@@ -204,9 +217,9 @@ kubectl delete -f IIS.yaml
 ```
 
 # Stateful applications and StatefulSet with Persistent Volume
-```
-. azure.rc
-```
+Deployments in Kubernetes are great for stateless applications, but statful apps, eg. databases. might require different handling. For example we want to use persistent storage and make sure, that when pod fails, new is created mapped to the same persistent volume (so data are persisted). Also in stateful applications we want to keep identifiers like network (IP address, DNS) when pod fails and needs to be rescheduled. Also when multiple replicas are used we need to start them one by one, because aften first instance is going to be master and others slave (so we need to wait for first one to come up first). If we need to scale down, we want to do this from last instance (not to scale down by killing first instance which is likely to be master). More details can be found in documentation.
+
+In this demo we will deploy single instance of PostgreSQL.
 
 ## Check storage class and create Persistent Volume
 ```
@@ -217,6 +230,7 @@ kubectl get pv
 ```
 
 Make sure volume is visible in Azure. 
+
 Clean up.
 ```
 kubectl delete -f persistentVolumeClaim.aml
@@ -272,17 +286,21 @@ kubectl delete pvc postgresql-volume-claim-postgresql-0
 ```
 
 # RBAC with AAD and ACR
+When using Kubernetes in enterprise there might be need to role based access control and strong authentication. In this demo we will see how to to use namespaces in Kubernetes to isolate resources from control plane level, how to authenticate user with strong Azure Active Directory authentication and how to authorize what each user can do with Kubernetes RBAC. Also we will look into private registry, how to secure it and make sure company provided images are used.
+
 ## Create namespace with some Pod
 ```
 kubectl create namespace rbac
 kubectl create -f podUbuntu.yaml --namespace rbac
+kubectl get pods
+kubectl get pods --namespace rbac
 ```
 
 ## Create RBAC credentials and RoleBinding
 Provide correct credentials like client-id, tenant-id etc. Also in roleBindingUser1.yaml make sure you replace first UUID with your directory-id (AAD domain id) and after # use id of user being used (in my case id of user1@tomsakubica.cz).
 ```
-. rbacconfig
-kubectl config set-credentials "user1@tomaskubica.cz" --auth-provider=azure --auth-provider-arg=environment=AzurePublicCloud --auth-provider-arg=client-id=$client-id --auth-provider-arg=tenant-id=$tenant-id --auth-provider-arg=apiserver-id=$apiserver-id 
+. rbacConfig
+kubectl config set-credentials "user1@tomaskubica.cz" --auth-provider=azure --auth-provider-arg=environment=AzurePublicCloud --auth-provider-arg=client-id=$clientid --auth-provider-arg=tenant-id=$tenantid --auth-provider-arg=apiserver-id=$apiserverid 
 
 kubectl create -f myrole.yaml
 kubectl create -f roleBindingUser1.yaml
@@ -357,7 +375,6 @@ kubectl create -f podACR.yaml
 ## Clean up
 ```
 kubectl delete -f clusterRoleBindingUser1.yaml
-kubectl config unset users.name.user1@tomaskubica.cz
 az group delete -n mykuberegistry -y --no-wait
 docker.exe rmi tomascontainers.azurecr.io/web:1
 docker.exe rmi tomascontainers.azurecr.io/web:2
@@ -366,6 +383,8 @@ docker.exe rmi tomascontainers.azurecr.io/private/web:1
 ```
 
 # ACI Connector (SuperMario example)
+As show in first example Azure Container Instance (in preview) can be used as top level resources. Azure can run containers directly without need to do so in VMs. There is experimental connector available so that Azure behaves like Kubernetes node with infinite capacity. In this demo we will install this connector and schedule pod to run on this infinite node reprezentaion of Azure.
+
 ## Create resource gorup
 ```
 az group create -n aci-connect -l eastus
@@ -398,10 +417,14 @@ kubectl delete -f clusterRoleBindingService.yaml
 ```
 
 # Networking
+We have seen a lot of networking already: internal ballancing and service discovery, external balancing with automatic integration to Azure Load Balancer with public IP, communication between pods in container etc. In this section we will focus on some other aspects namely networking policy.
+
 ## Azure CNI
 In Azure CNI cluster demonstrate how containers take IP addresses directly from VNET. Access pod directly from VM deployed in the same VNET.
 
 ## Network policy with Calico
+Calico is plugin that implements Kubernetes network policy, namely microsegmentation (L4 filtering between pods). In this demo we will create Web and DB and provide strict policy what and how can communicate.
+
 ### I will reference my kubectl config pointing to Calico-enabled cluster
 ```
 . calico.rc
@@ -430,6 +453,8 @@ kubectl exec -ti net-web -- ping -c 3 $dbip
 ```
 
 # Helm
+Helm is package manager for Kubernetes. It allows to put together all resources needed for application to run - deployments, services, statefulsets, variables.
+
 ## Install
 ```
 cd ./helm
@@ -451,7 +476,7 @@ helm delete myblog --purge
 ```
 
 # CI/CD with Jenkins and Helm
-In this demo we will see Jenkins deployed in Kubernetes via Helm and have Jenkins Agents spin up automatically as Pods.
+In this demo we will see Jenkins deployed into Kubernetes via Helm and have Jenkins Agents spin up automatically as Pods.
 
 CURRENT ISSUE: at the moment NodeSelector for agent does not seem to be delivered to Kubernetes cluster correctly. Since our cluster is hybrid (Linux and Windows) in order to work around it now we need to turn of Windows nodes.
 

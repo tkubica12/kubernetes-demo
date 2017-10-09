@@ -9,4 +9,4 @@ spec:
       command: ["tail"]
       args: ["-f", "/dev/null"]
   nodeSelector:
-    agentpool: linuxpool
+    beta.kubernetes.io/os: linux
