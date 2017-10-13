@@ -10,3 +10,5 @@ draft/
 kuberesources/aciConnector.yaml
 kuberesources/deamonSetOMS.yaml
 kuberesources/rbacConfig
+dbPassword.txt
+storageKey.txt

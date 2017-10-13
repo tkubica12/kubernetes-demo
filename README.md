@@ -262,6 +262,51 @@ kubectl delete pod postgresql-0
 kubectl exec -ti postgresql-0 -- psql -Upostgres -c 'SELECT * FROM mytable;'
 ```
 
+## Periodically backup DB to Azure Blob with CronJob
+With containers we should apply to single task per container strategy. Therefore scheduled backup process for our DB should be implemented as separate container. We will use CronJob to schedule regular backups and use environmental variables and secrets to pass information to container. That will contain simple Python script to backup our database and upload to Azure Blob Storage.
+
+### Create storage and container, get credentials
+```
+az storage account create -n tomasbackupdbstore -g mykubeacs -l westeurope --sku Standard_LRS
+export storagekey=$(az storage account keys list -g mykubeacs -n tomasbackupdbstore --query [0].value -o tsv)
+az storage container create -n backup --account-name tomasbackupdbstore --account-key $storagekey
+```
+
+### Container image for backup job
+You can use container image right from Docker Hub, but if you are intersted on how that works please look into backupJob folder. backup.py is simple script that reads inputs from environmental variables (we will pass this to container via Pod definition) and secrets from specific files (we will mount Kubernetes secrets). You can build container with Dockerfile that installs required dependencies such as Python Azure Storage library and pg_dump PostgreSQL backup utility and copies script to image. Here is how you do it:
+```
+cd ./backupJob
+docker.exe build -t tkubica/backupdb .
+docker.exe push tkubica/backupdb
+```
+
+### Prepare secrets
+We will pass non-sensitive information to our container via environmental variables. Nevertheless two items are considered sensitive - storage key and DB password. Therefore we will rather use concept of Kubernetes secret to pass this to container in more secured way. We need to create files with secrets and then create secret. This object is than mapped to Pod as volume.
+
+```
+echo -n 'Azure12345678' > dbPassword.txt
+echo -n $storagekey > storageKey.txt
+kubectl create secret generic backupcredentials --from-file=./dbPassword.txt --from-file=./storageKey.txt
+rm dbPassword.txt
+rm storageKey.txt
+```
+
+### Use CronJob to schedule backup job
+Read throw cronJobBackup.yaml. We are (for demonstration purposes) scheduling backup to run every minute and provide Pod template. In that we use env to pass information about DB host, username etc. and also mount volume with secrets.
+
+```
+kubectl create -f cronJobBackup.yaml
+kubectl get pods -w
+az storage blob list --account-name tomasbackupdbstore --account-key $storagekey -c backup
+```
+
+### Clean up
+```
+kubectl delete -f cronJobBackup.yaml
+kubectl delete secret backupcredentials
+az storage account delete -n tomasbackupdbstore -g mykubeacs -y
+```
+
 ## Continue in Azure
 Destroy statefulset and pvc, keep pv
 ```
@@ -283,6 +328,7 @@ Detach in GUI
 ## Clean up
 ```
 kubectl delete pvc postgresql-volume-claim-postgresql-0
+
 ```
 
 # RBAC with AAD and ACR

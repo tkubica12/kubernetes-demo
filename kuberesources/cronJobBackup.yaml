@@ -1,0 +1,37 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: backupjob
+spec:
+  schedule: "*/1 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: backupjob
+            image: tkubica/backupjob
+            env:
+            - name: STORAGE_ACCOUNT
+              value: tomasbackupdbstore
+            - name: CONTAINER_NAME
+              value: backup
+            - name: DB_USER
+              value: postgres
+            - name: DB_NAME
+              value: postgres
+            - name: DB_PORT
+              value: '5432'
+            - name: DB_HOST
+              value: postgresql
+            volumeMounts:
+            - name: backupcredentialsvolume
+              mountPath: "/backupCredentials"
+              readOnly: true
+          volumes:
+          - name: backupcredentialsvolume
+            secret:
+              secretName: backupcredentials
+          restartPolicy: OnFailure
+          nodeSelector:
+            beta.kubernetes.io/os: linux 
