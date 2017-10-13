@@ -2,6 +2,8 @@
 This repo contains my Kubernetes demo in Azure.
 
 # Table of Contents
+- [Kubernetes in Azure](#kubernetes-in-azure)
+- [Table of Contents](#table-of-contents)
 - [Azure Container Instance demo](#azure-container-instance-demo)
     - [Create resource group](#create-resource-group)
     - [Run SQL on Linux container](#run-sql-on-linux-container)
@@ -29,6 +31,12 @@ This repo contains my Kubernetes demo in Azure.
     - [Create StatefulSet with Volume template for Postgresql](#create-statefulset-with-volume-template-for-postgresql)
     - [Connect to PostgreSQL](#connect-to-postgresql)
     - [Destroy Pod and make sure StatefulSet recovers and data are still there](#destroy-pod-and-make-sure-statefulset-recovers-and-data-are-still-there)
+    - [Periodically backup DB to Azure Blob with CronJob](#periodically-backup-db-to-azure-blob-with-cronjob)
+        - [Create storage and container, get credentials](#create-storage-and-container-get-credentials)
+        - [Container image for backup job](#container-image-for-backup-job)
+        - [Prepare secrets](#prepare-secrets)
+        - [Use CronJob to schedule backup job](#use-cronjob-to-schedule-backup-job)
+        - [Clean up](#clean-up)
     - [Continue in Azure](#continue-in-azure)
     - [Clean up](#clean-up)
 - [RBAC with AAD and ACR](#rbac-with-aad-and-acr)
