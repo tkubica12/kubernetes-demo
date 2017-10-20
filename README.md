@@ -31,7 +31,6 @@ This repo contains my Kubernetes demo in Azure.
     - [Upgrade](#upgrade)
     - [Deploy IIS on Windows pool](#deploy-iis-on-windows-pool)
     - [Test Linux to Windows communication](#test-linux-to-windows-communication)
-        - [Connect via internal service endpoint](#connect-via-internal-service-endpoint)
     - [Clean up](#clean-up)
 - [Stateful applications and StatefulSet with Persistent Volume](#stateful-applications-and-statefulset-with-persistent-volume)
     - [Check storage class and create Persistent Volume](#check-storage-class-and-create-persistent-volume)
@@ -177,6 +176,8 @@ ssh tomas@mykubeextvm.westeurope.cloudapp.azure.com
 ```
 
 ### Access GUI
+Create proxy tunnel and open GUI on 127.0.0.1:8001/ui
+
 ```
 kubectl proxy
 ```
@@ -185,6 +186,8 @@ kubectl proxy
 This set of demos focus on stateless applications like APIs or web frontend. We will deploy application, balance it internally and externally, do rolling upgrade, deploy both Linux and Windows containers and make sure they can access each other.
 
 ## Deploy multiple pods with Deployment
+We are going to deploy simple web application with 3 instances.
+
 ```
 kubectl create -f deploymentWeb1.yaml
 kubectl get deployments -w
@@ -192,6 +195,8 @@ kubectl get pods -o wide
 ```
 
 ## Create service to balance traffic internally
+Create internal service and make sure it is accessible from within Kubernetes cluster. Try multiple times to se responses from different nodes in balancing pool.
+
 ```
 kubectl create -f podUbuntu.yaml
 kubectl create -f serviceWeb.yaml
@@ -226,11 +231,15 @@ curl 10.240.0.9
 In case we want L7 balancing, URL routing and SSL acceleration we need to use ingress controler with NGINX implementation. This will deploy http proxy into Kubernetes accessible via external IP (leveraging Azure LB and Azure DNS). Proxy then handles traffic routing to internal services in cluster and provides SSL acceleration.
 
 ### Deploy nginx ingress
+First we need to deploy L7 proxy that will work as Kubernetes Ingress balancer. We are using helm to easily install complete package (more on Helm later in this demo).
+
 ```
 helm install --name ingress stable/nginx-ingress -f nginx-ingress-values.yaml
 ```
 
 ### Prepare certificate and store it as Kubernetes secret 
+We will want to use TLS encryption (HTTPS). For demo purposes we will now create self-signed certificate.
+
 ```
 openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes -subj '/CN=mykubeapp.azure.tomaskubica.cz'
 
@@ -250,6 +259,8 @@ az network dns record-set a add-record -a $ingressIP -n mykubeapp -g shared-serv
 ```
 
 ### Create ingress for our service
+We are ready to go. Let's create ingress service that will reference (expose) internal service we have created previously.
+
 ```
 kubectl create -f ingressWeb.yaml
 ```
@@ -268,18 +279,27 @@ openssl s_client -showcerts -servername mykubeapp.azure.tomaskubica.cz -connect 
 ```
 
 ## Upgrade
+We will now do rolling upgrade of our application to new version. We are going to change deployment to use different container with v2 of our app.
 ```
 kubectl apply -f deploymentWeb2.yaml
 ```
 
+Watch pods being rolled
+```
+kubectl get pods -w
+```
+
 ## Deploy IIS on Windows pool
+Let's now deploy Windows container with IIS.
+
 ```
 kubectl create -f IIS.yaml
 kubectl get service
 ```
 
 ## Test Linux to Windows communication
-### Connect via internal service endpoint
+In this demo we want to make sure our Linux and Windows containers can talk to each other. Connect from Linux container to internal service endpoint of IIS.
+
 ```
 kubectl exec ubuntu -- curl -s myiis-service-ext
 ```
@@ -305,6 +325,8 @@ Deployments in Kubernetes are great for stateless applications, but statful apps
 In this demo we will deploy single instance of PostgreSQL.
 
 ## Check storage class and create Persistent Volume
+Our ACS cluster has Azure Disk persistence volume drivers setup.
+
 ```
 kubectl get storageclasses
 kubectl create -f persistentVolumeClaim.yaml
