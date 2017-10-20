@@ -1,0 +1,14 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: myweb-service-ext-private
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+spec:
+  selector:
+    app: myweb
+  type: LoadBalancer
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80

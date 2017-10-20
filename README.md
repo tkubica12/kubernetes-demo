@@ -20,7 +20,14 @@ This repo contains my Kubernetes demo in Azure.
 - [Using stateless app farms in mixed environment](#using-stateless-app-farms-in-mixed-environment)
     - [Deploy multiple pods with Deployment](#deploy-multiple-pods-with-deployment)
     - [Create service to balance traffic internally](#create-service-to-balance-traffic-internally)
-    - [Create externally accesable service with Azure LB](#create-externally-accesable-service-with-azure-lb)
+    - [Create externally accessible service with Azure LB with Public IP](#create-externally-accessible-service-with-azure-lb-with-public-ip)
+    - [Create externally accessible service with Azure LB with Private IP](#create-externally-accessible-service-with-azure-lb-with-private-ip)
+    - [Create externally accessible service with L7 proxy (Kubernetes ingress)](#create-externally-accessible-service-with-l7-proxy-kubernetes-ingress)
+        - [Deploy nginx ingress](#deploy-nginx-ingress)
+        - [Prepare certificate and store it as Kubernetes secret](#prepare-certificate-and-store-it-as-kubernetes-secret)
+        - [Create DNS record](#create-dns-record)
+        - [Create ingress for our service](#create-ingress-for-our-service)
+        - [Test](#test)
     - [Upgrade](#upgrade)
     - [Deploy IIS on Windows pool](#deploy-iis-on-windows-pool)
     - [Test Linux to Windows communication](#test-linux-to-windows-communication)
@@ -192,9 +199,72 @@ kubectl get services
 kubectl exec ubuntu -- curl -s myweb-service
 ```
 
-## Create externally accesable service with Azure LB
+## Create externally accessible service with Azure LB with Public IP
+In this example we make service accessible for users via Azure Load Balancer leveraging public IP address.
+
 ```
-kubectl create -f serviceWebExt.yaml
+kubectl create -f serviceWebExtPublic.yaml
+
+export extPublicIP=$(kubectl get service myweb-service-ext-public -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+curl $extPublicIP
+```
+
+## Create externally accessible service with Azure LB with Private IP
+In this example we make service accessible for internal users via Azure Load Balancer with private IP address so service only from VNET (or peered networks or on-premises network connected via S2S VPN or ExpressRoute).
+
+```
+kubectl create -f serviceWebExtPrivate.yaml
+```
+
+To test we will connect to VM that runs in the same VNET.
+```
+ssh tomas@mykubeextvm.westeurope.cloudapp.azure.com
+curl 10.240.0.9
+```
+
+## Create externally accessible service with L7 proxy (Kubernetes ingress)
+In case we want L7 balancing, URL routing and SSL acceleration we need to use ingress controler with NGINX implementation. This will deploy http proxy into Kubernetes accessible via external IP (leveraging Azure LB and Azure DNS). Proxy then handles traffic routing to internal services in cluster and provides SSL acceleration.
+
+### Deploy nginx ingress
+```
+helm install --name ingress stable/nginx-ingress -f nginx-ingress-values.yaml
+```
+
+### Prepare certificate and store it as Kubernetes secret 
+```
+openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes -subj '/CN=mykubeapp.azure.tomaskubica.cz'
+
+kubectl create secret tls mycert --key key.pem --cert cert.pem
+
+rm key.pem
+rm cert.pem
+```
+
+### Create DNS record
+We need to register nginx-ingress public IP address with DNS server. In this demo we use Azure DNS.
+
+```
+export ingressIP=$(kubectl get service ingress-nginx-ingress-controller -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+
+az network dns record-set a add-record -a $ingressIP -n mykubeapp -g shared-services -z azure.tomaskubica.cz
+```
+
+### Create ingress for our service
+```
+kubectl create -f ingressWeb.yaml
+```
+
+### Test
+Access app at https://mykubeapp.azure.tomaskubica.cz/myweb
+
+Because certificate is self-signed (not trusted) use this to test:
+```
+curl -k https://mykubeapp.azure.tomaskubica.cz/myweb
+```
+
+Print certificate
+```
+openssl s_client -showcerts -servername mykubeapp.azure.tomaskubica.cz -connect mykubeapp.azure.tomaskubica.cz:443 2>/dev/null | openssl x509 -inform pem -noout -text
 ```
 
 ## Upgrade
@@ -216,12 +286,17 @@ kubectl exec ubuntu -- curl -s myiis-service-ext
 
 ## Clean up
 ```
-kubectl delete -f serviceWebExt.yaml
+kubectl delete -f ingressWeb.yaml
+kubectl delete -f serviceWebExtPublic.yaml
+kubectl delete -f serviceWebExtPrivate.yaml
 kubectl delete -f serviceWeb.yaml
 kubectl delete -f podUbuntu.yaml
 kubectl delete -f deploymentWeb1.yaml
 kubectl delete -f deploymentWeb2.yaml
 kubectl delete -f IIS.yaml
+helm delete ingress --purge
+kubectl delete secret mycert
+az network dns record-set a delete -y -n mykubeapp -g shared-services -z azure.tomaskubica.cz
 ```
 
 # Stateful applications and StatefulSet with Persistent Volume
@@ -241,7 +316,7 @@ Make sure volume is visible in Azure.
 
 Clean up.
 ```
-kubectl delete -f persistentVolumeClaim.aml
+kubectl delete -f persistentVolumeClaim.yaml
 ```
 
 ## Create StatefulSet with Volume template for Postgresql

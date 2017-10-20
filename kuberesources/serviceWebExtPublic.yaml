@@ -1,0 +1,12 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: myweb-service-ext-public
+spec:
+  selector:
+    app: myweb
+  type: LoadBalancer
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
