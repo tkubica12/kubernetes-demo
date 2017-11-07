@@ -4,6 +4,7 @@ This repo contains my Kubernetes demo in Azure.
 # Table of Contents
 - [Kubernetes in Azure](#kubernetes-in-azure)
 - [Table of Contents](#table-of-contents)
+- [TO DO](#to-do)
 - [Azure Container Instance demo](#azure-container-instance-demo)
     - [Create resource group](#create-resource-group)
     - [Run SQL on Linux container](#run-sql-on-linux-container)
@@ -94,6 +95,13 @@ This repo contains my Kubernetes demo in Azure.
     - [Log Analytics](#log-analytics)
     - [Clean up](#clean-up)
 - [Author](#author)
+
+# TO DO
+* Redesign most of demos to run on AKS (managed Kubernetes)
+* Introduce kubectx to switch between clusters rather than using env
+* Kubernetes federation
+* Add VSTS integration
+* Demo service brokering with service catalog and open service broker
 
 # Azure Container Instance demo
 Before we start with Kubernetes let see Azure Container Instances. This is top level resource in Azure so you don't have to create (and pay for) any VM, just create container directly and pay by second. In this demo we will deploy Microsoft SQL Server in Linux container.
