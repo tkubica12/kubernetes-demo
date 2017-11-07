@@ -17,6 +17,7 @@ This repo contains my Kubernetes demo in Azure.
         - [Cluster with Calico networking policy](#cluster-with-calico-networking-policy)
         - [Create VM for testing](#create-vm-for-testing)
         - [Access GUI](#access-gui)
+- [Deploying managed Kubernetes (AKS)](#deploying-managed-kubernetes-aks)
 - [Using stateless app farms in mixed environment](#using-stateless-app-farms-in-mixed-environment)
     - [Deploy multiple pods with Deployment](#deploy-multiple-pods-with-deployment)
     - [Create service to balance traffic internally](#create-service-to-balance-traffic-internally)
@@ -125,9 +126,10 @@ Azure Container Instance is deployment, upgrade and scaling tool to get open sou
 
 ## Download ACS engine
 ```
-wget https://github.com/Azure/acs-engine/releases/download/v0.8.0/acs-engine-v0.8.0-linux-amd64.zip
-unzip acs-engine-v0.8.0-linux-amd64.zip
-mv acs-engine-v0.8.0-linux-amd64/acs-engine .
+wget https://github.com/Azure/acs-engine/releases/download/v0.9.1/acs-engine-v0.9.1-linux-amd64.zip
+unzip acs-engine-v0.9.1-linux-amd64.zip
+mv acs-engine-v0.9.1-linux-amd64/acs-engine .
+rm -rf acs-engine-v0.9.1-linux-amd64*
 ```
 
 ## Build cluster and copy kubectl configuratio file
@@ -181,6 +183,23 @@ Create proxy tunnel and open GUI on 127.0.0.1:8001/ui
 ```
 kubectl proxy
 ```
+
+# Deploying managed Kubernetes (AKS)
+This demo is currently build on acs-engine based Kubernetes environment in Azure, nevertheless Microsoft currently offers preview of new managed Kubernetes service (AKS). I plan to rework this demo for AKS in near future.
+
+After you install latest version of Azure CLI make sure it has access to this new service.
+```
+az provider register -n Microsoft.ContainerService
+az provider show -n Microsoft.ContainerService
+```
+
+To setup your managed Kubernetes cluster you can use following commands. Make sure you provide your service-principal and client-secret.
+
+```
+az group create -n aks -l westus2
+az aks create -n tomasaks -g aks --ssh-key-value "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDFhm1FUhzt/9roX7SmT/dI+vkpyQVZp3Oo5HC23YkUVtpmTdHje5oBV0LMLBB1Q5oSNMCWiJpdfD4VxURC31yet4mQxX2DFYz8oEUh0Vpv+9YWwkEhyDy4AVmVKVoISo5rAsl3JLbcOkSqSO8FaEfO5KIIeJXB6yGI3UQOoL1owMR9STEnI2TGPZzvk/BdRE73gJxqqY0joyPSWOMAQ75Xr9ddWHul+v//hKjibFuQF9AFzaEwNbW5HxDsQj8gvdG/5d6mt66SfaY+UWkKldM4vRiZ1w11WlyxRJn5yZNTeOxIYU4WLrDtvlBklCMgB7oF0QfiqahauOEo6m5Di2Ex" --kubernetes-version 1.8.1 --agent-count 2 --admin-username tomas --service-principal $principal --client-secret $client_secret -s Standard_A1
+```
+
 
 # Using stateless app farms in mixed environment
 This set of demos focus on stateless applications like APIs or web frontend. We will deploy application, balance it internally and externally, do rolling upgrade, deploy both Linux and Windows containers and make sure they can access each other.
