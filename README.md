@@ -20,7 +20,9 @@ This repo contains my Kubernetes demo in Azure.
         - [Create VM for testing](#create-vm-for-testing)
         - [Access GUI](#access-gui)
 - [Deploying managed Kubernetes (AKS)](#deploying-managed-kubernetes-aks)
+- [Merging cluster configurations and using kubectx to switch between clusters](#merging-cluster-configurations-and-using-kubectx-to-switch-between-clusters)
 - [Using stateless app farms in mixed environment](#using-stateless-app-farms-in-mixed-environment)
+    - [Switch to our mixed ACS cluster](#switch-to-our-mixed-acs-cluster)
     - [Deploy multiple pods with Deployment](#deploy-multiple-pods-with-deployment)
     - [Create service to balance traffic internally](#create-service-to-balance-traffic-internally)
     - [Create externally accessible service with Azure LB with Public IP](#create-externally-accessible-service-with-azure-lb-with-public-ip)
@@ -36,6 +38,7 @@ This repo contains my Kubernetes demo in Azure.
     - [Test Linux to Windows communication](#test-linux-to-windows-communication)
     - [Clean up](#clean-up)
 - [Stateful applications and StatefulSet with Persistent Volume](#stateful-applications-and-statefulset-with-persistent-volume)
+    - [Switch to our mixed ACS cluster](#switch-to-our-mixed-acs-cluster)
     - [Check storage class and create Persistent Volume](#check-storage-class-and-create-persistent-volume)
     - [Create StatefulSet with Volume template for Postgresql](#create-statefulset-with-volume-template-for-postgresql)
     - [Connect to PostgreSQL](#connect-to-postgresql)
@@ -49,6 +52,7 @@ This repo contains my Kubernetes demo in Azure.
     - [Continue in Azure](#continue-in-azure)
     - [Clean up](#clean-up)
 - [RBAC with AAD and ACR](#rbac-with-aad-and-acr)
+    - [Switch to our mixed ACS cluster](#switch-to-our-mixed-acs-cluster)
     - [Create namespace with some Pod](#create-namespace-with-some-pod)
     - [Create RBAC credentials and RoleBinding](#create-rbac-credentials-and-rolebinding)
     - [Create configuration context and switch to it](#create-configuration-context-and-switch-to-it)
@@ -65,6 +69,7 @@ This repo contains my Kubernetes demo in Azure.
         - [Run Kubernetes Pod from Azure Container Registry](#run-kubernetes-pod-from-azure-container-registry)
     - [Clean up](#clean-up)
 - [ACI Connector (SuperMario example)](#aci-connector-supermario-example)
+    - [Switch to our mixed ACS cluster](#switch-to-our-mixed-acs-cluster)
     - [Create resource gorup](#create-resource-gorup)
     - [Assign RBAC to default service account](#assign-rbac-to-default-service-account)
     - [Deploy ACI Connector](#deploy-aci-connector)
@@ -163,7 +168,7 @@ Our first cluster will be hybrid Linux and Windows agents, with RBAC enabled and
 cd _output/acstomas/
 az group create -n acs -l westeurope
 az group deployment create --template-file azuredeploy.json --parameters @azuredeploy.parameters.json -g acs
-scp tomas@acstomas.westeurope.cloudapp.azure.com:.kube/config ~/.kube/config
+scp tomas@acstomas.westeurope.cloudapp.azure.com:.kube/config ~/.kube/config-acs
 ```
 
 ### Cluster with Azure Networking CNI
@@ -226,9 +231,36 @@ Get credentials.
 az aks get-credentials -n tomaks -g aks
 ```
 
+# Merging cluster configurations and using kubectx to switch between clusters
+
+In order to easily switch between clusters let's download kubectx script.
+
+```
+sudo wget https://raw.githubusercontent.com/ahmetb/kubectx/master/kubectx -O /usr/local/bin/kubectx
+sudo chmod +x /usr/local/bin/kubectx
+```
+
+Set env variable to merge all our configuration files
+
+```
+echo 'export KUBECONFIG=~/.kube/config:~/.kube/config-acs:~/.kube/config-azurenet:~/.kube/config-calico'  > .kubeconfig
+source .kubeconfig
+```
+
+You can now run kubectx to list clusters and switch between them.
+
+```
+kubectx
+kubectx mojeacsdemo
+```
 
 # Using stateless app farms in mixed environment
 This set of demos focus on stateless applications like APIs or web frontend. We will deploy application, balance it internally and externally, do rolling upgrade, deploy both Linux and Windows containers and make sure they can access each other.
+
+## Switch to our mixed ACS cluster
+```
+kubectx mojeacsdemo
+```
 
 ## Deploy multiple pods with Deployment
 We are going to deploy simple web application with 3 instances.
@@ -369,6 +401,11 @@ Deployments in Kubernetes are great for stateless applications, but statful apps
 
 In this demo we will deploy single instance of PostgreSQL.
 
+## Switch to our mixed ACS cluster
+```
+kubectx mojeacsdemo
+```
+
 ## Check storage class and create Persistent Volume
 Our ACS cluster has Azure Disk persistence volume drivers setup.
 
@@ -484,6 +521,11 @@ kubectl delete pvc postgresql-volume-claim-postgresql-0
 # RBAC with AAD and ACR
 When using Kubernetes in enterprise there might be need to role based access control and strong authentication. In this demo we will see how to to use namespaces in Kubernetes to isolate resources from control plane level, how to authenticate user with strong Azure Active Directory authentication and how to authorize what each user can do with Kubernetes RBAC. Also we will look into private registry, how to secure it and make sure company provided images are used.
 
+## Switch to our mixed ACS cluster
+```
+kubectx mojeacsdemo
+```
+
 ## Create namespace with some Pod
 ```
 kubectl create namespace rbac
@@ -581,6 +623,11 @@ docker.exe rmi tomascontainers.azurecr.io/private/web:1
 # ACI Connector (SuperMario example)
 As show in first example Azure Container Instance (in preview) can be used as top level resources. Azure can run containers directly without need to do so in VMs. There is experimental connector available so that Azure behaves like Kubernetes node with infinite capacity. In this demo we will install this connector and schedule pod to run on this infinite node reprezentaion of Azure.
 
+## Switch to our mixed ACS cluster
+```
+kubectx mojeacsdemo
+```
+
 ## Create resource gorup
 ```
 az group create -n aci-connect -l eastus
@@ -623,7 +670,7 @@ Calico is plugin that implements Kubernetes network policy, namely microsegmenta
 
 ### I will reference my kubectl config pointing to Calico-enabled cluster
 ```
-. calico.rc
+kubectx mykubecalico
 ```
 
 ### Create web and db pod
