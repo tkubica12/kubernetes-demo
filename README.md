@@ -9,6 +9,7 @@ This repo contains my Kubernetes demo in Azure.
     - [Create resource group](#create-resource-group)
     - [Run SQL on Linux container](#run-sql-on-linux-container)
     - [Connect to SQL](#connect-to-sql)
+    - [Running tasks in Azure Container Instance](#running-tasks-in-azure-container-instance)
     - [Delete container](#delete-container)
 - [Building custom ACS cluster](#building-custom-acs-cluster)
     - [Download ACS engine](#download-acs-engine)
@@ -123,9 +124,20 @@ watch az container logs -n mssql -g aci-group
 sqlcmd -S $sqlip -U sa -P 'my(!)Password' -Q 'select name from sys.databases'
 ```
 
+## Running tasks in Azure Container Instance
+ACI can be used to execute tasks packaged in container, for example transform some data, prepare calculation or do maintenance. Key is to have this task as entry process and configure ACI to not restart process when it exits with 0 code. Instead when task is over Azure will delete this container so you stop paying for it.
+
+Let's use simplistic alpine container and our "task" will be simulated by sleeping for 20 seconds. Instead of default restart policy (Always, so it keeps restarting process) we configure this to OnFailure, so when our process returns 0, container will be terminated.
+
+```
+az container create -n containertask -g aci-group --cpu 1 --memory 1 -l eastus --image alpine --command-line 'sleep 20' --restart-policy OnFailure
+az container show -n containertask -g aci-group --query containers[].instanceView.currentState
+```
+
 ## Delete container
 ```
 az container delete -n mssql -g aci-group -y
+az container delete -n containertask -g aci-group -y
 az group delete -n aci-group -y
 ```
 
@@ -134,10 +146,10 @@ Azure Container Instance is deployment, upgrade and scaling tool to get open sou
 
 ## Download ACS engine
 ```
-wget https://github.com/Azure/acs-engine/releases/download/v0.9.1/acs-engine-v0.9.1-linux-amd64.zip
-unzip acs-engine-v0.9.1-linux-amd64.zip
-mv acs-engine-v0.9.1-linux-amd64/acs-engine .
-rm -rf acs-engine-v0.9.1-linux-amd64*
+wget https://github.com/Azure/acs-engine/releases/download/v0.9.3/acs-engine-v0.9.3-linux-amd64.zip
+unzip acs-engine-v0.9.3-linux-amd64.zip
+mv acs-engine-v0.9.3-linux-amd64/acs-engine .
+rm -rf acs-engine-v0.9.3-linux-amd64*
 ```
 
 ## Build cluster and copy kubectl configuratio file
@@ -147,11 +159,11 @@ We will build multiple clusters to show some additional options, but majority of
 Our first cluster will be hybrid Linux and Windows agents, with RBAC enabled and with support for Azure Managed Disks as persistent volumes in Kubernetes. Basic networking will be used with integration to Azure Load Balancer (for Kubernetes LodaBalancer Service).
 
 ```
-./acs-engine generate myKubeACS.json
-cd _output/myKubeACS/
-az group create -n mykubeacs -l westeurope
-az group deployment create --template-file azuredeploy.json --parameters @azuredeploy.parameters.json -g mykubeacs
-scp tomas@mykubeacs.westeurope.cloudapp.azure.com:.kube/config ~/.kube/config
+./acs-engine generate acs.json
+cd _output/acstomas/
+az group create -n acs -l westeurope
+az group deployment create --template-file azuredeploy.json --parameters @azuredeploy.parameters.json -g acs
+scp tomas@acstomas.westeurope.cloudapp.azure.com:.kube/config ~/.kube/config
 ```
 
 ### Cluster with Azure Networking CNI
@@ -205,7 +217,13 @@ To setup your managed Kubernetes cluster you can use following commands. Make su
 
 ```
 az group create -n aks -l westus2
-az aks create -n tomasaks -g aks --ssh-key-value "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDFhm1FUhzt/9roX7SmT/dI+vkpyQVZp3Oo5HC23YkUVtpmTdHje5oBV0LMLBB1Q5oSNMCWiJpdfD4VxURC31yet4mQxX2DFYz8oEUh0Vpv+9YWwkEhyDy4AVmVKVoISo5rAsl3JLbcOkSqSO8FaEfO5KIIeJXB6yGI3UQOoL1owMR9STEnI2TGPZzvk/BdRE73gJxqqY0joyPSWOMAQ75Xr9ddWHul+v//hKjibFuQF9AFzaEwNbW5HxDsQj8gvdG/5d6mt66SfaY+UWkKldM4vRiZ1w11WlyxRJn5yZNTeOxIYU4WLrDtvlBklCMgB7oF0QfiqahauOEo6m5Di2Ex" --kubernetes-version 1.8.1 --agent-count 2 --admin-username tomas --service-principal $principal --client-secret $client_secret -s Standard_A1
+az aks create -n aks -g aks --ssh-key-value "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDFhm1FUhzt/9roX7SmT/dI+vkpyQVZp3Oo5HC23YkUVtpmTdHje5oBV0LMLBB1Q5oSNMCWiJpdfD4VxURC31yet4mQxX2DFYz8oEUh0Vpv+9YWwkEhyDy4AVmVKVoISo5rAsl3JLbcOkSqSO8FaEfO5KIIeJXB6yGI3UQOoL1owMR9STEnI2TGPZzvk/BdRE73gJxqqY0joyPSWOMAQ75Xr9ddWHul+v//hKjibFuQF9AFzaEwNbW5HxDsQj8gvdG/5d6mt66SfaY+UWkKldM4vRiZ1w11WlyxRJn5yZNTeOxIYU4WLrDtvlBklCMgB7oF0QfiqahauOEo6m5Di2Ex" --kubernetes-version 1.8.1 --agent-count 2 --admin-username tomas --service-principal $principal --client-secret $client_secret -s Standard_A1
+```
+
+Get credentials.
+
+```
+az aks get-credentials -n tomaks -g aks
 ```
 
 

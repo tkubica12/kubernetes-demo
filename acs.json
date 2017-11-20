@@ -1,0 +1,57 @@
+{
+  "apiVersion": "vlabs",
+  "properties": {
+    "orchestratorProfile": {
+      "orchestratorType": "Kubernetes",
+      "orchestratorRelease": "1.8",
+      "kubernetesConfig": {
+        "enableRbac": true     
+        }       
+    },
+    "masterProfile": {
+      "count": 1,
+      "dnsPrefix": "acstomas",
+      "vmSize": "Standard_D2_v3"
+    },
+    "agentPoolProfiles": [
+      {
+        "name": "linuxpool",
+        "count": 2,
+        "vmSize": "Standard_D1_v2",
+        "storageProfile" : "ManagedDisks",
+        "availabilityProfile": "AvailabilitySet"
+      },
+      {
+        "name": "windowspool",
+        "count": 2,
+        "vmSize": "Standard_D1_v2",
+        "storageProfile" : "ManagedDisks",
+        "availabilityProfile": "AvailabilitySet",
+        "osType": "Windows"
+      }
+    ],
+    "linuxProfile": {
+      "adminUsername": "tomas",
+      "ssh": {
+        "publicKeys": [
+          {
+            "keyData": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDFhm1FUhzt/9roX7SmT/dI+vkpyQVZp3Oo5HC23YkUVtpmTdHje5oBV0LMLBB1Q5oSNMCWiJpdfD4VxURC31yet4mQxX2DFYz8oEUh0Vpv+9YWwkEhyDy4AVmVKVoISo5rAsl3JLbcOkSqSO8FaEfO5KIIeJXB6yGI3UQOoL1owMR9STEnI2TGPZzvk/BdRE73gJxqqY0joyPSWOMAQ75Xr9ddWHul+v//hKjibFuQF9AFzaEwNbW5HxDsQj8gvdG/5d6mt66SfaY+UWkKldM4vRiZ1w11WlyxRJn5yZNTeOxIYU4WLrDtvlBklCMgB7oF0QfiqahauOEo6m5Di2Ex"
+          }
+        ]
+      }
+    },
+    "windowsProfile": {
+        "adminUsername": "tomas",
+        "adminPassword": "Azure12345678"
+    },
+    "servicePrincipalProfile": {
+      "clientId": "a923ca56-e718-45ff-8259-0169e9f9a5e7",
+      "secret": "3AfmhpsfyQqL2V7fqFrCbY827MG4FDL10B4YsVc2jz4="
+    },
+    "aadProfile": {
+        "serverAppID": "48cb2e81-8e41-4147-99d2-cbf735f8de97",
+        "clientAppID": "d1313f2b-7816-4cdb-8646-3a5002959695",
+        "tenantID": "d1723ffd-a0ee-43d5-b890-f3e1395bcafd"
+    }
+  }
+}
