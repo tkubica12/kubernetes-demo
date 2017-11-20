@@ -22,23 +22,24 @@ This repo contains my Kubernetes demo in Azure.
 - [Deploying managed Kubernetes (AKS)](#deploying-managed-kubernetes-aks)
 - [Merging cluster configurations and using kubectx to switch between clusters](#merging-cluster-configurations-and-using-kubectx-to-switch-between-clusters)
 - [Using stateless app farms in mixed environment](#using-stateless-app-farms-in-mixed-environment)
-    - [Switch to our mixed ACS cluster](#switch-to-our-mixed-acs-cluster)
+    - [Switch to our AKS or mixed ACS cluster](#switch-to-our-aks-or-mixed-acs-cluster)
     - [Deploy multiple pods with Deployment](#deploy-multiple-pods-with-deployment)
     - [Create service to balance traffic internally](#create-service-to-balance-traffic-internally)
     - [Create externally accessible service with Azure LB with Public IP](#create-externally-accessible-service-with-azure-lb-with-public-ip)
     - [Create externally accessible service with Azure LB with Private IP](#create-externally-accessible-service-with-azure-lb-with-private-ip)
     - [Create externally accessible service with L7 proxy (Kubernetes ingress)](#create-externally-accessible-service-with-l7-proxy-kubernetes-ingress)
+        - [Make sure Helm is installed](#make-sure-helm-is-installed)
         - [Deploy nginx ingress](#deploy-nginx-ingress)
         - [Prepare certificate and store it as Kubernetes secret](#prepare-certificate-and-store-it-as-kubernetes-secret)
         - [Create DNS record](#create-dns-record)
         - [Create ingress for our service](#create-ingress-for-our-service)
         - [Test](#test)
     - [Upgrade](#upgrade)
-    - [Deploy IIS on Windows pool](#deploy-iis-on-windows-pool)
-    - [Test Linux to Windows communication](#test-linux-to-windows-communication)
+    - [Deploy IIS on Windows pool (currently only for ACS mixed cluster, no AKS)](#deploy-iis-on-windows-pool-currently-only-for-acs-mixed-cluster-no-aks)
+    - [Test Linux to Windows communication (currently only for ACS mixed cluster, no AKS)](#test-linux-to-windows-communication-currently-only-for-acs-mixed-cluster-no-aks)
     - [Clean up](#clean-up)
 - [Stateful applications and StatefulSet with Persistent Volume](#stateful-applications-and-statefulset-with-persistent-volume)
-    - [Switch to our mixed ACS cluster](#switch-to-our-mixed-acs-cluster)
+    - [Switch to our AKS or mixed ACS cluster](#switch-to-our-aks-or-mixed-acs-cluster)
     - [Check storage class and create Persistent Volume](#check-storage-class-and-create-persistent-volume)
     - [Create StatefulSet with Volume template for Postgresql](#create-statefulset-with-volume-template-for-postgresql)
     - [Connect to PostgreSQL](#connect-to-postgresql)
@@ -229,7 +230,7 @@ az aks create -n aks -g aks --ssh-key-value "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAA
 Get credentials.
 
 ```
-az aks get-credentials -n tomaks -g aks
+az aks get-credentials -n aks -g aks
 ```
 
 # Merging cluster configurations and using kubectx to switch between clusters
@@ -258,7 +259,15 @@ kubectx mojeacsdemo
 # Using stateless app farms in mixed environment
 This set of demos focus on stateless applications like APIs or web frontend. We will deploy application, balance it internally and externally, do rolling upgrade, deploy both Linux and Windows containers and make sure they can access each other.
 
-## Switch to our mixed ACS cluster
+Most parts of this demo works in AKS except for Windows containers, for which we currentlz need to use custom ACS engine.
+
+## Switch to our AKS or mixed ACS cluster
+```
+kubectx aks
+```
+
+or mixed ACS engine
+
 ```
 kubectx mojeacsdemo
 ```
@@ -308,11 +317,26 @@ curl 10.240.0.9
 ## Create externally accessible service with L7 proxy (Kubernetes ingress)
 In case we want L7 balancing, URL routing and SSL acceleration we need to use ingress controler with NGINX implementation. This will deploy http proxy into Kubernetes accessible via external IP (leveraging Azure LB and Azure DNS). Proxy then handles traffic routing to internal services in cluster and provides SSL acceleration.
 
+### Make sure Helm is installed
+```
+wget https://storage.googleapis.com/kubernetes-helm/helm-v2.7.2-linux-amd64.tar.gz
+tar -zxvf helm-v2.7.2-linux-amd64.tar.gz
+sudo cp linux-amd64/helm /usr/local/bin
+rm -rf linux-amd64/
+helm init
+```
+
 ### Deploy nginx ingress
 First we need to deploy L7 proxy that will work as Kubernetes Ingress balancer. We are using helm to easily install complete package (more on Helm later in this demo).
 
+If you run on cluster with no RBAC (currently AKS) use this:
 ```
 helm install --name ingress stable/nginx-ingress -f nginx-ingress-values.yaml
+```
+
+If you run on cluster with no RBAC (our mixed ACS cluster example) use this:
+```
+helm install --name ingress stable/nginx-ingress -f nginx-ingress-values-rbac.yaml
 ```
 
 ### Prepare certificate and store it as Kubernetes secret 
@@ -367,7 +391,7 @@ Watch pods being rolled
 kubectl get pods -w
 ```
 
-## Deploy IIS on Windows pool
+## Deploy IIS on Windows pool (currently only for ACS mixed cluster, no AKS)
 Let's now deploy Windows container with IIS.
 
 ```
@@ -375,7 +399,7 @@ kubectl create -f IIS.yaml
 kubectl get service
 ```
 
-## Test Linux to Windows communication
+## Test Linux to Windows communication (currently only for ACS mixed cluster, no AKS)
 In this demo we want to make sure our Linux and Windows containers can talk to each other. Connect from Linux container to internal service endpoint of IIS.
 
 ```
@@ -402,7 +426,15 @@ Deployments in Kubernetes are great for stateless applications, but statful apps
 
 In this demo we will deploy single instance of PostgreSQL.
 
-## Switch to our mixed ACS cluster
+This demo works in both AKS and ACS engine environments.
+
+## Switch to our AKS or mixed ACS cluster
+```
+kubectx aks
+```
+
+or mixed ACS engine
+
 ```
 kubectx mojeacsdemo
 ```
@@ -702,9 +734,10 @@ Helm is package manager for Kubernetes. It allows to put together all resources 
 ## Install
 ```
 cd ./helm
-wget https://storage.googleapis.com/kubernetes-helm/helm-v2.6.1-linux-amd64.tar.gz
-tar -zxvf helm-v2.6.1-linux-amd64.tar.gz
+wget https://storage.googleapis.com/kubernetes-helm/helm-v2.7.2-linux-amd64.tar.gz
+tar -zxvf helm-v2.7.2-linux-amd64.tar.gz
 sudo cp linux-amd64/helm /usr/local/bin
+rm -rf linux-amd64/
 ```
 
 ## Run Wordpress

@@ -47,11 +47,11 @@ if [[ $1 =~ "aks" ]]
 then
   if [[ $2 =~ "up" ]]
   then
-    az vm start --ids $(az vm list --query "[].id" -g MC_aks_tomaks_westus2 -o tsv) --no-wait
+    az vm start --ids $(az vm list --query "[].id" -g MC_aks_aks_westus2 -o tsv) --no-wait
   fi
   if [[ $2 =~ "down" ]]
   then
-    az vm deallocate --ids $(az vm list --query "[].id" -g MC_aks_tomaks_westus2 -o tsv) --no-wait
+    az vm deallocate --ids $(az vm list --query "[].id" -g MC_aks_aks_westus2 -o tsv) --no-wait
   fi
 fi
 

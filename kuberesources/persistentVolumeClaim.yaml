@@ -3,7 +3,7 @@ apiVersion: v1
 metadata:
   name: postgresql-pv-claim
 spec:
-  storageClassName: managed-standard
+  storageClassName: managed-premium
   accessModes:
     - ReadWriteOnce
   resources:

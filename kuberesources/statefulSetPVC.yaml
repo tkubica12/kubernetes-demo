@@ -48,7 +48,7 @@ spec:
   - metadata:
       name: postgresql-volume-claim
     spec:
-      storageClassName: managed-standard
+      storageClassName: managed-premium
       accessModes:
         - ReadWriteOnce
       resources:
