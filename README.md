@@ -11,7 +11,7 @@ This repo contains my Kubernetes demo in Azure.
 * Brigade
 * Istio
 
-# Table of Content
+# Table of Contents
 - [Azure Container Instance](docs/aci.md)
 - [Building custom ACS cluster](docs/acs-build.md)
 - [Deploying managed Kubernetes (AKS)](docs/aks-build.md)
@@ -21,7 +21,7 @@ This repo contains my Kubernetes demo in Azure.
 - [RBAC with AAD and ACR](docs/rbac.md)
 - [Networking](docs/networking.md)
 - [Helm, Draft, CI/CD](docs/dev.md)
-- [Monitoring](docs/ops.md)
+- [Monitoring](docs/monitoring.md)
 
 
 # Author
