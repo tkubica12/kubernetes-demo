@@ -11,6 +11,9 @@ We have seen a lot of networking already: internal ballancing and service discov
 
 ## Azure CNI
 In Azure CNI cluster demonstrate how containers take IP addresses directly from VNET. Access pod directly from VM deployed in the same VNET.
+```
+kubectx mykubeazurenet
+```
 
 ## Network policy with Calico
 Calico is plugin that implements Kubernetes network policy, namely microsegmentation (L4 filtering between pods). In this demo we will create Web and DB and provide strict policy what and how can communicate.
