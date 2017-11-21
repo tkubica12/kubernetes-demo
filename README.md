@@ -3,7 +3,6 @@ This repo contains my Kubernetes demo in Azure.
 
 # TO DO
 * Kubernetes federation
-* Deploy Calico network policy on top of AKS
 * Add VSTS integration
 * Demo service brokering with service catalog and open service broker
 * Horizontal pod scaling
