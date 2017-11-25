@@ -13,11 +13,12 @@ This repo contains my Kubernetes demo in Azure.
 
 # Table of Contents
 - [Azure Container Instance](docs/aci.md)
-- [Building custom ACS cluster](docs/acs-build.md)
 - [Deploying managed Kubernetes (AKS)](docs/aks-build.md)
+- [Building custom unmanaged ACS cluster](docs/acs-build.md)
 - [Merging cluster configurations and using kubectx to switch between clusters](docs/cluster-config.md)
 - [Using stateless app farms](docs/stateless.md)
 - [Stateful applications and StatefulSet with Persistent Volume](docs/stateful.md)
+- [Scaling](docs/scaling.md)
 - [RBAC with AAD and ACR](docs/rbac.md)
 - [Networking](docs/networking.md)
 - [Helm, Draft, CI/CD](docs/dev.md)

@@ -1,0 +1,19 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: myclusterscaling-deployment
+spec:
+  replicas: 10
+  template:
+    metadata:
+      labels:
+        app: myhpa
+    spec:
+      containers:
+      - name: myclusterscaling
+        image: tkubica/stress
+        resources:
+          limits:
+            cpu: 0.5
+      nodeSelector:
+        beta.kubernetes.io/os: linux

@@ -4,6 +4,7 @@ In order to easily switch between clusters let's download kubectx script.
 
 ```
 sudo wget https://raw.githubusercontent.com/ahmetb/kubectx/master/kubectx -O /usr/local/bin/kubectx
+sudo wget https://raw.githubusercontent.com/ahmetb/kubectx/master/utils.bash -O /usr/local/bin/utils.bash
 sudo chmod +x /usr/local/bin/kubectx
 ```
 
