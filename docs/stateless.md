@@ -78,13 +78,9 @@ curl 10.240.0.9
 In case we want L7 balancing, URL routing and SSL acceleration we need to use ingress controler with NGINX implementation. This will deploy http proxy into Kubernetes accessible via external IP (leveraging Azure LB and Azure DNS). Proxy then handles traffic routing to internal services in cluster and provides SSL acceleration.
 
 ### Make sure Helm is installed
-```
-wget https://storage.googleapis.com/kubernetes-helm/helm-v2.7.2-linux-amd64.tar.gz
-tar -zxvf helm-v2.7.2-linux-amd64.tar.gz
-sudo cp linux-amd64/helm /usr/local/bin
-rm -rf linux-amd64/
-helm init
-```
+Please refer to this chapter for installing Helm:
+
+[Package applications with Helm](docs/helm.md)
 
 ### Deploy nginx ingress
 First we need to deploy L7 proxy that will work as Kubernetes Ingress balancer. We are using helm to easily install complete package (more on Helm later in this demo).

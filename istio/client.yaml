@@ -1,0 +1,30 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: client-deployment
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: client
+    spec:
+      containers:
+        - name: client
+          image: tutum/curl
+          command: ["tail"]
+          args: ["-f", "/dev/null"]
+      nodeSelector:
+        beta.kubernetes.io/os: linux
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: client-service
+spec:
+  selector:
+    app: client
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80

@@ -1,0 +1,17 @@
+apiVersion: config.istio.io/v1alpha2
+kind: RouteRule
+metadata:
+  name: retry-service-default
+spec:
+  destination:
+    name: retry-service
+  route:
+  - labels:
+      app: retry
+  httpReqRetries:
+    simpleRetry:
+      attempts: 10
+      perTryTimeout: 2s
+  httpReqTimeout:
+    simpleTimeout:
+      timeout: 10s

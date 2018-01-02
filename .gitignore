@@ -14,3 +14,4 @@ kuberesources/key.pem
 kuberesources/cert.pem
 dbPassword.txt
 storageKey.txt
+istio/install/

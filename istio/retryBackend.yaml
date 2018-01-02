@@ -1,0 +1,31 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: retry-backend
+spec:
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: retry
+    spec:
+      containers:
+      - name: retry-backend
+        image: tkubica/retry-backend
+        ports:
+        - containerPort: 80
+      nodeSelector:
+        beta.kubernetes.io/os: linux
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: retry-service
+spec:
+  selector:
+    app: retry
+  ports:
+  - protocol: TCP
+    name: http
+    port: 80
+    targetPort: 80
