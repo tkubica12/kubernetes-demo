@@ -14,6 +14,7 @@
         - [Test Egress rule](#test-egress-rule)
         - [Test Ingress rule](#test-ingress-rule)
         - [Test Circuit Breaker](#test-circuit-breaker)
+        - [Test service authentication and encryption](#test-service-authentication-and-encryption)
     - [Clean up](#clean-up)
 
 # Creating service mesh with Istio
@@ -227,6 +228,9 @@ kubectl exec $clientPod -c client -- curl -vs httpbin.org/ip
 TBD
 
 ### Test Circuit Breaker
+TBD
+
+### Test service authentication and encryption
 TBD
 
 ## Clean up
