@@ -8,7 +8,7 @@ spec:
   rules:
   - http:
       paths:
-      - path: /myweb/.*
+      - path: /
         backend:
           serviceName: myweb-service
           servicePort: 80

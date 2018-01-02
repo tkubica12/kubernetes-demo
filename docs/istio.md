@@ -225,7 +225,23 @@ kubectl exec $clientPod -c client -- curl -vs httpbin.org/ip
 ```
 
 ### Test Ingress rule
-TBD
+As all traffic between services is encrypted outside users cannot access services directly. In order to expose service such as web frontend to users outside of cluster we will use Kubernetes Ingress object. Istio comes with special implementation of Ingress that handles traffic entering Service Mesh.
+
+Deploy Ingress to make service accessible from outside of our cluster.
+```
+kubectl create -f ingressRule.yaml
+```
+
+Find out on which IP address Istio Ingress is running (Helm chart created service instanci of ty LoadBalancer so Azure provided external address to it).
+```
+export ingressIP=$(kubectl get service istio-ingress --namespace istio-system -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+
+```
+
+Check access to service extrenally.
+```
+curl -i $ingressIP
+```
 
 ### Test Circuit Breaker
 TBD
@@ -242,6 +258,7 @@ kubectl delete -f policyRetry.yaml
 kubectl delete -f egressRule.yaml
 kubectl delete -f policyCanary10percent.yaml
 kubectl delete -f policyCanaryCookie.yaml
+kubectl delete -f ingressRule.yaml
 helm delete istio --purge
 ```
 
