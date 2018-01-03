@@ -1,17 +1,17 @@
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
-  name: client-deployment
+  name: siege-deployment
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        app: client
+        app: siege
     spec:
       containers:
-        - name: client
-          image: tutum/curl
+        - name: siege
+          image: yokogawa/siege
           command: ["tail"]
           args: ["-f", "/dev/null"]
       nodeSelector:

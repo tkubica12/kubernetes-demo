@@ -13,7 +13,8 @@
         - [Test canary deployments](#test-canary-deployments)
         - [Test Egress rule](#test-egress-rule)
         - [Test Ingress rule](#test-ingress-rule)
-        - [Test Circuit Breaker](#test-circuit-breaker)
+        - [Test load-balancing algorithms](#test-load-balancing-algorithms)
+        - [Test Circuit Breaker to protect from overloading](#test-circuit-breaker-to-protect-from-overloading)
         - [Test service authentication and encryption](#test-service-authentication-and-encryption)
     - [Clean up](#clean-up)
 
@@ -243,8 +244,36 @@ Check access to service extrenally.
 curl -i $ingressIP
 ```
 
-### Test Circuit Breaker
+In order to deploy URL paths and TLS certificates please refer to [this part of demo](docs/stateless.md)
+
+### Test load-balancing algorithms
+Istio comes with three load-balancing algorithms. Round robin, random and least connections. Let's test this.
+
+First we will deploy policy for round robin. We expect to see responses in sequences (one by one and again).
+```
+kubectl apply -f policyLbRoundRobin.yaml
+while true; do kubectl exec $clientPod -c client -- curl -s myweb-service; done
+```
+
+Now we will configure LB algorithm random and test it.
+```
+kubectl apply -f policyLbRandom.yaml
+while true; do kubectl exec $clientPod -c client -- curl -s myweb-service; done
+```
+
+
+### Test Circuit Breaker to protect from overloading
 TBD
+
+```
+kubectl create -f <(istioctl kube-inject -i istio-system -f siege.yaml)
+export siegePod=$(kubectl get pods -l app=siege -o jsonpath="{.items[0].metadata.name}")
+kubectl exec $siegePod -c siege -- curl -vs -m 10 retry-service?failRate=50
+
+kubectl exec -it $clientPod -c client -- bash -c 'while true; do curl -o /dev/null -w "%{http_code}..." -s myweb-service; sleep 0.1; done'
+
+kubectl apply -f policyConnections.yaml
+```
 
 ### Test service authentication and encryption
 TBD
