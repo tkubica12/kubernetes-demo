@@ -8,8 +8,6 @@ This repo contains my Kubernetes demo in Azure.
 * Demo service brokering with service catalog and open service broker
 * Kube-lego
 * Brigade
-* Istio
-* Demonstrate some architectural patterns (sidecar for logging, ambassador with circuit breaker, encryption or sharding client, adapter for health checking, demo cache aside, demo queuing, ...)
 
 # Table of Contents
 - [Azure Container Instance](docs/aci.md)
