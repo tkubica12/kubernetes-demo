@@ -14,6 +14,10 @@ This set of demos focus on stateless applications like APIs or web frontend. We 
         - [Create DNS record](#create-dns-record)
         - [Create ingress for our service](#create-ingress-for-our-service)
         - [Test](#test)
+    - [Preserving client source IP](#preserving-client-source-ip)
+        - [Why Kubernetes do SNAT by default](#why-kubernetes-do-snat-by-default)
+        - [How can you preserve client IP and what are negative implications](#how-can-you-preserve-client-ip-and-what-are-negative-implications)
+        - [Recomendation of using this with Ingress only and then use X-Forwarded-For](#recomendation-of-using-this-with-ingress-only-and-then-use-x-forwarded-for)
     - [Upgrade](#upgrade)
     - [Deploy IIS on Windows pool (currently only for ACS mixed cluster, no AKS)](#deploy-iis-on-windows-pool-currently-only-for-acs-mixed-cluster-no-aks)
     - [Test Linux to Windows communication (currently only for ACS mixed cluster, no AKS)](#test-linux-to-windows-communication-currently-only-for-acs-mixed-cluster-no-aks)
@@ -87,12 +91,12 @@ First we need to deploy L7 proxy that will work as Kubernetes Ingress balancer. 
 
 If you run on cluster with no RBAC (currently AKS) use this:
 ```
-helm install --name ingress stable/nginx-ingress -f nginx-ingress-values.yaml
+helm install --name ingress stable/nginx-ingress
 ```
 
-If you run on cluster with no RBAC (our mixed ACS cluster example) use this:
+If you run on cluster with RBAC (our mixed ACS cluster example) use this:
 ```
-helm install --name ingress stable/nginx-ingress -f nginx-ingress-values-rbac.yaml
+helm install --name ingress stable/nginx-ingress --set rbac.create
 ```
 
 ### Prepare certificate and store it as Kubernetes secret 
@@ -135,6 +139,36 @@ Print certificate
 ```
 openssl s_client -showcerts -servername mykubeapp.azure.tomaskubica.cz -connect mykubeapp.azure.tomaskubica.cz:443 2>/dev/null | openssl x509 -inform pem -noout -text
 ```
+
+## Preserving client source IP
+By default Kubernetes Service is doing SNAT before sending traffic to Pod so client IP information is lost. This might not be problem unless you want to:
+* Whitelist access to service based on source IP addresses
+* Log client IP address (legal requirement, location tracking, ...)
+
+### Why Kubernetes do SNAT by default
+When you deploy service of type LoadBalancer underlying IaaS will deploy load balancer, Azure LB in our case. This balancer is configured to send traffic to any node of your cluster. If traffic arrives on node that does not hoste any instance (Pod) of that Service, it will proxy traffic to different node. Current Kubernetes implementation need to do SNAT for this to work.
+
+### How can you preserve client IP and what are negative implications
+In Azure you can use externalTrafficPolicy (part of spec section of Service definition) set to Local. This ensures that Azure LB does balance traffic only to nodes where Pod replica runs. With that there is no need to reroute traffic to different node and so there is no SNAT required. This settings preserves actual client IP in packet entering Pod.
+
+Using this might create suboptimal routing distribution if number of replicas close to number of nodes or more. Under such conditions some nodes might get more than one replica (Pod) running. Since there is no rerouting now traffic distribution is not done on Pods level but rather Nodes level. Example:
+
+node1 -> pod1, pod4
+node2 -> pod2
+node3 -> pod3
+
+With default configuration each pod will get 25% of new connections. With externalTrafficPolicy set to Local, each node will get 33% of new connections. Therefor pod1 and pod4 will get just 16,5% connections each while pod2 and pod3 will get 33% each.
+
+### Recomendation of using this with Ingress only and then use X-Forwarded-For
+Good solution if you need client IP information is to use it for Ingress, but not for other Services. By deploying ingress controller in Service with externalTrafficPolicy Local, your nginx proxy will see client IP. This means you can do whitelisting (source IP filters) in you Ingress definition. Traffic distribution problem is virtualy non existent because you typically run ingress on one or few nodes in cluster, but rarely you want more replicas then number of nodes.
+
+You can specify this via Helm.
+
+```
+helm install --name ingress stable/nginx-ingress --set controller.service.externalTrafficPolicy=Local
+```
+
+Services that are behind proxy (for example frontend web server) will not suffer any potention disbalance in traffic distribution and while source IP is altered NGINX have inserted client IP information into X-Forwarded-For header that you can read in your application (to do logging for example).
 
 ## Upgrade
 We will now do rolling upgrade of our application to new version. We are going to change deployment to use different container with v2 of our app.
