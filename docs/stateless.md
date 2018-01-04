@@ -168,6 +168,17 @@ You can specify this via Helm.
 helm install --name ingress stable/nginx-ingress --set controller.service.externalTrafficPolicy=Local
 ```
 
+Then you can use whitelisting in your ingress definitions:
+
+```
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: whitelist
+annotations:
+  ingress.kubernetes.io/whitelist-source-range: "1.1.1.1/24,2.2.2.2/32"
+```
+
 Services that are behind proxy (for example frontend web server) will not suffer any potention disbalance in traffic distribution and while source IP is altered NGINX have inserted client IP information into X-Forwarded-For header that you can read in your application (to do logging for example).
 
 ## Upgrade
