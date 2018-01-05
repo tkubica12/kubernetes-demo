@@ -1,0 +1,21 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    ingress.kubernetes.io/rewrite-target: /
+    kubernetes.io/tls-acme: 'true'
+  name: myweb-ingress
+spec:
+  rules:
+    - host: mykubeapp.azure.tomaskubica.cz
+      http:
+        paths:
+          - path: /myweb
+            backend:
+              serviceName: myweb-service
+              servicePort: 80
+  tls:
+      - hosts:
+          - mykubeapp.azure.tomaskubica.cz
+        secretName: mycert

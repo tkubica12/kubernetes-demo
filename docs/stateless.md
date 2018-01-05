@@ -13,6 +13,7 @@ This set of demos focus on stateless applications like APIs or web frontend. We 
         - [Prepare certificate and store it as Kubernetes secret](#prepare-certificate-and-store-it-as-kubernetes-secret)
         - [Create DNS record](#create-dns-record)
         - [Create ingress for our service](#create-ingress-for-our-service)
+        - [Autoenroll Let's encrypt certificates with Kube-lego](#autoenroll-lets-encrypt-certificates-with-kube-lego)
         - [Test](#test)
     - [Preserving client source IP](#preserving-client-source-ip)
         - [Why Kubernetes do SNAT by default](#why-kubernetes-do-snat-by-default)
@@ -103,12 +104,12 @@ helm install --name ingress stable/nginx-ingress --set rbac.create
 We will want to use TLS encryption (HTTPS). For demo purposes we will now create self-signed certificate.
 
 ```
-openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes -subj '/CN=mykubeapp.azure.tomaskubica.cz'
+openssl req -x509 -newkey rsa:4096 -keyout tls.key -out tls.crt -days 365 -nodes -subj '/CN=mykubeapp.azure.tomaskubica.cz'
 
-kubectl create secret tls mycert --key key.pem --cert cert.pem
+kubectl create secret tls mycert --key tls.key --cert tls.crt
 
-rm key.pem
-rm cert.pem
+rm tls.key
+rm tls.crt
 ```
 
 ### Create DNS record
@@ -127,17 +128,30 @@ We are ready to go. Let's create ingress service that will reference (expose) in
 kubectl create -f ingressWeb.yaml
 ```
 
+### Autoenroll Let's encrypt certificates with Kube-lego
+As we have seen you can import any certificate to Ingress you prepare beforehand, but doing so with Let's encrypt certification authority require you to repeat this process manualy every three months. You might want to enroll and re-enroll certificates automatically. This is what Kube-lego can handle.
+
+Use helm to deploy kube-lego and make sure to provide your valid email address.
+```
+helm install stable/kube-lego --namespace kube-system --name kube-lego --set config.LEGO_EMAIL=YOUR_EMAIL,config.LEGO_URL=https://acme-v01.api.letsencrypt.org/directory
+```
+
+We need to add annotation to our Ingress definition to request kube-lego to enroll Let's encrypt certificates.
+```
+kubectl apply -f ingressWebLego.yaml
+```
+
+Test your site now. As we have valid public certificate we do not have to use -k option.
+```
+curl -v https://mykubeapp.azure.tomaskubica.cz
+```
+
 ### Test
 Access app at https://mykubeapp.azure.tomaskubica.cz/myweb
 
-Because certificate is self-signed (not trusted) use this to test:
+Because certificate is self-signed (not trusted) use this to test and check certificate:
 ```
-curl -k https://mykubeapp.azure.tomaskubica.cz/myweb
-```
-
-Print certificate
-```
-openssl s_client -showcerts -servername mykubeapp.azure.tomaskubica.cz -connect mykubeapp.azure.tomaskubica.cz:443 2>/dev/null | openssl x509 -inform pem -noout -text
+curl -vk https://mykubeapp.azure.tomaskubica.cz/myweb
 ```
 
 ## Preserving client source IP
