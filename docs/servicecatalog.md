@@ -85,7 +85,7 @@ We can now create binding that will also generate Secrets with connection detail
 svcat bind myfirstdb
 ```
 
-All detailes required to connect to service are available in Secret. We can list it via kubectl, but values are base64 encoded.
+All detailes required to connect to service are available in Secret. We can list it via kubectl, but values are base64 encoded (so let's decode it).
 ```
 kubectl get secret myfirstdb -o yaml
 printf 'Host: ' && kubectl get secret myfirstdb -o json | jq -r .data.host | base64 --decode && echo && \
