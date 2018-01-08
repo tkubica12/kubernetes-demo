@@ -4,9 +4,8 @@ This repo contains my Kubernetes demo in Azure.
 # TO DO
 * Kubernetes federation
 * AKS cluster upgrade demo
-* Add VSTS integration
-* Demo service brokering with service catalog and open service broker
-* Kube-lego
+* VSTS integration
+* Spinnaker integration
 * Brigade
 
 # Table of Contents
@@ -23,6 +22,7 @@ This repo contains my Kubernetes demo in Azure.
 - [Develop apps on Kubernetes with Draft](docs/draft.md)
 - [Deploy CI/CD with Jenkins and agents in containers](docs/jenkins.md)
 - [Creating service mesh with Istio](docs/istio.md)
+- [Automatically provision Azure services with Service Catalog](docs/servicecatalog.md)
 - [Monitoring](docs/monitoring.md)
 
 

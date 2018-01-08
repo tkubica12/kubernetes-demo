@@ -1,0 +1,60 @@
+apiVersion: servicecatalog.k8s.io/v1beta1
+kind: ServiceInstance
+metadata:
+  name: my-mysqldb-instance
+  namespace: default
+spec:
+  clusterServiceClassExternalName: azure-mysqldb
+  clusterServicePlanExternalName: basic50
+  parameters:
+    location: westeurope
+    resourceGroup: myservices
+    firewallStartIPAddress: "0.0.0.0"
+    firewallEndIPAddress: "255.255.255.255"
+---
+apiVersion: servicecatalog.k8s.io/v1beta1
+kind: ServiceBinding
+metadata:
+  name: my-mysqldb-binding
+  namespace: default
+spec:
+  instanceRef:
+    name: my-mysqldb-instance
+  secretName: my-mysqldb-secret
+---
+kind: Pod
+apiVersion: v1
+metadata:
+  name: env
+spec:
+  containers:
+    - name: ubuntu
+      image: tutum/curl
+      command: ["tail"]
+      args: ["-f", "/dev/null"]
+      env:
+      - name: "DB_HOST"
+        valueFrom:
+          secretKeyRef:
+            name: my-mysqldb-secret
+            key: host
+      - name: "DB_PORT"
+        valueFrom:
+          secretKeyRef:
+            name: my-mysqldb-secret
+            key: port
+      - name: "DB_DB"
+        valueFrom:
+          secretKeyRef:
+            name: my-mysqldb-secret
+            key: database
+      - name: "DB_USERNAME"
+        valueFrom:
+          secretKeyRef:
+            name: my-mysqldb-secret
+            key: username
+      - name: "DB_PASSWORD"
+        valueFrom:
+          secretKeyRef:
+            name: my-mysqldb-secret
+            key: password
