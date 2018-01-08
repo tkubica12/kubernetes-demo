@@ -137,8 +137,11 @@ First ensure we have added Azure repo to our Helm (we did that during instalatio
 helm repo add azure https://kubernetescharts.blob.core.windows.net/azure
 ```
 
+Install Wordpress
 ```
-helm install azure/wordpress --name wp --set wordpressUsername=tomas --set wordpressPassword=Azure12345678 --set mysql.azure.location=westeurope 
+helm install azure/wordpress --name wp --set wordpressUsername=tomas \
+    --set wordpressPassword=Azure12345678 \
+    --set mysql.azure.location=westeurope 
 ```
 
 Wait for Helm to complete deployment (helm status wp), get Wordpress instance URL a test.
