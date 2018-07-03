@@ -1,31 +1,34 @@
 - [Helm](#helm)
-    - [Install](#install)
-    - [When running on AKS, install Helm](#when-running-on-aks-install-helm)
+    - [Install on client machine](#install-on-client-machine)
+    - [Prepare RBAC rule for Tiller service account](#prepare-rbac-rule-for-tiller-service-account)
+    - [Install Helm server component](#install-helm-server-component)
     - [Run Wordpress](#run-wordpress)
     - [Clean up](#clean-up)
 
 # Helm
 Helm is package manager for Kubernetes. It allows to put together all resources needed for application to run - deployments, services, statefulsets, variables.
 
-## Install
+## Install on client machine
 ```
 cd ./helm
-wget https://storage.googleapis.com/kubernetes-helm/helm-v2.7.2-linux-amd64.tar.gz
-tar -zxvf helm-v2.7.2-linux-amd64.tar.gz
+wget https://storage.googleapis.com/kubernetes-helm/helm-v2.9.1-linux-amd64.tar.gz
+tar -zxvf helm-v2.9.1-linux-amd64.tar.gz
 sudo cp linux-amd64/helm /usr/local/bin
 rm -rf linux-amd64/
 ```
-
-## When running on AKS, install Helm
+## Prepare RBAC rule for Tiller service account
 ```
-helm init
+kubectl apply -f tiller-rbac.yaml
+```
+
+## Install Helm server component
+```
+helm init --service-account tiller
 ```
 
 ## Run Wordpress
 ```
-helm 
-cd ./helm
-helm install --name myblog -f values.yaml .
+helm install --name myblog stable/wordpress --set persistence.storageclass=default
 ```
 
 ## Clean up

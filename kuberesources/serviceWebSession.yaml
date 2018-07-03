@@ -1,0 +1,12 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: myweb-service-session
+spec:
+  sessionAffinity: ClientIP
+  selector:
+    app: myweb
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80

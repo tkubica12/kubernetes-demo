@@ -1,0 +1,54 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: canaryweb-v1
+spec:
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: canaryweb
+        track: stable
+    spec:
+      containers:
+      - name: myweb
+        image: tkubica/web:1
+        env:
+        - name: PORT
+          value: "80"
+        ports:
+        - containerPort: 80
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: canaryweb-v2
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: canaryweb
+        track: canary
+    spec:
+      containers:
+      - name: myweb
+        image: tkubica/web:2
+        env:
+        - name: PORT
+          value: "80"
+        ports:
+        - containerPort: 80
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: canaryweb
+spec:
+  selector:
+    app: canaryweb
+  type: LoadBalancer
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80

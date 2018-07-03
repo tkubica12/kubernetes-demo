@@ -62,7 +62,7 @@ az aks create -n akscluster -g $aksRg \
         --workspace-resource-id $workspaceId \
         --enable-rbac \
         --service-principal $principal \
-        --client-secret $client_secret --debug
+        --client-secret $client_secret
 ```
 
 ### Get credentials
@@ -108,5 +108,5 @@ ssh tomas@$vmIp
 Create proxy tunnel and open GUI on 127.0.0.1:8001/ui
 
 ```
-kubectl proxy
+az aks browse -g $aksRg -n akscluster
 ```
