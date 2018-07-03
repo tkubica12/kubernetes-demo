@@ -69,7 +69,7 @@ az aks create -n akscluster -g $aksRg \
 Use Azure CLI to download cluster credentials and merge it to your kubectl configuration file on ~/.kubce/config
 
 ```
-az aks get-credentials -n aks -g aks
+az aks get-credentials -n akscluster -g $aksRg
 ```
 
 ### Download kubectl
