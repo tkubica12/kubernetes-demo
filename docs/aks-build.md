@@ -1,37 +1,107 @@
 # Deploying managed Kubernetes (AKS)
-This demo is currently build on acs-engine based Kubernetes environment in Azure, nevertheless Microsoft currently offers preview of new managed Kubernetes service (AKS). I plan to rework this demo for AKS in near future.
+In this section we are going to deploy managed Kubernetes service in Azure. Make sure you have latest version of Azure CLI 2.0 installed. 
 
 - [Deploying managed Kubernetes (AKS)](#deploying-managed-kubernetes-aks)
-        - [Get credentials](#get-credentials)
-        - [Create VM for testing](#create-vm-for-testing)
-        - [Access GUI](#access-gui)
+                - [Get credentials](#get-credentials)
+                - [Download kubectl](#download-kubectl)
+                - [Create VM for testing access within VNET](#create-vm-for-testing-access-within-vnet)
+                - [Access GUI](#access-gui)
 
-After you install latest version of Azure CLI make sure it has access to this new service.
-```
-az provider register -n Microsoft.ContainerService
-az provider show -n Microsoft.ContainerService
-```
+In this demo we will use Advanced Networking.
 
-To setup your managed Kubernetes cluster you can use following commands. You can specify existing service principal and client secret, but if you don't, CLI will create one for you.
+First create virtual network and subnets.
 
 ```
-az group create -n aks -l westeurope
-az aks create -n aks -g aks --ssh-key-value "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDFhm1FUhzt/9roX7SmT/dI+vkpyQVZp3Oo5HC23YkUVtpmTdHje5oBV0LMLBB1Q5oSNMCWiJpdfD4VxURC31yet4mQxX2DFYz8oEUh0Vpv+9YWwkEhyDy4AVmVKVoISo5rAsl3JLbcOkSqSO8FaEfO5KIIeJXB6yGI3UQOoL1owMR9STEnI2TGPZzvk/BdRE73gJxqqY0joyPSWOMAQ75Xr9ddWHul+v//hKjibFuQF9AFzaEwNbW5HxDsQj8gvdG/5d6mt66SfaY+UWkKldM4vRiZ1w11WlyxRJn5yZNTeOxIYU4WLrDtvlBklCMgB7oF0QfiqahauOEo6m5Di2Ex" --kubernetes-version 1.8.2 -c 3 --admin-username tomas -s Standard_A1_v2
+export netRg=aksnetwork
+export location=westeurope
+az group create -n $netRg -l $location
+az network vnet create -g $netRg \
+	-n aks-network \
+	--address-prefix 192.168.0.0/20 \
+	--subnet-name aks-subnet \
+	--subnet-prefix 192.168.0.0/22
+az network vnet subnet create -n testingvm-subnet \
+        -g $netRg \
+        --vnet-name aks-network \
+        --address-prefix 192.168.8.0/24
+
+```
+
+Deploy Kubernetes cluster with advanced networking, HTTP application routing and monitoring solution.
+
+Azure CLI currently do not support creating Log Analytics workspace, so we will do that with portal (or use existing one) and provide workspace id.
+
+Azure CLI will create service principal account for you that is neccessary to deploy AKS. In order to have this under direct control we will use existing service principal account. If you wish CLI to create one for you please remove --service-principal and --client-secret from az aks create command.
+
+```
+export aksRg=aksgroup
+export location=westeurope
+export subnetId=$(
+                az network vnet subnet show -g $netRg \
+                -n aks-subnet \
+                --vnet-name aks-network \
+                --query id \
+                -o tsv	  )
+export workspaceId=/subscriptions/YOUR_SUBSCRIPTION_ID/resourcegroups/YOUR_RESOURCE_GROUP/providers/microsoft.operationalinsights/workspaces/YOUR_WORKSPACE_NAME
+export principal=YOUT_SERVICE_PRINCIPAL_ID
+export client_secret=YOUR_SERVICE_PRINCIPAL_SECRET
+
+az group create -n $aksRg -l $location
+
+az aks create -n akscluster -g $aksRg \
+        --no-ssh-key \
+        --kubernetes-version 1.10.3 \
+        --node-count 3 \
+        --node-vm-size Standard_B2s \
+        --network-plugin azure \
+        --vnet-subnet-id $subnetId \
+        --docker-bridge-address 172.17.0.1/16 \
+        --dns-service-ip 192.168.4.10 \
+        --service-cidr 192.168.4.0/22 \
+        --enable-addons http_application_routing,monitoring \
+        --workspace-resource-id $workspaceId \
+        --enable-rbac \
+        --service-principal $principal \
+        --client-secret $client_secret --debug
 ```
 
 ### Get credentials
+Use Azure CLI to download cluster credentials and merge it to your kubectl configuration file on ~/.kubce/config
 
 ```
 az aks get-credentials -n aks -g aks
 ```
 
-### Create VM for testing
+### Download kubectl
+
 ```
-export vnet=$(az network vnet list -g mykubeacs --query [].name -o tsv)
+sudo az aks install-cli
+```
 
-az vm create -n myvm -g mykubeacs --admin-username tomas --ssh-key-value "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDFhm1FUhzt/9roX7SmT/dI+vkpyQVZp3Oo5HC23YkUVtpmTdHje5oBV0LMLBB1Q5oSNMCWiJpdfD4VxURC31yet4mQxX2DFYz8oEUh0Vpv+9YWwkEhyDy4AVmVKVoISo5rAsl3JLbcOkSqSO8FaEfO5KIIeJXB6yGI3UQOoL1owMR9STEnI2TGPZzvk/BdRE73gJxqqY0joyPSWOMAQ75Xr9ddWHul+v//hKjibFuQF9AFzaEwNbW5HxDsQj8gvdG/5d6mt66SfaY+UWkKldM4vRiZ1w11WlyxRJn5yZNTeOxIYU4WLrDtvlBklCMgB7oF0QfiqahauOEo6m5Di2Ex" --image UbuntuLTS --nsg "" --vnet-name $vnet --subnet k8s-subnet --public-ip-address-dns-name mykubeextvm --size Basic_A0
+### Create VM for testing access within VNET
+```
+export vmSubnetId=$(
+                az network vnet subnet show -g $netRg \
+                -n testingvm-subnet \
+                --vnet-name aks-network \
+                --query id \
+                -o tsv	  )
+export testingvmResourceGroup=akstestingvm
+export location=westeurope
 
-ssh tomas@mykubeextvm.westeurope.cloudapp.azure.com
+az group create -n $testingvmResourceGroup -l $location
+az vm create -n mytestingvm \
+        -g $testingvmResourceGroup \
+        --admin-username tomas \
+        --admin-password Azure12345678 \
+        --authentication-type password \
+        --image UbuntuLTS \
+        --nsg "" \
+        --subnet $vmSubnetId \
+        --size Standard_B1s
+
+export vmIp=$(az network public-ip show -n mytestingvmPublicIP -g akstestingvm --query ipAddress -o tsv)
+ssh tomas@$vmIp
 ```
 
 ### Access GUI

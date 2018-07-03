@@ -5,10 +5,9 @@ metadata:
   namespace: default
 spec:
   containers:
-  - image: pengbai/docker-supermario
-    imagePullPolicy: Always
-    name: super-mario
+  - name: myiis
+    image: microsoft/iis:nanoserver
     ports:
-      - containerPort: 8080
+    - containerPort: 80
   dnsPolicy: ClusterFirst
   nodeName: aci-connector
