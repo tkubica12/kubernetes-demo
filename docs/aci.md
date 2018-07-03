@@ -22,7 +22,16 @@ az group create -n aci-group -l westeurope
 
 ## Run SQL on Linux container
 ```
-az container create -n mssql -g aci-group --cpu 2 --memory 4 --ip-address public --port 1433 -l eastus --image microsoft/mssql-server-linux -e 'ACCEPT_EULA=Y' 'SA_PASSWORD=my(!)Password' 
+az container create -n mssql \
+    -g aci-group \
+    --cpu 2 \
+    --memory 4 \
+    --ip-address public \
+    --port 1433 \
+    -l westeurope \
+    --image microsoft/mssql-server-linux \
+    -e 'ACCEPT_EULA=Y' 'SA_PASSWORD=my(!)Password' 
+
 export sqlip=$(az container show -n mssql -g aci-group --query ipAddress.ip -o tsv)
 watch az container logs -n mssql -g aci-group
 ```
@@ -38,7 +47,15 @@ ACI can be used to execute tasks packaged in container, for example transform so
 Let's use simplistic alpine container and our "task" will be simulated by sleeping for 20 seconds. Instead of default restart policy (Always, so it keeps restarting process) we configure this to OnFailure, so when our process returns 0, container will be terminated.
 
 ```
-az container create -n containertask -g aci-group --cpu 1 --memory 1 -l eastus --image alpine --command-line 'sleep 20' --restart-policy OnFailure
+az container create -n containertask \
+    -g aci-group \
+    --cpu 1 \
+    --memory 1 \
+    -l westeurope \
+    --image alpine \
+    --command-line 'sleep 20' \
+    --restart-policy OnFailure
+    
 az container show -n containertask -g aci-group --query containers[].instanceView.currentState
 ```
 
