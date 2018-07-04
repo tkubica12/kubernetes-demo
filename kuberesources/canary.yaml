@@ -47,7 +47,6 @@ metadata:
 spec:
   selector:
     app: canaryweb
-  type: LoadBalancer
   ports:
   - protocol: TCP
     port: 80

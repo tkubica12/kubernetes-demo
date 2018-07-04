@@ -1,7 +1,7 @@
 # Kubernetes in Azure
 This repo contains my Kubernetes demo in Azure.
 
-# Recently added
+# Recently added (July 2018)
 * AKS GA updates
 * ConfigMaps and Secrets
 * Sigterm
@@ -9,9 +9,14 @@ This repo contains my Kubernetes demo in Azure.
 * Session affinity
 * Init containers
 * Multi-process containers, multi-container Pods and pod affinity
+* Canary releases with multiple Deployments under single Service
 
 # TO DO
 * Revisit all parts to support AKS GA
+* Upgrade to latest Istio
+* Upgrade to latest Draft
+* AAD based RBAC with AKS
+* Building custom Charts with Helm
 * Kubernetes federation
 * AKS cluster upgrade demo
 * VSTS integration

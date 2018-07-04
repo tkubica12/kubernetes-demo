@@ -101,6 +101,8 @@ kubectl exec ubuntu -- /bin/bash -c 'for i in {1..10}; do curl -s myweb-service;
 kubectl exec ubuntu -- /bin/bash -c 'for i in {1..10}; do curl -s myweb-service-session; done'
 ```
 
+Please note that while servicing 100s of client enabling session persistence might not have dramatic effect on fair load over existing instances, when you have just one client side (client IP) session affinity in effect turn any balancing off!
+
 ## Preserving client source IP
 By default Kubernetes Service is doing SNAT before sending traffic to Pod so client IP information is lost. This might not be problem unless you want to:
 * Whitelisting access to service based on source IP addresses
@@ -137,7 +139,29 @@ kubectl get pods -w
 ## Canary releases with multiple deployments under single Service
 You might want to have tighter control about rolling upgrade. For examle you want canary release like serving small percentage of clients new version for long enough time to gather feedback (hours). Or you want to control ratio between old and new version over time (for example roll 20% of requests every hour).
 
-TBD
+We are going to deploy two separate deployments - one with v1 and one with v2 of our web app. As they share common label we are using in selector for service, Pods of both deployments will be in balancing pool. As we have 3 replicas of v1 and 1 replica of v2, we are much more likely to hit v1.
+
+```
+kubectl apply -f canary.yaml
+kubectl exec ubuntu -- /bin/bash -c 'for i in {1..10}; do curl -s canaryweb; done'
+```
+
+We can independently scale v1 and v2 as we want to have more and more v2s available. Let's rescale our deployments and check we are now much more likely to hit v2.
+
+```
+kubectl scale deployment canaryweb-v1 --replicas 1
+kubectl scale deployment canaryweb-v2 --replicas 3
+kubectl exec ubuntu -- /bin/bash -c 'for i in {1..10}; do curl -s canaryweb; done'
+```
+
+Even we have more control over process compared to Deployment roling upgrade there are still few limitations:
+* Percentage for each version is done by scaling actual resources. It is then hard to send just 1% of traffic to v2 because that would mean you need to have 99 Pods of v1
+* Since Service does not support cookie based session persistence, when more clients access service from behind NAT (such as from their corporate network) you cannot guarantee they hit the same version every time
+* You might require selecting who gets v2 by matching some header in request (eg. testers or beta customers)
+
+If you need even more control you can either:
+* Deploy Istio for Service Mesh [see here](docs/istio.md)
+* Create two separate services and solve this using reverse proxy such as NGINX, Envoy or Traefik
 
 ## Using liveness and readiness probes to monitor Pod status
 Kubernetes will by default react on your main process crash and will restart it. Sometimes you might experience rather hang so app is not responding, but process is up. We will add liveness probe to detect this and restart. Also your instance might not be ready to serve requests. Maybe it is booting or it is overloaded and you do not want it to receive additional traffic for some time. We will signal this with readiness probe.
@@ -369,6 +393,7 @@ kubectl delete -f deploymentNoLiveness.yaml
 kubectl delete -f podMultiContainerNet.yaml
 kubectl delete -f podMultiContainerVolume.yaml
 kubectl delete -f podMultiProcess.yaml
+kubectl delete -f canary.yaml
 kubectl delete -f initDemo.yaml
 kubectl delete -f IIS.yaml
 
