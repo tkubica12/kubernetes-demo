@@ -18,6 +18,7 @@ This set of demos focus on stateless applications like APIs or web frontend. We 
     - [Using liveness and readiness probes to monitor Pod status](#using-liveness-and-readiness-probes-to-monitor-pod-status)
         - [Reacting on dead instances with liveness probe](#reacting-on-dead-instances-with-liveness-probe)
         - [Signal overloaded instance with readiness probe](#signal-overloaded-instance-with-readiness-probe)
+    - [Pod inicialization with init containers](#pod-inicialization-with-init-containers)
     - [Deploy IIS on Windows pool (currently only for ACS mixed cluster, no AKS)](#deploy-iis-on-windows-pool-currently-only-for-acs-mixed-cluster-no-aks)
     - [Test Linux to Windows communication (currently only for ACS mixed cluster, no AKS)](#test-linux-to-windows-communication-currently-only-for-acs-mixed-cluster-no-aks)
     - [Clean up](#clean-up)
@@ -221,6 +222,22 @@ curl $lfPublicIP/setNotReady
 kubectl describe service lf | grep Endpoints
 ```
 
+## Pod inicialization with init containers
+If you define more containers in your Pod they all start together. Sometimes you might want to do some initialization before your app containers are started. Maybe you want to download something first, store on volume and when this is ready start your application. Maybe you want to prefill Redis cache before main container starts. Or you might to wait until some external systems are ready before you start main container. Way to achieve this is to use init containers. Those do start sequentialy. When first init container starts Kubernetes wait for its process to end. Then next and next (if configured). When all init containers exited, main containers are started.
+
+In our example we will use init container to download HTML page from external source (and wait 5 seconds just for demo purposes). Page will be stored in volume and mapped to our main container (NGINX) that will then start and serve this content.
+
+```
+kubectl apply -f initDemo.yaml
+kubectl get pods -w
+```
+
+We will see how container first goes to PodInitializing phase and then Running. You can check NGINX is serving our page using port-forward to Pod.
+
+```
+kubectl port-forward pod/initdemo :80
+```
+
 ## Deploy IIS on Windows pool (currently only for ACS mixed cluster, no AKS)
 Let's now deploy Windows container with IIS.
 
@@ -246,6 +263,7 @@ kubectl delete -f podUbuntu.yaml
 kubectl delete -f deploymentWeb1.yaml
 kubectl delete -f deploymentWeb2.yaml
 kubectl delete -f deploymentNoLiveness.yaml
+kubectl delete -f initDemo.yaml
 kubectl delete -f IIS.yaml
 
 ```
