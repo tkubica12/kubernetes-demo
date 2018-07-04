@@ -1,7 +1,7 @@
-# Using stateless app farms with Deployments and Services
+# Deploying apps with Pods, Deployments and Services
 This set of demos focus on stateless applications like APIs or web frontend. We will deploy application, balance it internally and externally, do rolling upgrade, deploy both Linux and Windows containers and make sure they can access each other.
 
-- [Using stateless app farms with Deployments and Services](#using-stateless-app-farms-with-deployments-and-services)
+- [Deploying apps with Pods, Deployments and Services](#deploying-apps-with-pods-deployments-and-services)
     - [Switch to our AKS cluster](#switch-to-our-aks-cluster)
     - [Deploy multiple pods with Deployment](#deploy-multiple-pods-with-deployment)
     - [Create service to balance traffic internally](#create-service-to-balance-traffic-internally)
