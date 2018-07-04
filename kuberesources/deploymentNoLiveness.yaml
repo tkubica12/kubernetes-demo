@@ -1,0 +1,29 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: lf
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: lf
+    spec:
+      containers:
+      - name: lf-container
+        image: tkubica/lifecycleweb
+        ports:
+        - containerPort: 5000
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: lf
+spec:
+  selector:
+    app: lf
+  type: LoadBalancer
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 5000

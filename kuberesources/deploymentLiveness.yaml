@@ -1,0 +1,22 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: lf
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: lf
+    spec:
+      containers:
+      - name: lf-container
+        image: tkubica/lifecycleweb
+        ports:
+        - containerPort: 5000
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 3
+          periodSeconds: 2

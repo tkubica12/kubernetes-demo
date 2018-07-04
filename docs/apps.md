@@ -15,6 +15,9 @@ This set of demos focus on stateless applications like APIs or web frontend. We 
         - [Recomendation of using this with Ingress only and then use X-Forwarded-For](#recomendation-of-using-this-with-ingress-only-and-then-use-x-forwarded-for)
     - [Rolling upgrade](#rolling-upgrade)
     - [Canary releases with multiple deployments under single Service](#canary-releases-with-multiple-deployments-under-single-service)
+    - [Using liveness and readiness probes to monitor Pod status](#using-liveness-and-readiness-probes-to-monitor-pod-status)
+        - [Reacting on dead instances with liveness probe](#reacting-on-dead-instances-with-liveness-probe)
+        - [Signal overloaded instance with readiness probe](#signal-overloaded-instance-with-readiness-probe)
     - [Deploy IIS on Windows pool (currently only for ACS mixed cluster, no AKS)](#deploy-iis-on-windows-pool-currently-only-for-acs-mixed-cluster-no-aks)
     - [Test Linux to Windows communication (currently only for ACS mixed cluster, no AKS)](#test-linux-to-windows-communication-currently-only-for-acs-mixed-cluster-no-aks)
     - [Clean up](#clean-up)
@@ -77,7 +80,7 @@ kubectl create -f serviceWebExtPrivateStatic.yaml
 ```
 ## Session persistence
 By default service does round robin so your client can connect to different instance every request. This should not be problem with truly stateless scenarios and does allow you for very good balancing. But in some cases even stateless applications might benefit from session persistence:
-* You are using canary deployment some some instances might run newer version of your app then others and such inconsistencies might be unwanted for user experience
+* You are using canary deployment so some instances might run newer version of your app then others and such inconsistencies might be unwanted for user experience
 * You are terminating TLS right in instances and moving to another means renegotiating and therefore increase latency
 * Your API use paging where client request data page by page and you are prefetching data from database in advance. Connecting to different instance can have performance penalty (data not prefetched)
 
@@ -130,6 +133,94 @@ You might want to have tighter control about rolling upgrade. For examle you wan
 
 TBD
 
+## Using liveness and readiness probes to monitor Pod status
+Kubernetes will by default react on your main process crash and will restart it. Sometimes you might experience rather hang so app is not responding, but process is up. We will add liveness probe to detect this and restart. Also your instance might not be ready to serve requests. Maybe it is booting or it is overloaded and you do not want it to receive additional traffic for some time. We will signal this with readiness probe.
+
+In order to simulate this we will use simple Python app that you can find probesDemoApp. I have already created container with it and pushed it to Docker Hub. App is responding with 5 seconds delay, but with 15 seconds delay when simulating instance overloaded scenario. There are following APIs available:
+* /kill will terminate process
+* /hang will keep process running, but stop responding
+* /health checks health of app (used for liveness probe)
+* /setReady will flag instance as ready (default)
+* /setNotReady will simulate overloaded scenario by prolonging response to 15 seconds
+* /readiness will return 200 under normal conditions, but 503 when flagged as overloaded (with /setNotReady)
+
+### Reacting on dead instances with liveness probe
+Let's create deployment and service without liveness probe and test it out.
+
+```
+kubectl apply -f deploymentNoLiveness.yaml
+```
+
+Get external service public IP address and test it.
+
+```
+export lfPublicIP=$(kubectl get service lf -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+curl $lfPublicIP
+```
+
+Simulate application crash. Kubernetes will automatically restart.
+
+```
+curl $lfPublicIP/kill
+kubectl get pods
+```
+
+Simulate application hang. Kubernetes will not react and our app is down.
+
+```
+curl $lfPublicIP/hang
+curl $lfPublicIP
+```
+
+We will now solve this by implementing health probe.
+
+```
+kubectl delete deployment lf
+kubectl apply -f deploymentLiveness.yaml
+```
+
+Make app hang. After few seconds Kubernetes will detect this and restart.
+
+```
+curl $lfPublicIP/hang
+kubectl get pods -w
+curl $lfPublicIP
+```
+
+### Signal overloaded instance with readiness probe
+Let's continue our example by testing behavior with simulation of overloaded instance. First let's increase replicas to 2.
+
+```
+kubectl scale deployment lf --replicas 2
+```
+
+Run load test (for example with VSTS). Response time should always be around 5 seconds.
+
+Now let's flag one of instances as overloaded so its response time increase to 15 seconds.
+
+```
+kubectl describe service lf | grep Endpoints
+curl $lfPublicIP/setNotReady
+kubectl describe service lf | grep Endpoints
+```
+
+If we run test now we will see significanlty longer average latency, because some requests are handle by not overloaded instance (5 seconds delay) and some by overloaded one (15 seconds delay).
+
+We will now want our Service to stop sending requests to instance that is overloaded. Instance will signal this via returning 503 on readiness probe.
+
+```
+kubectl delete deployment lf
+kubectl apply -f deploymentLivenessReadiness.yaml
+```
+
+Rerun your load test. Initialy both instances are serving requests. In the middle of the test flag one of instances as overloaded. Due to readiness probe Kubernetes will remove it from balancing pool so it will not receive any new traffic. Note that Kubernetes will not hurt this instance (as health is still OK), so it can continue working on existing tasks and later can itself join back the pool by starting to return 200 again on readiness probe.
+
+```
+kubectl describe service lf | grep Endpoints
+curl $lfPublicIP/setNotReady
+kubectl describe service lf | grep Endpoints
+```
+
 ## Deploy IIS on Windows pool (currently only for ACS mixed cluster, no AKS)
 Let's now deploy Windows container with IIS.
 
@@ -154,6 +245,7 @@ kubectl delete -f serviceWeb.yaml
 kubectl delete -f podUbuntu.yaml
 kubectl delete -f deploymentWeb1.yaml
 kubectl delete -f deploymentWeb2.yaml
+kubectl delete -f deploymentNoLiveness.yaml
 kubectl delete -f IIS.yaml
 
 ```
