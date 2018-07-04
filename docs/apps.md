@@ -19,6 +19,7 @@ This set of demos focus on stateless applications like APIs or web frontend. We 
         - [Reacting on dead instances with liveness probe](#reacting-on-dead-instances-with-liveness-probe)
         - [Signal overloaded instance with readiness probe](#signal-overloaded-instance-with-readiness-probe)
     - [Pod inicialization with init containers](#pod-inicialization-with-init-containers)
+    - [Reacting to SIGTERM in your application](#reacting-to-sigterm-in-your-application)
     - [Deploy IIS on Windows pool (currently only for ACS mixed cluster, no AKS)](#deploy-iis-on-windows-pool-currently-only-for-acs-mixed-cluster-no-aks)
     - [Test Linux to Windows communication (currently only for ACS mixed cluster, no AKS)](#test-linux-to-windows-communication-currently-only-for-acs-mixed-cluster-no-aks)
     - [Clean up](#clean-up)
@@ -237,6 +238,26 @@ We will see how container first goes to PodInitializing phase and then Running. 
 ```
 kubectl port-forward pod/initdemo :80
 ```
+
+## Reacting to SIGTERM in your application
+When Kubernetes need to take down your Pod due to scale down or draining Node because of pending reboot, your containers will get SIGTERM signal and by default 30 seconds period to gracefully shut down. This period is configurable in Pod definition. You can register to those OS events and do whatever is needed to maintain consistency. You might want to signal 503 on readiness probe, finish current requests and tasks, flush data to persistent storage or inform other members of application cluster about your leave (for example handover master role to different instance).
+
+We will use simple Python app in folder sigtermDemoApp to register for sigterm. For demo purposes we will be printing Running to stdout and when we receive sigterm we will start to print Cleaning up. I have already packaged this up to Docker container and published on Docker Hub.
+
+Start Pod in interactive mode so we see live output.
+
+```
+kubectl run -it sigterm --image tkubica/sigterm:handled --restart Never
+```
+
+In second window kill this Pod.
+
+```
+kubectl delete pod sigterm
+```
+
+You should see application reacting on sigterm.
+
 
 ## Deploy IIS on Windows pool (currently only for ACS mixed cluster, no AKS)
 Let's now deploy Windows container with IIS.
