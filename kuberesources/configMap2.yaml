@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: myconfigmap
+data:
+  mycfgkey: CHANGEDmyvalue
+  mycfgkey2: CHANGEDmyvalue2
+  configfile.ini: |
+    [default]
+    something=azure
+    somethigelse=false

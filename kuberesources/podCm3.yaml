@@ -1,0 +1,28 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: cm3-pod
+spec:
+  containers:
+    - name: ubuntu
+      image: ubuntu
+      command: ["tail"]
+      args: ["-f", "/dev/null"]
+      env:
+        - name: newnamekey1
+          valueFrom:
+            configMapKeyRef:
+              name: myconfigmap
+              key: mycfgkey
+        - name: newnamekey2
+          valueFrom:
+            configMapKeyRef:
+              name: myconfigmap
+              key: mycfgkey2
+      volumeMounts:
+      - name: config-volume
+        mountPath: /etc/config
+  volumes:
+    - name: config-volume
+      configMap:
+        name: myconfigmap

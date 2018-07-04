@@ -1,0 +1,15 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: env-pod
+spec:
+  containers:
+    - name: ubuntu
+      image: ubuntu
+      command: ["tail"]
+      args: ["-f", "/dev/null"]
+      env:
+        - name: mykey
+          value: myvalue
+        - name: mykey2
+          value: myvalue2

@@ -1,0 +1,13 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: cm1-pod
+spec:
+  containers:
+    - name: ubuntu
+      image: ubuntu
+      command: ["tail"]
+      args: ["-f", "/dev/null"]
+      envFrom:
+      - configMapRef:
+          name: myconfigmap
