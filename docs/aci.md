@@ -1,18 +1,19 @@
-# Azure Container Instance demo
-Before we start with Kubernetes let see Azure Container Instances. This is top level resource in Azure so you don't have to create (and pay for) any VM, just create container directly and pay by second. In this demo we will deploy Microsoft SQL Server in Linux container.
+# Azure Container Instances and serverless containers with Virtual Kubelet
+Azure Container Instances are top level resource in Azure so you don't have to create (and pay for) any VM, just create container directly and pay by second. In this demo we will deploy Microsoft SQL Server in Linux container.
 
-- [Azure Container Instance demo](#azure-container-instance-demo)
+- [Azure Container Instances and serverless containers with Virtual Kubelet](#azure-container-instances-and-serverless-containers-with-virtual-kubelet)
     - [Create resource group](#create-resource-group)
     - [Run SQL on Linux container](#run-sql-on-linux-container)
     - [Connect to SQL](#connect-to-sql)
     - [Running tasks in Azure Container Instance](#running-tasks-in-azure-container-instance)
     - [Delete container](#delete-container)
-- [ACI Connector (SuperMario example)](#aci-connector-supermario-example)
-    - [Switch to our AKS or mixed ACS cluster](#switch-to-our-aks-or-mixed-acs-cluster)
-    - [Create resource gorup](#create-resource-gorup)
-    - [Assign RBAC to default service account](#assign-rbac-to-default-service-account)
-    - [Deploy ACI Connector](#deploy-aci-connector)
-    - [Deploy pod to ACI](#deploy-pod-to-aci)
+- [Virtual Kubelet - orchestrating containers without actual nodes](#virtual-kubelet---orchestrating-containers-without-actual-nodes)
+    - [Using Virtual Kubelet with Azure Container Instances](#using-virtual-kubelet-with-azure-container-instances)
+        - [Create resource gorup](#create-resource-gorup)
+        - [Assign RBAC to default service account](#assign-rbac-to-default-service-account)
+        - [Deploy ACI Connector](#deploy-aci-connector)
+        - [Deploy pod to ACI](#deploy-pod-to-aci)
+    - [Using Virtual Kubelet for IoT devices](#using-virtual-kubelet-for-iot-devices)
     - [Clean up](#clean-up)
 
 ## Create resource group
@@ -66,45 +67,46 @@ az container delete -n containertask -g aci-group -y
 az group delete -n aci-group -y
 ```
 
-# ACI Connector (SuperMario example)
-As show in first example Azure Container Instance (in preview) can be used as top level resources. Azure can run containers directly without need to do so in VMs. There is experimental connector available so that Azure behaves like Kubernetes node with infinite capacity. In this demo we will install this connector and schedule pod to run on this infinite node reprezentaion of Azure.
+# Virtual Kubelet - orchestrating containers without actual nodes
+Kubernetes comes with scheduler and managed nodes to deploy Pods however there are situations when you want to leverage Kubernetes orchestration capabilities without deploying to managed nodes. Two examples are Azure Container Instances (deployment of containers directly to cloud without need for any underlaying nodes) and IoT devices (run containers in IoT device, for example using Azure IoT edge to deploy Azure Functions, Azure Stream Analytics or Machine Learning).
 
-## Switch to our AKS or mixed ACS cluster
-```
-kubectx aks
-```
+Virtual Kubelet is virtual node that simulates unlimited pool of cloud containers (ACI) or pool of IoT devices (Azure IoT Hub). Please note this technology is in alpha stage.
 
-or mixed ACS engine
+## Using Virtual Kubelet with Azure Container Instances
 
-```
-kubectx mojeacsdemo
-```
+As show in first example Azure Container Instance can be used as top level resources. Azure can run containers directly without need to do so in VMs. There is experimental connector available so that Azure behaves like Kubernetes node with infinite capacity. In this demo we will install this connector and schedule pod to run on this infinite node reprezentaion of Azure.
 
-## Create resource gorup
+### Create resource gorup
 ```
 az group create -n aci-connect -l eastus
 ```
 
-## Assign RBAC to default service account
+### Assign RBAC to default service account
 This step is only for RBAC enabled cluster, no AKS
 
 ```
 kubectl create -f clusterRoleBindingService.yaml
 ```
 
-## Deploy ACI Connector
+### Deploy ACI Connector
+TO BE UPDATED FOR AKS
+
 ```
 kubectl create -f aciConnector.yaml
 kubectl get nodes
 ```
 
-## Deploy pod to ACI
+### Deploy pod to ACI
 ```
 kubectl create -f podACI.yaml
 kubectl get pods -o wide
 az container list -g aci-connect -o table
 ```
 Connect to IP on port 8080
+
+## Using Virtual Kubelet for IoT devices
+
+TBD
 
 ## Clean up
 ```
