@@ -1,7 +1,16 @@
 # Kubernetes in Azure
 This repo contains my Kubernetes demo in Azure.
 
+# Recently added
+* AKS GA updates
+* ConfigMaps and Secrets
+* Sigterm
+* Liveness and readiness probes
+* Session affinity
+* Init containers
+
 # TO DO
+* Revisit all parts to support AKS GA
 * Kubernetes federation
 * AKS cluster upgrade demo
 * VSTS integration
