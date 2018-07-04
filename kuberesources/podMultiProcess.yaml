@@ -1,0 +1,8 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: supervisord
+spec:
+  containers:
+    - name: ubuntu
+      image: tkubica/multiprocess

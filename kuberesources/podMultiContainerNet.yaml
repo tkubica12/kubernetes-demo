@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: sidecar2
+spec:
+  containers:
+  - name: app
+    image: tutum/curl
+    command: ["tail"]
+    args: ["-f", "/dev/null"]
+  - name: ambassador
+    image: nginx

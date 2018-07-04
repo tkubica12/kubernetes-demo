@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: sidecar
+spec:
+  restartPolicy: Never
+  volumes:
+  - name: shared-data
+    emptyDir: {}
+  containers:
+  - name: nginx
+    image: nginx
+    volumeMounts:
+    - name: shared-data
+      mountPath: /usr/share/nginx/html
+    ports:
+      - containerPort: 80
+  - name: downloader
+    image: tutum/curl
+    volumeMounts:
+    - name: shared-data
+      mountPath: /pod-data
+    command: ["curl"]
+    args: ["https://en.wikipedia.org/wiki/Single-page_application", "-o", "/pod-data/index.html"]

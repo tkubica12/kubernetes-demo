@@ -8,6 +8,7 @@ This repo contains my Kubernetes demo in Azure.
 * Liveness and readiness probes
 * Session affinity
 * Init containers
+* Multi-process containers, multi-container Pods and pod affinity
 
 # TO DO
 * Revisit all parts to support AKS GA

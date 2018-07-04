@@ -20,6 +20,10 @@ This set of demos focus on stateless applications like APIs or web frontend. We 
         - [Signal overloaded instance with readiness probe](#signal-overloaded-instance-with-readiness-probe)
     - [Pod inicialization with init containers](#pod-inicialization-with-init-containers)
     - [Reacting to SIGTERM in your application](#reacting-to-sigterm-in-your-application)
+    - [Running processes close to each other](#running-processes-close-to-each-other)
+        - [Multiple processes in single container](#multiple-processes-in-single-container)
+        - [Multiple containers in single Pod](#multiple-containers-in-single-pod)
+        - [Pods affinity](#pods-affinity)
     - [Deploy IIS on Windows pool (currently only for ACS mixed cluster, no AKS)](#deploy-iis-on-windows-pool-currently-only-for-acs-mixed-cluster-no-aks)
     - [Test Linux to Windows communication (currently only for ACS mixed cluster, no AKS)](#test-linux-to-windows-communication-currently-only-for-acs-mixed-cluster-no-aks)
     - [Clean up](#clean-up)
@@ -258,6 +262,84 @@ kubectl delete pod sigterm
 
 You should see application reacting on sigterm.
 
+## Running processes close to each other
+Sometimes you have processes that talk to each other a lot and introducing additional network hops has negative effect on latency and performance of your application. There are couple of ways to solve this and each comes with advantages and disadvantages.
+
+### Multiple processes in single container
+It is OK for your process to start additional processes or threads. What if you need run two independent processes for example for troubleshooting purposes? I am not big fan of this approach, but you can create container that will start your main process as well as other one - debugging tool, SSH daemon etc. Better way to implement such "helpers" is not to put them in the same container, but rather leverage side-car pattern and deploy multiple containers in single. Nevertheless if you realy need start more than one process in container it is good to use some lightweight process manager. If you just start with bash script that would put some processes to background Kubernetes is loosing control and cannot maitain health status (Kubernetes restarts if your PID 1 crashes - but in such that is bash, if process in background goes down, bash is still up and Kubernetes will not restart your container). Using something like systemd would be too heavy.
+
+In such cases you can use supervisord - lightweight process manager. Checkout example in folder multiProcessContainer. I have build this image and pushed to Docker Hub. You can start it 
+
+```
+kubectl apply -f podMultiProcess.yaml
+```
+
+Supervisord becomes PID 1 and maintains two processes running - tail and sleep. We can kill either one to simulate crash and supervisord will restart it. If suprevisord itself would fail Kubernetes will restart whole container.
+
+```
+kubectl exec -it supervisord -- bash
+root@supervisord:/# ps aux
+USER        PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root          1  0.2  0.4  47788 18304 ?        Ss   08:51   0:00 /usr/bin/python /usr/bin/supervisord
+root          7  0.0  0.0   4416   788 ?        S    08:51   0:00 tail -f /dev/null
+root          8  0.0  0.0   4384   684 ?        S    08:51   0:00 sleep infinity
+root          9  0.0  0.0  18276  3244 ?        Ss   08:52   0:00 bash
+root         18  0.0  0.0  34432  2876 ?        R+   08:52   0:00 ps aux
+root@supervisord:/# kill 7
+root@supervisord:/# ps aux
+USER        PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root          1  0.1  0.4  47992 18392 ?        Ss   08:51   0:00 /usr/bin/python /usr/bin/supervisord
+root          8  0.0  0.0   4384   684 ?        S    08:51   0:00 sleep infinity
+root          9  0.0  0.0  18276  3244 ?        Ss   08:52   0:00 bash
+root         19  0.0  0.0   4416   708 ?        S    08:52   0:00 tail -f /dev/null
+root         20  0.0  0.0  34432  2820 ?        R+   08:52   0:00 ps aux
+root@supervisord:/# kill 8
+root@supervisord:/# ps aux
+USER        PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root          1  0.1  0.4  47992 18392 ?        Ss   08:51   0:00 /usr/bin/python /usr/bin/supervisord
+root          9  0.0  0.0  18276  3316 ?        Ss   08:52   0:00 bash
+root         19  0.0  0.0   4416   708 ?        S    08:52   0:00 tail -f /dev/null
+root         21  0.0  0.0   4384   664 ?        S    08:52   0:00 sleep infinity
+root         22  0.0  0.0  34432  2820 ?        R+   08:52   0:00 ps aux
+```
+
+### Multiple containers in single Pod
+Running multiple processes in the same container creates too tight binding. Kubernetes comes with concept of Pod that can actually hold more that one container and they can communicate with each other. You can use network communication via loopback 127.0.0.1, see the same files in Volume or write to /dev/shm to share memory.
+
+Typical use is with side-car pattern such as:
+* Adapter - change the way how things are exposed to outside world. For example if your app writes its metrics to file and you want to expose that information via API, you can store that file in shared Volume and have second container convert that information into API service. 
+* Ambassador - second container can provide services for communication going out of your app container. Rather than connecting to external service directly you app will talk to 127.0.0.1 where second container will pick it app and proxy communication outside. With that you can implement things like sharding, retry, circuit breaker or TLS encryption. Service Mesh systems like [Istio](docs/istio.md) leverage this
+* Helpers - for example second container can be downloading static content for your web server or provide dynamic configurations for your app
+
+In our first example we will use shared Volume and second container to download HTML content that primary NGINX container is serving.
+```
+kubectl apply -f podMultiContainerVolume.yaml
+kubectl port-forward pod/sidecar :80
+```
+
+In our second example we will test pods can listen to each other via loopback. Our primary container will use 127.0.0.1 to talk to second container with nginx.
+```
+kubectl apply -f podMultiContainerNet.yaml
+kubectl exec -c app sidecar2 -- curl 127.0.0.1
+```
+
+This technique is very good, but might not be the best one to bound two separate services that just happen to talk to each other a lot. In such case you cannot scale them independently. If you need as an example stateless service that talks to Redis deployment within cluster this is issue. It is good to have containers close to each other so cache reads are very fast, but when you need to scale your app service to 20 instances Redis will scale also. Overhead of that much replicas will be very high.
+
+### Pods affinity
+When you have two separated services that often talk to each other, but still want to maintain independent scaling, you might want to have separate Pods or Deployments, but make schedule place those Pod on the same Node so there no network hops added (note that if you use Service on top of Deployment it will by default balance traffic even over network hops - see Service section to see how to change this configuration so local-only will be used). There is concept of Pod affinity we will explore now.
+
+Let's start by deploying first Pod (it can be Deployment, but let's keep this simple for now).
+```
+kubectl apply -f podAffinity1.yaml
+```
+
+We now want to deploy second Pod or Deployment, but tell Kubernetes to schedule it only to Nodes that our first Pod (or Pods of Deployment). There two ways to define this. In our demo we will use requiredDuringSchedulingIgnoredDuringExecution which means Kubernetes will schedule second Pod only to Node that runs first one. If that is not possible (not enough capacity), deployment will fail. You might also want to "preffer" placing it on the same Node, but if that is not possible, it is better to place it elsewhere than doing nothing. This can be implemented using prefferedDuringSchedulingIgnoredDuringExecution.
+
+Deploy second pod and check it is on the same Node.
+```
+kubectl apply -f podAffinity2.yaml
+kubectl get pods -o wide
+```
 
 ## Deploy IIS on Windows pool (currently only for ACS mixed cluster, no AKS)
 Let's now deploy Windows container with IIS.
@@ -284,6 +366,9 @@ kubectl delete -f podUbuntu.yaml
 kubectl delete -f deploymentWeb1.yaml
 kubectl delete -f deploymentWeb2.yaml
 kubectl delete -f deploymentNoLiveness.yaml
+kubectl delete -f podMultiContainerNet.yaml
+kubectl delete -f podMultiContainerVolume.yaml
+kubectl delete -f podMultiProcess.yaml
 kubectl delete -f initDemo.yaml
 kubectl delete -f IIS.yaml
 
