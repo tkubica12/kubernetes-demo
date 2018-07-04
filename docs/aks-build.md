@@ -66,10 +66,16 @@ az aks create -n akscluster -g $aksRg \
 ```
 
 ### Get credentials
-Use Azure CLI to download cluster credentials and merge it to your kubectl configuration file on ~/.kubce/config
+Use Azure CLI to download cluster credentials and merge it to your kubectl configuration file on ~/.kube/config
 
 ```
 az aks get-credentials -n akscluster -g $aksRg
+```
+
+After merging this cluster becomes your current context. If you have stored multiple clusters you can use following commands to switch between them:
+
+```
+kubectl config use-context akscluster
 ```
 
 ### Download kubectl

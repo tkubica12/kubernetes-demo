@@ -26,7 +26,6 @@ This repo contains my Kubernetes demo in Azure.
 # Table of Contents
 - [Deploying managed Kubernetes (AKS)](docs/aks-build.md)
 - [Building custom unmanaged ACS cluster](docs/acs-build.md)
-- [Merging cluster configurations and using kubectx to switch between clusters](docs/cluster-config.md)
 - [Deploying apps with Pods, Deployments and Services](docs/apps.md)
 - [Passing secrets and configurations to Pods](docs/configurations.md)
 - [Stateful applications and StatefulSet with Persistent Volume](docs/stateful.md)
