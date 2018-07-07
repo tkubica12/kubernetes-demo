@@ -131,9 +131,19 @@ We will now do rolling upgrade of our application to new version. We are going t
 kubectl apply -f deploymentWeb2.yaml
 ```
 
-Watch pods being rolled
+Watch pods being rolled (Deployment is using ReplicaSets so how it works is that it creates new ReplicaSet for new version and scales it up while scaling previous down accordinlgy until previous one is scaled to 0).
 ```
 kubectl get pods -w
+```
+
+What if something went wrong and you want to rollback? In this demo we have used pure declarative model, so we have previous version of our Deployment yaml available, so we can easily run this:
+```
+kubectl apply -f deploymentWeb1.yaml
+```
+
+In case you have used imperative model or for some reason getting previous YAML is a bit difficult (eg. you do Continuous Deployment and you are reverting something that your robot deployed, therefore it might take you relatively long time to find right file) Kubernetes Deployment actually stores previous state so you can rollback using this:
+```
+kubectl rollout undo deployment/myweb-deployment
 ```
 
 ## Canary releases with multiple deployments under single Service
