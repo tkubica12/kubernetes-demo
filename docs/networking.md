@@ -2,24 +2,32 @@
 We have seen a lot of networking already: internal ballancing and service discovery, external balancing with automatic integration to Azure Load Balancer with public IP, communication between pods in container etc. In this section we will focus on some other aspects namely networking policy.
 
 - [Advanced networking with Ingress (L7 proxy) and network policy](#advanced-networking-with-ingress-l7-proxy-and-network-policy)
-    - [Create externally accessible service with L7 proxy (Kubernetes ingress)](#create-externally-accessible-service-with-l7-proxy-kubernetes-ingress)
-        - [Make sure Helm is installed](#make-sure-helm-is-installed)
-        - [Deploy nginx ingress](#deploy-nginx-ingress)
-        - [Prepare certificate and store it as Kubernetes secret](#prepare-certificate-and-store-it-as-kubernetes-secret)
-        - [Create DNS record](#create-dns-record)
-        - [Create ingress for our service](#create-ingress-for-our-service)
-        - [Autoenroll Let's encrypt certificates with Kube-lego](#autoenroll-lets-encrypt-certificates-with-kube-lego)
-        - [Test](#test)
-        - [Source IP whitelisting](#source-ip-whitelisting)
-        - [Cleanup](#cleanup)
-    - [Network policy with Calico](#network-policy-with-calico)
-        - [I will reference my kubectl config pointing to Calico-enabled cluster](#i-will-reference-my-kubectl-config-pointing-to-calico-enabled-cluster)
-        - [Create web and db pod](#create-web-and-db-pod)
-        - [Make sure web can both ping and mysql to db pod](#make-sure-web-can-both-ping-and-mysql-to-db-pod)
-        - [Create network policy to allow mysql communication only](#create-network-policy-to-allow-mysql-communication-only)
+- [Externally accessible service with L7 proxy (Kubernetes Ingress)](#externally-accessible-service-with-l7-proxy-kubernetes-ingress)
+  - [Basic Ingress](#basic-ingress)
+    - [Make sure Helm is installed](#make-sure-helm-is-installed)
+    - [Deploy nginx ingress](#deploy-nginx-ingress)
+    - [Prepare certificate and store it as Kubernetes secret](#prepare-certificate-and-store-it-as-kubernetes-secret)
+    - [Create DNS record](#create-dns-record)
+    - [Create ingress for our service](#create-ingress-for-our-service)
+    - [Autoenroll Let's encrypt certificates with Kube-lego](#autoenroll-lets-encrypt-certificates-with-kube-lego)
+    - [Test](#test)
+  - [Advanced Ingress configuration](#advanced-ingress-configuration)
+    - [Source IP whitelisting](#source-ip-whitelisting)
+    - [Sticky session](#sticky-session)
+    - [Basic authentication](#basic-authentication)
+    - [External authentication using OAuth 2.0 and Azure Active Directory](#external-authentication-using-oauth-20-and-azure-active-directory)
+  - [Cleanup](#cleanup)
+- [Network policy with Calico](#network-policy-with-calico)
+    - [I will reference my kubectl config pointing to Calico-enabled cluster](#i-will-reference-my-kubectl-config-pointing-to-calico-enabled-cluster)
+    - [Create web and db pod](#create-web-and-db-pod)
+    - [Make sure web can both ping and mysql to db pod](#make-sure-web-can-both-ping-and-mysql-to-db-pod)
+    - [Create network policy to allow mysql communication only](#create-network-policy-to-allow-mysql-communication-only)
 
-## Create externally accessible service with L7 proxy (Kubernetes ingress)
+# Externally accessible service with L7 proxy (Kubernetes Ingress)
 In case we want L7 balancing, URL routing and SSL acceleration we need to use ingress controler with NGINX implementation. This will deploy http proxy into Kubernetes accessible via external IP (leveraging Azure LB and Azure DNS). Proxy then handles traffic routing to internal services in cluster and provides SSL acceleration.
+
+## Basic Ingress
+In this section we will install and explore basic Ingress services using NGINX implementation including L7 path selections, TLS termination and automatic certificates management.
 
 ### Make sure Helm is installed
 Please refer to this chapter for installing Helm:
@@ -27,7 +35,7 @@ Please refer to this chapter for installing Helm:
 [Package applications with Helm](docs/helm.md)
 
 ### Deploy nginx ingress
-First we need to deploy L7 proxy that will work as Kubernetes Ingress balancer. We are using helm to easily install complete package (more on Helm later in this demo).
+First we need to deploy L7 proxy that will work as Kubernetes Ingress balancer. We are using Helm to easily install complete package.
 
 ```
 helm install --name ingress stable/nginx-ingress --set rbac.create=true
@@ -62,6 +70,9 @@ kubectl create -f ingressWeb.yaml
 ```
 
 ### Autoenroll Let's encrypt certificates with Kube-lego
+
+** TBD - Kube-lego is deprecated, need to move to cert-manager **
+
 As we have seen you can import any certificate to Ingress you prepare beforehand, but doing so with Let's encrypt certification authority require you to repeat this process manualy every three months. You might want to enroll and re-enroll certificates automatically. This is what Kube-lego can handle.
 
 Use helm to deploy kube-lego and make sure to provide your valid email address.
@@ -87,8 +98,11 @@ Because certificate is self-signed (not trusted) use this to test and check cert
 curl -vk https://mykubeapp.azure.tomaskubica.cz/myweb
 ```
 
+## Advanced Ingress configuration
+We have covered what is currently available as part of Kubernetes Ingress object definition. NGINX implementation does offer more capabilities that can be configured using annotations.
+
 ### Source IP whitelisting
-You can specify this via Helm.
+There are scenarios when access to your application needs to be limited based on client source IP. In order get this working we need to keep client source IP when traffic reaches Ingress controller (which runs as Kubernetes Service). We need to deploy this Service with externalTrafficPolicy local, which we can do when using helm install.
 
 ```
 helm install --name ingress stable/nginx-ingress --set controller.service.externalTrafficPolicy=Local
@@ -107,7 +121,19 @@ annotations:
 
 Services that are behind proxy (for example frontend web server) will not suffer any potention disbalance in traffic distribution and while source IP is altered NGINX have inserted client IP information into X-Forwarded-For header that you can read in your application (to do logging for example).
 
-### Cleanup
+### Sticky session
+
+TBD
+
+### Basic authentication
+
+TBD
+
+### External authentication using OAuth 2.0 and Azure Active Directory
+
+TBD
+
+## Cleanup
 
 ```
 kubectl delete -f ingressWeb.yaml
@@ -116,7 +142,10 @@ kubectl delete secret mycert
 az network dns record-set a delete -y -n mykubeapp -g shared-services -z azure.tomaskubica.cz
 ```
 
-## Network policy with Calico
+# Network policy with Calico
+
+** Currenlty Calico is not available for AKS, only for ACS-engine **
+
 Calico is plugin that implements Kubernetes network policy, namely microsegmentation (L4 filtering between pods). In this demo we will create Web and DB and provide strict policy what and how can communicate.
 
 ### I will reference my kubectl config pointing to Calico-enabled cluster
