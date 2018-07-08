@@ -8,6 +8,8 @@ This set of demos focus on stateless applications like APIs or web frontend. We 
     - [Create externally accessible service with Azure LB with Public IP](#create-externally-accessible-service-with-azure-lb-with-public-ip)
     - [Create externally accessible service with Azure LB with Private IP](#create-externally-accessible-service-with-azure-lb-with-private-ip)
     - [Predictable (static) external IP addresses](#predictable-static-external-ip-addresses)
+    - [Using Service without balancing (headless service)](#using-service-without-balancing-headless-service)
+    - [Using Service for balancing apps deployed outside Kubernetes cluster](#using-service-for-balancing-apps-deployed-outside-kubernetes-cluster)
     - [Session persistence](#session-persistence)
     - [Preserving client source IP](#preserving-client-source-ip)
         - [Why Kubernetes do SNAT by default](#why-kubernetes-do-snat-by-default)
@@ -84,6 +86,31 @@ Kubernetes Service together with Azure will assign external IP for you - either 
 ```
 kubectl create -f serviceWebExtPrivateStatic.yaml
 ```
+
+## Using Service without balancing (headless service)
+In most cases it is best to access your balanced apps via Service providing virtual IP and balancing. Rarely your client is more clever and can implement some more advanced algorithm (metric-based balancing, sharding, ...) so you want your client to get all healthy Pod IP addresses. In other word you want to leverage service discovery capabilities of Service without using virtual IP. Let's try it. Deploy headless Service.
+
+```
+kubectl create -f serviceWebHeadless.yaml
+```
+
+We will now try DNS request to regular service (with virtual ClusterIP) versus headless service. First returns Cluster IP A record while second returns multiple A record (one for each healthy Pod).
+```
+kubectl exec ubuntu -- bash -c 'apt update && apt install dnsutils -y'
+kubectl exec ubuntu -- dig myweb-service.default.svc.cluster.local
+kubectl exec ubuntu -- dig myweb-service-headless.default.svc.cluster.local
+```
+
+## Using Service for balancing apps deployed outside Kubernetes cluster
+Suppose you have one of your services running outside of Kubernetes cluster in Azure VM, but you plan to migrate it to your cluster soon. You can create Service object, but rather than using selector to match pods (which build list of endpoint IPs - let say balancing pool) you can specify endpoints manually. This way other services can use this Service using internal mechanisms and you can later migrate that component to Kubernetes and replace fixed endpoints with selector. Note that you can even specify multiple endpoints and Service will do balancing (but it will not be able to check health status because it is not running in cluster therefore if you need HA you better use something like Azure LB externally).
+
+Create service and point to our external VM. We run SSH server there. We do not have client installed in our ubuntu Pod, but we can do curl to port 22 (it will fail with protocol mismatch message, but we will see identificator from other side).
+
+```
+kubectl apply -f serviceOut.yaml
+kubectl exec -it ubuntu -- curl out-service:22
+```
+
 ## Session persistence
 By default service does round robin so your client can connect to different instance every request. This should not be problem with truly stateless scenarios and does allow you for very good balancing. But in some cases even stateless applications might benefit from session persistence:
 * You are using canary deployment so some instances might run newer version of your app then others and such inconsistencies might be unwanted for user experience

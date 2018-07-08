@@ -1,0 +1,20 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: out-service
+spec:
+  type: ClusterIP
+  ports:
+  - protocol: TCP
+    port: 22
+    targetPort: 22
+---
+kind: Endpoints
+apiVersion: v1
+metadata:
+  name: out-service
+subsets:
+  - addresses:
+      - ip: 192.168.8.4 
+    ports:
+      - port: 22
