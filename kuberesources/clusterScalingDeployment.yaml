@@ -14,6 +14,4 @@ spec:
         image: tkubica/stress
         resources:
           limits:
-            cpu: 0.5
-      nodeSelector:
-        beta.kubernetes.io/os: linux
+            cpu: 500m

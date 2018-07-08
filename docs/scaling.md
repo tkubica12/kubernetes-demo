@@ -1,5 +1,10 @@
+# Scaling your apps and cluster
+In this section we will explore Pod scaling and cluster scaling.
+
+- [Scaling your apps and cluster](#scaling-your-apps-and-cluster)
 - [Horizontal Pod auto-scaling](#horizontal-pod-auto-scaling)
     - [Example container](#example-container)
+    - [Gathering CPU metrics](#gathering-cpu-metrics)
     - [Using horizontal scaling](#using-horizontal-scaling)
     - [Clean up](#clean-up)
 - [Cluster scaling](#cluster-scaling)
@@ -7,6 +12,9 @@
     - [Scale cluster and check results](#scale-cluster-and-check-results)
     - [Clean up](#clean-up)
 - [Cluster auto-scaling](#cluster-auto-scaling)
+    - [Prepare configuration details as Secret](#prepare-configuration-details-as-secret)
+    - [Deploy cluster autoscaler](#deploy-cluster-autoscaler)
+    - [Cleanup](#cleanup)
 
 # Horizontal Pod auto-scaling
 For unpredictable workloads we might want to scale number of instances in Deployment based on some metric. Kubernetes comes with built-in auto-scaling capability. In our example we will use simple CPU load metric, but it is also possible to have custom metric including something maintained in application itself.
@@ -16,17 +24,20 @@ In order for scaling to be effective we need to define resources for our pods, n
 ## Example container
 In order to test reaction on CPU load we will use the following container that generate periodic CPU load (number of seconds as period lenght are configured via environmental variable): https://github.com/tkubica12/cpu-stress-docker
 
+## Gathering CPU metrics
+Integrated HPA is using metrics-server to gather CPU load, but scaler can be configured to support customer metrics also.
+
+As time of this writing AKS cluster does not come with metrics-server by default (it uses older Heapster), so for now we will deploy iy manually.
+```
+helm repo update
+helm install stable/metrics-server --name metrics
+```
+
 ## Using horizontal scaling
-We will deploy container with our stress application using Deployment concept in Kubernetes. We start with one instance. By defining env variable to container we set period of stress vs. idle to be 240 seconds.
+We will deploy container with our stress application using Deployment concept in Kubernetes. We start with one instance. By defining env variable to container we set period of stress vs. idle to be 600 seconds (we are using 10 minutes here as default cooldown of HPA is 5 minutes).
 
 ```
 kubectl create -f hpaDeployment.yaml
-kubectl get pods -w
-```
-
-When pod is up, create scaler. We will watch how scaler sees metrics and what number of pods is running in deployment.
-
-```
 kubectl create -f hpaScaler.yaml
 kubectl get hpa -w
 ```
@@ -35,6 +46,7 @@ kubectl get hpa -w
 ```
 kubectl delete -f hpaDeployment.yaml
 kubectl delete -f hpaScaler.yaml
+helm delete metrics --purge
 ```
 
 # Cluster scaling
@@ -55,10 +67,10 @@ kubectl get deployments
 ```
 
 ## Scale cluster and check results
-Now we will use az CLI to scale out cluster to 8 nodes.
+Now we will use az CLI to scale out cluster to 6 nodes.
 
 ```
-az aks scale -n aks -g aks -c 8
+az aks scale -n akscluster -g aksgroup -c 6
 ```
 
 After some time check our cluster now has more nodes and we have addedd enough resources for all our Pods to come to running state.
@@ -77,6 +89,50 @@ az aks scale -n aks -g aks -c 2
 ```
 
 # Cluster auto-scaling
-We can monitor cluster for Pods that stay in pending state due to insufficient resources and when this happen initiate scale out operation. This is currently available as unsupported option for ACS engine, but not for AKS just yet.
+We can monitor cluster for Pods that stay in pending state due to insufficient resources and when this happen initiate scale out operation. Implementation is available for AKS, ACS engine and custom solutions also with Availability Set or Virtual Machine Scale Set here: (https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/cloudprovider/azure/README.md)
 
-To be updated when supported in AKS natively.
+AKS currently does not deploy this component in automated way so we will do that manually.
+
+** Please note that version mentioned here v1.2.2 is not compatible with AKS clusters that use Advanced Networking **
+
+## Prepare configuration details as Secret
+First we need to gather configuration information for autoscaler as it needs to talk to Azure in order to scale our deployment. Resource group details, service principal account and other parameters will be pushed into Kubernetes Secret.
+
+```
+export aksRg=aksgroup
+
+mkdir scaler
+printf $principal > scaler/ClientID
+printf $client_secret > scaler/ClientSecret
+printf $aksRg > scaler/ResourceGroup
+printf $subscription > scaler/SubscriptionID
+printf $tenant > scaler/TenantID
+printf AKS > scaler/VMType
+printf akscluster > scaler/ClusterName
+printf MC_aksgroup_akscluster_westeurope > scaler/NodeResourceGroup
+
+kubectl create secret generic cluster-autoscaler-azure --from-file=scaler/ --namespace kube-system
+rm -rf scaler
+```
+
+In clusterAutoScaling.yaml locate following command that is passed to deployment. Keep nodepool1 (default naming for node pool in AKS) and you can change minimum and maximum number of nodes. Our example scales between 1 to 10 nodes.
+```
+    - --nodes=1:10:nodepool1
+```
+
+There is hard dependency between Kubernetes version and autoscaler version. In our example we expect AKS running 1.10.x and therefore we use cluster autoscaler 1.2.x. You can change this in Deployment definition:
+```
+      - image: k8s.gcr.io/cluster-autoscaler:v1.2.2
+```
+
+## Deploy cluster autoscaler
+```
+kubectl apply -f clusterAutoScaling.yaml
+```
+
+## Cleanup
+
+```
+kubectl delete -f clusterAutoScaling.yaml
+kubectl delete secrets/cluster-autoscaler-azure --namespace kube-system
+```

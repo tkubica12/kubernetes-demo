@@ -10,6 +10,8 @@ This repo contains my Kubernetes demo in Azure.
 * Init containers
 * Multi-process containers, multi-container Pods and pod affinity
 * Canary releases with multiple Deployments under single Service
+* Headless services
+* Services with no selector
 
 # TO DO
 * Revisit all parts to support AKS GA

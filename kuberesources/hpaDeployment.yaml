@@ -1,9 +1,12 @@
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: myhpa-deployment
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: myhpa
   template:
     metadata:
       labels:
@@ -14,9 +17,7 @@ spec:
         image: tkubica/stress
         env:
         - name: STRESS_TIMEOUT
-          value: "240"
+          value: "600"
         resources:
           limits:
-            cpu: 0.2
-      nodeSelector:
-        beta.kubernetes.io/os: linux
+            cpu: 200m
