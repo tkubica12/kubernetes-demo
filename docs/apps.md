@@ -419,19 +419,7 @@ kubectl exec ubuntu -- curl -s myiis-service-ext
 
 ## Clean up
 ```
-kubectl delete -f serviceWebExtPublic.yaml
-kubectl delete -f serviceWebExtPrivate.yaml
-kubectl delete -f serviceWebExtPrivateStatic.yaml
-kubectl delete -f serviceWeb.yaml
-kubectl delete -f podUbuntu.yaml
-kubectl delete -f deploymentWeb1.yaml
-kubectl delete -f deploymentWeb2.yaml
-kubectl delete -f deploymentNoLiveness.yaml
-kubectl delete -f podMultiContainerNet.yaml
-kubectl delete -f podMultiContainerVolume.yaml
-kubectl delete -f podMultiProcess.yaml
-kubectl delete -f canary.yaml
-kubectl delete -f initDemo.yaml
-kubectl delete -f IIS.yaml
-
+kubectl delete deployments --all
+kubectl delete pods --all
+kubectl delete services --all
 ```
