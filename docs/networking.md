@@ -141,7 +141,29 @@ Services that are behind proxy (for example frontend web server) will not suffer
 
 ### Sticky session
 
-TBD
+Cloud-native applications that follow design principles such as 12 factor do not hold any session state in memory, but rather externally in service such as Azure Redis. With that client can contact any instance every time as session state (such as buying basket) is loaded from Redis. More traditional applications might not be designed this way or additional latency is not acceptable. In that case state can be hold on client and sent to instance with every request, but that requires client side to implement that and store and transfer that in secure manner. Nevertheless stateless apps do scale better as new instances being created are immediately avaliable for all clients, not just for new sessions.
+
+But if application architecture requires it you can implement session persistence on Ingress level so all client requests are handled by the same instance (Pod) every time (unless there is failure). With plain Services you are limited to Client IP persistence only which works well for individual end customers, but not when a lot of clients sit behind single IP (such as company router). In that case it is better to handle this persistence using cookie and NGINX Ingress does implement that.
+
+Let's deploy Ingress and use annotations to turn on cookie session persistence.
+```
+kubectl apply -f ingressWebCookiePersistence.yaml
+```
+
+If we ignore cookie we may reach different instance for every request.
+```
+for i in {1..10}; do curl https://mykubeapp.azure.tomaskubica.cz; done
+```
+
+Let's read headers we get back from Ingress.
+```
+curl -I https://mykubeapp.azure.tomaskubica.cz
+```
+
+We will no pass this cookie in our request to get always to the same instance.
+```
+for i in {1..10}; do curl --cookie SESSIONCOOKIE=25deff81b2b2b39a97e454d971daff6160b04d24 https://mykubeapp.azure.tomaskubica.cz; done
+```
 
 ### Custom errors
 

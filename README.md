@@ -12,6 +12,8 @@ This repo contains my Kubernetes demo in Azure.
 * Canary releases with multiple Deployments under single Service
 * Headless services
 * Services with no selector
+* Ingress with cert-manager to auto-enroll letsencrypt certificates
+* Ingress session cookie persistence
 
 # TO DO
 * Revisit all parts to support AKS GA
