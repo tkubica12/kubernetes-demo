@@ -14,6 +14,8 @@ We have seen a lot of networking already: internal ballancing and service discov
   - [Advanced Ingress configuration](#advanced-ingress-configuration)
     - [Source IP whitelisting](#source-ip-whitelisting)
     - [Sticky session](#sticky-session)
+    - [Custom errors](#custom-errors)
+    - [Rate limiting](#rate-limiting)
     - [Basic authentication](#basic-authentication)
     - [External authentication using OAuth 2.0 and Azure Active Directory](#external-authentication-using-oauth-20-and-azure-active-directory)
   - [Cleanup](#cleanup)
@@ -122,6 +124,14 @@ annotations:
 Services that are behind proxy (for example frontend web server) will not suffer any potention disbalance in traffic distribution and while source IP is altered NGINX have inserted client IP information into X-Forwarded-For header that you can read in your application (to do logging for example).
 
 ### Sticky session
+
+TBD
+
+### Custom errors
+
+TBD
+
+### Rate limiting
 
 TBD
 
