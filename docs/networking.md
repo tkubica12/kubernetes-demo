@@ -171,7 +171,14 @@ TBD
 
 ### Rate limiting
 
-TBD
+Are you afraid misbehaving clients can overload your services? To protect yourself from large-scale DDoS attacks you can deploy Azure DDoS Protection Standard SKU in your VNET. Another level of protection can be implemented on Ingress level as basic rate limit of request from single source IP. Note that by default Client IP is not visible for Ingress so you could do just some very high level overall rate limit (see proper section in this document to learn how to make Client IP visible for Ingress).
+
+To easily demonstrate this let's deploy Ingress with limit of 5 requests per minute. There are also annotations to limit requests per second or limit concurent connections from single source IP. You may also whitelist some source IP ranges so rate limit do not apply for those with nginx.ingress.kubernetes.io/limit-whitelist.
+
+```
+kubectl apply -f ingressWebRateLimit.yaml
+for i in {1..50}; do curl https://mykubeapp.azure.tomaskubica.cz; done
+```
 
 ### Basic authentication
 
