@@ -9,8 +9,7 @@ We have seen a lot of networking already: internal ballancing and service discov
     - [Prepare certificate and store it as Kubernetes secret](#prepare-certificate-and-store-it-as-kubernetes-secret)
     - [Create DNS record](#create-dns-record)
     - [Create ingress for our service](#create-ingress-for-our-service)
-    - [Autoenroll Let's encrypt certificates with Kube-lego](#autoenroll-lets-encrypt-certificates-with-kube-lego)
-    - [Test](#test)
+    - [Autoenroll Let's encrypt certificates with cert-manager](#autoenroll-lets-encrypt-certificates-with-cert-manager)
   - [Advanced Ingress configuration](#advanced-ingress-configuration)
     - [Source IP whitelisting](#source-ip-whitelisting)
     - [Sticky session](#sticky-session)
@@ -83,33 +82,38 @@ curl -kv https://mykubeapp.azure.tomaskubica.cz
 curl -kv https://portal.mykubeapp.azure.tomaskubica.cz
 ```
 
-### Autoenroll Let's encrypt certificates with Kube-lego
+### Autoenroll Let's encrypt certificates with cert-manager
 
-** TBD - Kube-lego is deprecated, need to move to cert-manager **
+As we have seen you can import any certificate to Ingress you prepare beforehand, but doing so with Let's encrypt certification authority require you to repeat this process manualy every three months. You might want to enroll and re-enroll certificates automatically. This is what cert-manager can handle.
 
-As we have seen you can import any certificate to Ingress you prepare beforehand, but doing so with Let's encrypt certification authority require you to repeat this process manualy every three months. You might want to enroll and re-enroll certificates automatically. This is what Kube-lego can handle.
+Use helm to deploy cert-manager and configure for Let's encrypt provider.
 
-Use helm to deploy kube-lego and make sure to provide your valid email address.
 ```
-helm install stable/kube-lego --namespace kube-system --name kube-lego --set config.LEGO_EMAIL=YOUR_EMAIL,config.LEGO_URL=https://acme-v01.api.letsencrypt.org/directory
+helm install stable/cert-manager --name cert-manager \
+  --set ingressShim.defaultIssuerName=letsencrypt-prod \
+  --set ingressShim.defaultIssuerKind=ClusterIssuer
+```
+
+Now we need to deploy certificate issuer. Please modify yaml file to include your email address.
+```
+kubectl apply -f certIssuer.yaml
+```
+
+At this point we are ready to create certificate for our domain. We will store it in Secret.
+```
+kubectl apply -f cert.yaml
+kubectl describe secret/letsencrypt-prod
 ```
 
 We need to add annotation to our Ingress definition to request kube-lego to enroll Let's encrypt certificates.
 ```
-kubectl apply -f ingressWebLego.yaml
+kubectl delete -f ingressWeb.yaml
+kubectl apply -f ingressWebCertmanager.yaml
 ```
 
 Test your site now. As we have valid public certificate we do not have to use -k option.
 ```
 curl -v https://mykubeapp.azure.tomaskubica.cz
-```
-
-### Test
-Access app at https://mykubeapp.azure.tomaskubica.cz/myweb
-
-Because certificate is self-signed (not trusted) use this to test and check certificate:
-```
-curl -vk https://mykubeapp.azure.tomaskubica.cz/myweb
 ```
 
 ## Advanced Ingress configuration
@@ -160,7 +164,10 @@ TBD
 ```
 kubectl delete -f ingressWeb.yaml
 helm delete ingress --purge
+helm delete cert-manager --purge
 kubectl delete secret mycert
+kubectl delete -f cert.yaml
+kubectl delete -f certIssuer.yaml
 az network dns record-set a delete -y -n mykubeapp -g shared-services -z azure.tomaskubica.cz
 az network dns record-set a delete -y -n "*.mykubeapp" -g shared-services -z azure.tomaskubica.cz
 ```
