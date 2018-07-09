@@ -56,19 +56,31 @@ rm tls.crt
 ```
 
 ### Create DNS record
-We need to register nginx-ingress public IP address with DNS server. In this demo we use my existing Azure DNS.
+We need to register nginx-ingress public IP address with DNS server. In this demo we use my existing Azure DNS. Also we will want to add wildcard DNS record so we can expose for example portal.mykubeapp.azure.tomaskubica.cz without need to create specific record for portal.
 
 ```
 export ingressIP=$(kubectl get service ingress-nginx-ingress-controller -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
 
 az network dns record-set a add-record -a $ingressIP -n mykubeapp -g shared-services -z azure.tomaskubica.cz
+
+az network dns record-set a add-record -a $ingressIP -n "*.mykubeapp" -g shared-services -z azure.tomaskubica.cz
 ```
 
 ### Create ingress for our service
-We are ready to go. Let's create ingress service that will reference (expose) internal service we have created previously.
+We are ready to go. Let's create ingress service that will reference (expose) internal service. We will expose application on two paths - mykubeapp.azure.tomaskubica.cz and portal.mykubeapp.azure.tomaskubica.cz.
 
 ```
+kubectl create -f deploymentWeb1.yaml
+kubectl create -f serviceWeb.yaml
 kubectl create -f ingressWeb.yaml
+```
+
+Test it out and make sure our certificate is presented for mykubeapp.azure.tomaskubica.cz. We have not specified certificate for portal.mykubeapp.azure.tomaskubica.cz so we will see default NGINX certificate. Also note that when accessing via http Ingress will do redirect to https.
+
+```
+curl -v mykubeapp.azure.tomaskubica.cz
+curl -kv https://mykubeapp.azure.tomaskubica.cz
+curl -kv https://portal.mykubeapp.azure.tomaskubica.cz
 ```
 
 ### Autoenroll Let's encrypt certificates with Kube-lego
@@ -150,6 +162,7 @@ kubectl delete -f ingressWeb.yaml
 helm delete ingress --purge
 kubectl delete secret mycert
 az network dns record-set a delete -y -n mykubeapp -g shared-services -z azure.tomaskubica.cz
+az network dns record-set a delete -y -n "*.mykubeapp" -g shared-services -z azure.tomaskubica.cz
 ```
 
 # Network policy with Calico

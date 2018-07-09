@@ -10,7 +10,14 @@ spec:
     - host: mykubeapp.azure.tomaskubica.cz
       http:
         paths:
-          - path: /myweb
+          - path: /
+            backend:
+              serviceName: myweb-service
+              servicePort: 80
+    - host: portal.mykubeapp.azure.tomaskubica.cz
+      http:
+        paths:
+          - path: /
             backend:
               serviceName: myweb-service
               servicePort: 80
