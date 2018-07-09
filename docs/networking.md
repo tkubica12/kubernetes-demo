@@ -167,7 +167,15 @@ for i in {1..10}; do curl --cookie SESSIONCOOKIE=25deff81b2b2b39a97e454d971daff6
 
 ### Custom errors
 
-TBD
+When we installed NGINX Ingress with Helm we let it create default backend. This creates Deployment (web server with response) and Service object and Ingress then servers this as response to 404. You can change container of default backend when installing Ingress using parameters defaultBackend.image.repository and defaultBackend.image.tag.
+
+Just to test it (in production change your Helm deployment) let's test existing default backend, then modify Deployment to include different image (wenitlabs/fancy-404) and test again.
+
+```
+curl nothing.mykubeapp.azure.tomaskubica.cz
+kubectl edit deploy/ingress-nginx-ingress-default-backend
+curl nothing.mykubeapp.azure.tomaskubica.cz
+```
 
 ### Rate limiting
 

@@ -15,6 +15,7 @@ This repo contains my Kubernetes demo in Azure.
 * Ingress with cert-manager to auto-enroll letsencrypt certificates
 * Ingress session cookie persistence
 * Ingress rate limit
+* Ingress custom errors
 
 # TO DO
 * Revisit all parts to support AKS GA
