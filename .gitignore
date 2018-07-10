@@ -12,6 +12,7 @@ kuberesources/deamonSetOMS.yaml
 kuberesources/rbacConfig
 kuberesources/key.pem
 kuberesources/cert.pem
+kuberesources/auth
 kuberesources/scaler/
 dbPassword.txt
 storageKey.txt

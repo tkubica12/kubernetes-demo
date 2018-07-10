@@ -16,6 +16,7 @@ This repo contains my Kubernetes demo in Azure.
 * Ingress session cookie persistence
 * Ingress rate limit
 * Ingress custom errors
+* Ingress Basic Authentication
 
 # TO DO
 * Revisit all parts to support AKS GA

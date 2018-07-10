@@ -190,7 +190,29 @@ for i in {1..50}; do curl https://mykubeapp.azure.tomaskubica.cz; done
 
 ### Basic authentication
 
-TBD
+In most cases you will probably implement authentication in your code or deploy side-car solution for that such as Istio. Nevertheless sometimes especially during development when such functionality might not be yet ready you can implement basic authentication in Ingress so users without credentials cannot access your beta apps.
+
+First we will create standard htpasswd file with users and passwords
+
+```
+htpasswd -c auth user1
+htpasswd auth user2
+```
+
+Let's create Kubernetes Secret from this file and use annotations in Ingres object to configure NGINX to provide Basic Authentication.
+
+```
+kubectl create secret generic basic-auth --from-file=auth
+rm auth
+kubectl apply -f ingressWebBasicAuth.yaml
+```
+
+Test our deployment.
+
+```
+curl https://mykubeapp.azure.tomaskubica.cz
+curl https://mykubeapp.azure.tomaskubica.cz -u 'user1:password'
+```
 
 ### External authentication using OAuth 2.0 and Azure Active Directory
 
