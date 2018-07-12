@@ -21,6 +21,7 @@ This repo contains my Kubernetes demo in Azure.
 
 # TO DO
 * Revisit all parts to support AKS GA
+* HPA scaling with metrics from Prometheus such as requests per second
 * Upgrade to latest Istio
 * Upgrade to latest Draft
 * AAD based RBAC with AKS
