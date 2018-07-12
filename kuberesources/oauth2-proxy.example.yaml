@@ -1,0 +1,50 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    k8s-app: oauth2-proxy
+  name: oauth2-proxy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      k8s-app: oauth2-proxy
+  template:
+    metadata:
+      labels:
+        k8s-app: oauth2-proxy
+    spec:
+      containers:
+      - args:
+        - --provider=azure
+        - --email-domain=*
+        - --upstream=file:///dev/null
+        - --http-address=0.0.0.0:4180
+        env:
+        - name: OAUTH2_PROXY_CLIENT_ID
+          value: YOUR_APP_ID
+        - name: OAUTH2_PROXY_CLIENT_SECRET
+          value: YOUR_KEY
+        - name: OAUTH2_PROXY_COOKIE_SECRET
+          value: SOMETHING_RANDOM
+        image: a5huynh/oauth2_proxy:2.2
+        imagePullPolicy: Always
+        name: oauth2-proxy
+        ports:
+        - containerPort: 4180
+          protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    k8s-app: oauth2-proxy
+  name: oauth2-proxy
+spec:
+  ports:
+  - name: http
+    port: 4180
+    protocol: TCP
+    targetPort: 4180
+  selector:
+    k8s-app: oauth2-proxy

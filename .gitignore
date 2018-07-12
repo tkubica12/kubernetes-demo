@@ -14,6 +14,7 @@ kuberesources/key.pem
 kuberesources/cert.pem
 kuberesources/auth
 kuberesources/scaler/
+kuberesources/oauth2-proxy.yaml
 dbPassword.txt
 storageKey.txt
 istio/install/

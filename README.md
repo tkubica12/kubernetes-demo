@@ -17,6 +17,7 @@ This repo contains my Kubernetes demo in Azure.
 * Ingress rate limit
 * Ingress custom errors
 * Ingress Basic Authentication
+* Ingress authentication against Azure Active Directory
 
 # TO DO
 * Revisit all parts to support AKS GA

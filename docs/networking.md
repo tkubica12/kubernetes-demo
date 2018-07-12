@@ -6,8 +6,8 @@ We have seen a lot of networking already: internal ballancing and service discov
   - [Basic Ingress](#basic-ingress)
     - [Make sure Helm is installed](#make-sure-helm-is-installed)
     - [Deploy nginx ingress](#deploy-nginx-ingress)
-    - [Prepare certificate and store it as Kubernetes secret](#prepare-certificate-and-store-it-as-kubernetes-secret)
     - [Create DNS record](#create-dns-record)
+    - [Prepare certificate and store it as Kubernetes secret](#prepare-certificate-and-store-it-as-kubernetes-secret)
     - [Create ingress for our service](#create-ingress-for-our-service)
     - [Autoenroll Let's encrypt certificates with cert-manager](#autoenroll-lets-encrypt-certificates-with-cert-manager)
   - [Advanced Ingress configuration](#advanced-ingress-configuration)
@@ -39,7 +39,18 @@ Please refer to this chapter for installing Helm:
 First we need to deploy L7 proxy that will work as Kubernetes Ingress balancer. We are using Helm to easily install complete package.
 
 ```
-helm install --name ingress stable/nginx-ingress --set rbac.create=true
+helm install --name ingress stable/nginx-ingress --set rbac.create=true 
+```
+
+### Create DNS record
+We need to register nginx-ingress public IP address with DNS server. In this demo we use my existing Azure DNS. Also we will want to add wildcard DNS record so we can expose for example portal.mykubeapp.azure.tomaskubica.cz without need to create specific record for portal.
+
+```
+export ingressIP=$(kubectl get service ingress-nginx-ingress-controller -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+
+az network dns record-set a add-record -a $ingressIP -n mykubeapp -g shared-services -z azure.tomaskubica.cz
+
+az network dns record-set a add-record -a $ingressIP -n "*.mykubeapp" -g shared-services -z azure.tomaskubica.cz
 ```
 
 ### Prepare certificate and store it as Kubernetes secret 
@@ -54,24 +65,13 @@ rm tls.key
 rm tls.crt
 ```
 
-### Create DNS record
-We need to register nginx-ingress public IP address with DNS server. In this demo we use my existing Azure DNS. Also we will want to add wildcard DNS record so we can expose for example portal.mykubeapp.azure.tomaskubica.cz without need to create specific record for portal.
-
-```
-export ingressIP=$(kubectl get service ingress-nginx-ingress-controller -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
-
-az network dns record-set a add-record -a $ingressIP -n mykubeapp -g shared-services -z azure.tomaskubica.cz
-
-az network dns record-set a add-record -a $ingressIP -n "*.mykubeapp" -g shared-services -z azure.tomaskubica.cz
-```
-
 ### Create ingress for our service
 We are ready to go. Let's create ingress service that will reference (expose) internal service. We will expose application on two paths - mykubeapp.azure.tomaskubica.cz and portal.mykubeapp.azure.tomaskubica.cz.
 
 ```
-kubectl create -f deploymentWeb1.yaml
-kubectl create -f serviceWeb.yaml
-kubectl create -f ingressWeb.yaml
+kubectl apply -f deploymentWeb1.yaml
+kubectl apply -f serviceWeb.yaml
+kubectl apply -f ingressWeb.yaml
 ```
 
 Test it out and make sure our certificate is presented for mykubeapp.azure.tomaskubica.cz. We have not specified certificate for portal.mykubeapp.azure.tomaskubica.cz so we will see default NGINX certificate. Also note that when accessing via http Ingress will do redirect to https.
@@ -216,17 +216,43 @@ curl https://mykubeapp.azure.tomaskubica.cz -u 'user1:password'
 
 ### External authentication using OAuth 2.0 and Azure Active Directory
 
-TBD
+As with previous example in production you will likely implement authentication in your code or with side-car solution such as Istio, but for dev releases where authentication code is not yet developed, you can authenticate on Ingress level. Using Basic Authentication can be fine for small projects, but it may be more convenient and secure to integrate Ingress authentication with Azure Active Directory.
+
+** Please note this functionality is at this point not available with Azure CNI network implementation, so with AKS deployed with Advanced Networking. **
+As workaround you can turn on hairpin mode manually on host interface that is on one side veth pair going to your Pod. As this is complex I am not describing such procedure in this document and will update this guide when Azure CNI fully spports this out of the box.
+
+NGINX can use oath2 authentication via Open ID Connect against Azure Active Directory by leveraging oauth2-proxy. First we need to register application in AAD with name https://mykubeapp.azure.tomaskubica.cz and callback (reploy URL) to https://mykubeapp.azure.tomaskubica.cz/oauth2/callback. You will also get application ID and you need to generate key.
+
+Next we will deploy oauth2-proxy. Please get oauth2-proxy.example.yaml a modify it with your parameters (app id and key). Then we will deploy this Deployment and Service.
+
+```
+kubectl apply -f oauth2-proxy.yaml
+```
+
+We will now modify our Ingress and add annotations to configure external authentication. Also we will deploy second Ingress that is mapped to the same domain, but on /oauth2 serves our oauth2-proxy. Flow with the client is the following:
+1. Client connects to our site
+2. NGINX calls /oauth2/auth of our proxy to check whether client is already authenticated
+3. User is redirected to AAD login page to authenticate and get token
+4. oauth2-proxy checks validity of this token by accessing Microsoft Graph API
+5. User is redirected to our site
+
+```
+kubectl apply -f ingressWebAADAuth.yaml
+```
+
+To check it out open our app in your browser on https://mykubeapp.azure.tomaskubica.cz/
 
 ## Cleanup
 
 ```
 kubectl delete -f ingressWeb.yaml
 helm delete ingress --purge
-helm delete cert-manager --purge
 kubectl delete secret mycert
 kubectl delete -f cert.yaml
 kubectl delete -f certIssuer.yaml
+helm delete cert-manager --purge
+kubectl delete secret/tls-secret
+kubectl delete secret/letsencrypt-prod
 az network dns record-set a delete -y -n mykubeapp -g shared-services -z azure.tomaskubica.cz
 az network dns record-set a delete -y -n "*.mykubeapp" -g shared-services -z azure.tomaskubica.cz
 ```
