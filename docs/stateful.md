@@ -2,8 +2,11 @@
 Deployments in Kubernetes are great for stateless applications, but statful apps, eg. databases. might require different handling. For example we want to use persistent storage and make sure, that when pod fails, new is created mapped to the same persistent volume (so data are persisted). Also in stateful applications we want to keep identifiers like network (IP address, DNS) when pod fails and needs to be rescheduled. Also when multiple replicas are used we need to start them one by one, because aften first instance is going to be master and others slave (so we need to wait for first one to come up first). If we need to scale down, we want to do this from last instance (not to scale down by killing first instance which is likely to be master). More details can be found in documentation.
 
 - [Stateful applications and StatefulSet with Persistent Volume](#stateful-applications-and-statefulset-with-persistent-volume)
-    - [Switch to our AKS or mixed ACS cluster](#switch-to-our-aks-or-mixed-acs-cluster)
-    - [Check storage class and create Persistent Volume](#check-storage-class-and-create-persistent-volume)
+- [Persistent Volumes for data persistence](#persistent-volumes-for-data-persistence)
+    - [Using Azure Disks as Persistent Volume](#using-azure-disks-as-persistent-volume)
+    - [Using Azure Disks as Persistent Volume](#using-azure-disks-as-persistent-volume)
+    - [Clean up](#clean-up)
+- [Stateful applications with StatefulSets](#stateful-applications-with-statefulsets)
     - [Create StatefulSet with Volume template for Postgresql](#create-statefulset-with-volume-template-for-postgresql)
     - [Connect to PostgreSQL](#connect-to-postgresql)
     - [Destroy Pod and make sure StatefulSet recovers and data are still there](#destroy-pod-and-make-sure-statefulset-recovers-and-data-are-still-there)
@@ -18,35 +21,105 @@ Deployments in Kubernetes are great for stateless applications, but statful apps
 
 In this demo we will deploy single instance of PostgreSQL.
 
-This demo works in both AKS and ACS engine environments.
+# Persistent Volumes for data persistence
+In order to deploy stateful services we first need to make sure we gain persistency of data storage. Without Persistent Volumes all data is stored on Kubernetes nodes that could fail at any time. Should Pods write data that need to be persistent we need to store them differently. Azure comes with 2 different implementations - Azure Disk or Azure Files and both come with advantages and disadvantages.
 
-## Switch to our AKS or mixed ACS cluster
-```
-kubectx aks
-```
+Azure Disk
+* Can get very high performance when Premium storage is used (SSD-based)
+* Full Linux file system compatibility including permissions etc.
+* Cannot be shared with multiple Pods
+* Cannot be access directly outside of Kubernetes cluster (unless disk is disconnected and connected to Linux VM in Azure)
+* There is limit on number of Disk that can be attached to VM depending on VM size/SKU. When using small VMs you might hit this.
+* It might take few minutes to create and attach disk (Pod will be pending)
 
-or mixed ACS engine
+Azure Files (implemented via SMB as a service)
+* Can be shared by multiple Pods (eg. for quorum or static web content)
+* Can be accessed from outside of Kubernetes cluster via SMB protocol (including apps, VMs in Azure, PaaS services, client notebooks or on-premises resources)
+* Due to SMB/CIFS limitations is not compatible with full Linuf FS features (eg. cannot store Linux permissions data)
+* Cannot achieve as low latency and IOPS as Premium storage SSD drives
+* No limitations in number of Volumes that could be attached
+* Fast attach
 
-```
-kubectx mojeacsdemo
-```
-
-## Check storage class and create Persistent Volume
-Our ACS cluster has Azure Disk persistence volume drivers setup.
+## Using Azure Disks as Persistent Volume
+Our AKS cluster has Azure Disk persistence volume drivers available by default. We can see two storage classes - default (Standard HDD) and managed-premium (Premium SSD).
 
 ```
 kubectl get storageclasses
-kubectl create -f persistentVolumeClaim.yaml
+```
+
+Let's create Presistent Volume Claim and check how it creates actual Persistent Volume
+
+```
 kubectl get pvc
 kubectl get pv
 ```
 
-Make sure volume is visible in Azure. 
+Make sure volume is visible in Azure. You find it in MC... resource group with name similar to kubernetes-dynamic-pvc-823fe291-85c3-11e8-a134-462d743040a1
 
-Clean up.
+We can create Pod, attach it our Volume and write some data.
+
 ```
-kubectl delete -f persistentVolumeClaim.yaml
+kubectl apply -f podPvcDisk.yaml
+kubectl exec pod-pvc-disk -- bash -c 'echo My data > /mnt/azure/file.txt'
+kubectl exec pod-pvc-disk -- cat /mnt/azure/file.txt
 ```
+
+## Using Azure Disks as Persistent Volume
+
+First we need to create storage account in Azure. Make sure service principal used when creating AKS cluster has access to it (RBAC). If you have let this generated automatically then it is scoped to MC... resource group so we will deploy our storage account there (or add service principal to any storage account in your subscription).
+
+```
+az storage account create -n tomaskubefiles \
+    -g MC_aksgroup_akscluster_westeurope \
+    --sku Standard_LRS 
+```
+
+Azure Files storage class is not deployed by default in AKS, so let's do it now. Make sure you modify this yaml to reflect your storage account name. Also since our cluster is RBAC enabled we need to create role binding for persistent-volume-binding.
+
+```
+kubectl apply -f storageClassFiles.yaml
+```
+
+We will deploy PVC with managed-files storage class.
+```
+kubectl apply -f persistentVolumeClaimFiles.yaml
+```
+
+We should see new share available in our storage account
+```
+export AZURE_STORAGE_KEY=$(az storage account keys list \
+    -g MC_aksgroup_akscluster_westeurope \
+    -n tomaskubefiles \
+    --query [0].value \
+    -o tsv )
+
+az storage share list --account-name tomaskubefiles
+```
+
+We should see share with name similar to this: kubernetes-dynamic-pvc-1d504a0b-85c8-11e8-a134-462d743040a1
+
+Let's run two Pod that uses Files as shared Persistent Volume. We can test writing in one and reading in seconds Pod.
+```
+kubectl apply -f podPvcFiles.yaml
+kubectl exec pvc-files1 -- bash -c 'echo My data > /mnt/azure/file.txt'
+kubectl exec pvc-files2 -- cat /mnt/azure/file.txt
+```
+
+Nevertheless let's show how permissions are not stored with Azure Files implementation.
+```
+kubectl exec pvc-files1 -- chmod 500 /mnt/azure/file.txt
+kubectl exec pvc-files1 -- ls -l /mnt/azure
+```
+
+## Clean up
+```
+kubectl delete -f podPvcDisk.yaml
+kubectl delete -f podPvcFiles.yaml
+kubectl delete -f persistentVolumeClaimDisk.yaml
+kubectl delete -f persistentVolumeClaimFiles.yaml
+```
+
+# Stateful applications with StatefulSets
 
 ## Create StatefulSet with Volume template for Postgresql
 ```

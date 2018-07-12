@@ -18,6 +18,7 @@ This repo contains my Kubernetes demo in Azure.
 * Ingress custom errors
 * Ingress Basic Authentication
 * Ingress authentication against Azure Active Directory
+* Persistent Volumes with Azure Files
 
 # TO DO
 * Revisit all parts to support AKS GA
