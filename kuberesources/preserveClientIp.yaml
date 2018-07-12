@@ -1,0 +1,30 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: httpecho
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: httpecho
+    spec:
+      containers:
+      - name: httpecho
+        image: tkubica/httpecho
+        ports:
+        - containerPort: 5000
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: httpecho
+spec:
+  selector:
+    app: httpecho
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 5000
+  type: LoadBalancer
+  externalTrafficPolicy: Local

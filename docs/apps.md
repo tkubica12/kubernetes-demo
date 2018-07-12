@@ -149,6 +149,16 @@ node3 -> pod3
 
 With default configuration each pod will get 25% of new connections. With externalTrafficPolicy set to Local, each node will get 33% of new connections. Therefor pod1 and pod4 will get just 16,5% connections each while pod2 and pod3 will get 33% each.
 
+Let's create Deployment and Service configured for Local. This app will return Client IP and we expect this to be real IP of the client.
+
+```
+kubectl apply -f preserveClientIp.yaml
+export extPreserveIp=$(kubectl get service httpecho -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+curl $extPreserveIp
+```
+
+Note: as time of this writing this setting works well with AKS with standard networking, but currently IP address is still NATed with Advanced Networking (Azure CNI)
+
 ### Recomendation of using this with Ingress only and then use X-Forwarded-For
 Good solution if you need client IP information is to use it for [Ingress](docs/networking.md), but not for other Services. By deploying ingress controller in Service with externalTrafficPolicy Local, your nginx proxy will see client IP. This means you can do whitelisting (source IP filters) in you Ingress definition. Traffic distribution problem is virtualy non existent because you typically run ingress on one or few nodes in cluster, but rarely you want more replicas then number of nodes.
 
