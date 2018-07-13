@@ -3,6 +3,9 @@
     - [Install Draft](#install-draft)
     - [Run](#run)
 
+**This section has not yet been updated for AKS**
+
+
 # Draft
 ## Install Traefik and create DNS entry
 ```

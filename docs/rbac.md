@@ -1,5 +1,6 @@
 # RBAC with AAD and ACR
-(currently only with ACS engine, no AKS)
+
+**This section has not yet been updated for AKS**
 
 When using Kubernetes in enterprise there might be need to role based access control and strong authentication. In this demo we will see how to to use namespaces in Kubernetes to isolate resources from control plane level, how to authenticate user with strong Azure Active Directory authentication and how to authorize what each user can do with Kubernetes RBAC. Also we will look into private registry, how to secure it and make sure company provided images are used.
 

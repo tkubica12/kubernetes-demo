@@ -8,6 +8,9 @@
     - [Using Service Catalog and Helm to provision applications](#using-service-catalog-and-helm-to-provision-applications)
 
 # Service catalog to automatically provision and inject PaaS services from Azure
+
+**This section has not yet been updated for AKS**
+
 Kubernetes Service Catalog provides easy to use tooling to provision resources outside of Kubernetes cluster. Especially when running Kubernetes in cloud you might be better served using fully managed platforms for databases, queing or caching rather than building this yourself inside Kubernetes cluster using StatefulSets (you typically gain features such as scaling, patch management, high availability, regional replication, backups, encryption etc.). Service Catalog talks to cloud providers via Open Service Broker standard. We will now explore Service Catalog with Open Service Broker for Azure.
 
 ## Installing service catalog and Azure OSB

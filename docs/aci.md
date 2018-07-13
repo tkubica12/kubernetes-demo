@@ -16,6 +16,9 @@ Azure Container Instances are top level resource in Azure so you don't have to c
     - [Using Virtual Kubelet for IoT devices](#using-virtual-kubelet-for-iot-devices)
     - [Clean up](#clean-up)
 
+**This section has not yet been updated for AKS**
+
+
 ## Create resource group
 ```
 az group create -n aci-group -l westeurope

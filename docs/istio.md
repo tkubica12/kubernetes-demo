@@ -18,6 +18,9 @@
         - [Test service authentication and encryption](#test-service-authentication-and-encryption)
     - [Clean up](#clean-up)
 
+**This section has not yet been updated for AKS**
+
+
 # Creating service mesh with Istio
 
 While Kubernetes provides container orchestration to expose services, provide balancing, rolling upgrades and service discovery, there are needs for connecting services together that require change in application code. Patterns like retry, circuit breaker, intelligent routing and service discovery, canary releases or end-to-end security with TLS encryption. Istio builds on top of Kubernetes and provides features for service mesh as addon leveraging side cars so there is no need to change application code to get those features.
