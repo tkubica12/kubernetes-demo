@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: stateful
+spec:
+  clusterIP: None
+  selector:
+    app: stateful
+  ports:
+  - port: 5432
+    name: dbport
+---    
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  name: stateful
+spec:
+  selector:
+    matchLabels:
+      app: stateful
+  serviceName: stateful
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: stateful
+    spec:
+      containers:
+      - name: container
+        image: tutum/curl
+        command: ["tail"]
+        args: ["-f", "/dev/null"]
+        ports:
+          - containerPort: 5432
+            name: dbport
+      initContainers:
+      - name: init
+        image: tutum/curl
+        command: ["sleep"]
+        args: ["10"]

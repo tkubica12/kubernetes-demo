@@ -18,3 +18,4 @@ kuberesources/oauth2-proxy.yaml
 dbPassword.txt
 storageKey.txt
 istio/install/
+kuberesources/dbpassword

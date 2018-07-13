@@ -20,20 +20,22 @@ spec:
   selector:
     matchLabels:
       app: postgresql
-  serviceName: "postgresql"
+  serviceName: postgresql
   replicas: 1
   template:
     metadata:
       labels:
         app: postgresql
     spec:
-      terminationGracePeriodSeconds: 10
       containers:
       - name: postgresql-pv-container
         image: postgres
         env:
         - name: POSTGRES_PASSWORD
-          value: Azure12345678
+          valueFrom:
+            secretKeyRef:
+              name: dbpass
+              key: dbpassword
         - name: PGDATA
           value: "/var/lib/postgresql/data/pgdata"
         ports:
@@ -42,8 +44,6 @@ spec:
         volumeMounts:
         - mountPath: "/var/lib/postgresql/data"
           name: postgresql-volume-claim
-      nodeSelector:
-        beta.kubernetes.io/os: linux
   volumeClaimTemplates:
   - metadata:
       name: postgresql-volume-claim

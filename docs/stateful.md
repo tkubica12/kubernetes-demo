@@ -7,17 +7,14 @@ Deployments in Kubernetes are great for stateless applications, but statful apps
     - [Using Azure Disks as Persistent Volume](#using-azure-disks-as-persistent-volume)
     - [Clean up](#clean-up)
 - [Stateful applications with StatefulSets](#stateful-applications-with-statefulsets)
+    - [StatefulSets](#statefulsets)
     - [Create StatefulSet with Volume template for Postgresql](#create-statefulset-with-volume-template-for-postgresql)
-    - [Connect to PostgreSQL](#connect-to-postgresql)
-    - [Destroy Pod and make sure StatefulSet recovers and data are still there](#destroy-pod-and-make-sure-statefulset-recovers-and-data-are-still-there)
     - [Periodically backup DB to Azure Blob with CronJob](#periodically-backup-db-to-azure-blob-with-cronjob)
         - [Create storage and container, get credentials](#create-storage-and-container-get-credentials)
         - [Container image for backup job](#container-image-for-backup-job)
         - [Prepare secrets](#prepare-secrets)
         - [Use CronJob to schedule backup job](#use-cronjob-to-schedule-backup-job)
         - [Clean up](#clean-up)
-    - [Continue in Azure](#continue-in-azure)
-    - [Clean up](#clean-up)
 
 In this demo we will deploy single instance of PostgreSQL.
 
@@ -120,9 +117,48 @@ kubectl delete -f persistentVolumeClaimFiles.yaml
 ```
 
 # Stateful applications with StatefulSets
+Having persistent volumes is important part of managing stateful applications, but there are more things to take care of. Kubernetes Deployment has few limitations when using with statefull apps:
+* Deployment creates ports in parallel. Stateful apps sometimess need to start sequentially - spin up first node, make it initialize and become master and after that spin up second node, connect it to master and make it assume agent/slave/minion role
+* Pods with deployments do not have predictable names and those are not persistent. When Pods is rescheduled to different Node it does not keep its configurations such as name
+* When Pod is using Persistent Volume and fails new pod gets created with new Volume rather than take over of existing one
+* During scale-down operation Pods are killed with no order guarantees so it can easily kill Pod that has been created first who became master and cause new master elections that can bring downtime
+
+StatefulSets are designed to behave differently and solve those challanges.
+
+## StatefulSets
+First let's explore behavior of StatefulSet on simple example and later add Volumes and real stateful application like database.
+
+We will run very simple StatefulSet with init container. Observe that Pods are started one by one (only after one Pod goes into full Running state next one is started) and also pod names are predictable (stateful-0, stateful-1 and so on).
+
+```
+kubectl apply -f statefulSet.yaml
+kubectl get pods -w
+```
+
+We will no kill one of Pods and make sure when new one is automatically created it assumes the same predictable name.
+
+```
+kubectl delete pod stateful-1
+kubectl get pods -w
+```
+
+In case of stateful applications nodes sometimes assume specific roles such as master and agent and your client needs to send its writes only to master. If app itself does not have any routing mechanism implemented it is responsibility of client to send traffic to correct Pod (eg. via client library). Therefore we do not want simple balancing with virtual IP but rather create DNS record gives client full list of instances to choose from. To achieve that we have deployed headless Service, which does not provide load balancing, just discovery of individual Pods.
+
+```
+kubectl apply -f podUbuntu.yaml
+kubectl exec ubuntu -- bash -c 'apt update && apt install dnsutils -y && dig stateful.default.svc.cluster.local'
+```
 
 ## Create StatefulSet with Volume template for Postgresql
+Now we will deploy something more useful - let's create single instance of PostgreSQL database. This will be pretty easy and when we loose the Pod for instance due to agent failure Kubernetes will reshedule it and point to the same storage. This is not really HA solution, but gives at least basic automated recovery. Deploying actual HA cluster is complex as it requires separate monitoring solution to initiate fail over and proxy client to point to the right node - you can check Stolon project for more details. In HA scenarios I would strongly recommend to go with Azure Database for PostgreSQL (and other managed databases such as SQL, MySQL or CosmosDB with SQL, MongoDB or Cassandra APIs). Nevertheles for simple scenarios or testing we might be fine with just one instance using StatefulSet.
+
+We are going to deploy PostgreSQL instance with StatefulSet. First we will create Secret with DB password and then deploy our yaml template.
+
 ```
+printf Azure12345678 > dbpassword
+kubectl create secret generic dbpass --from-file=./dbpassword
+rm dbpassword
+
 kubectl create -f statefulSetPVC.yaml
 kubectl get pvc -w
 kubectl get statefulset -w
@@ -130,7 +166,8 @@ kubectl get pods -w
 kubectl logs postgresql-0
 ```
 
-## Connect to PostgreSQL
+We will now connect to database and store some data.
+
 ```
 kubectl exec -ti postgresql-0 -- psql -Upostgres
 CREATE TABLE mytable (
@@ -141,19 +178,22 @@ SELECT * FROM mytable;
 \q
 ```
 
-## Destroy Pod and make sure StatefulSet recovers and data are still there
+Destroy Pod, make sure StatefulSet recovers and data are still there
 ```
 kubectl delete pod postgresql-0
 kubectl exec -ti postgresql-0 -- psql -Upostgres -c 'SELECT * FROM mytable;'
 ```
 
+Note that we can also delete StatefulSet without deleting PVC, go to Azure portal, dettach disk from Kubernetes, attach it to some standard VM and get access to data by mount file system on Azure Disk.
+
 ## Periodically backup DB to Azure Blob with CronJob
-With containers we should apply to single task per container strategy. Therefore scheduled backup process for our DB should be implemented as separate container. We will use CronJob to schedule regular backups and use environmental variables and secrets to pass information to container. That will contain simple Python script to backup our database and upload to Azure Blob Storage.
+With containers we should subscribe to single task per container strategy. Therefore scheduled backup process for our DB should be implemented as separate container. We will use CronJob to schedule regular backups and use environmental variables and secrets to pass information to container. That will contain simple Python script to backup our database and upload to Azure Blob Storage.
 
 ### Create storage and container, get credentials
 ```
-az storage account create -n tomasbackupdbstore -g mykubeacs -l westeurope --sku Standard_LRS
-export storagekey=$(az storage account keys list -g mykubeacs -n tomasbackupdbstore --query [0].value -o tsv)
+az group create -n backups -l westeurope
+az storage account create -n tomasbackupdbstore -g backups -l westeurope --sku Standard_LRS
+export storagekey=$(az storage account keys list -g backups -n tomasbackupdbstore --query [0].value -o tsv)
 az storage container create -n backup --account-name tomasbackupdbstore --account-key $storagekey
 ```
 
@@ -161,8 +201,8 @@ az storage container create -n backup --account-name tomasbackupdbstore --accoun
 You can use container image right from Docker Hub, but if you are intersted on how that works please look into backupJob folder. backup.py is simple script that reads inputs from environmental variables (we will pass this to container via Pod definition) and secrets from specific files (we will mount Kubernetes secrets). You can build container with Dockerfile that installs required dependencies such as Python Azure Storage library and pg_dump PostgreSQL backup utility and copies script to image. Here is how you do it:
 ```
 cd ./backupJob
-docker.exe build -t tkubica/backupdb .
-docker.exe push tkubica/backupdb
+docker.exe build -t tkubica/backupjob .
+docker.exe push tkubica/backupjob
 ```
 
 ### Prepare secrets
@@ -188,30 +228,10 @@ az storage blob list --account-name tomasbackupdbstore --account-key $storagekey
 ### Clean up
 ```
 kubectl delete -f cronJobBackup.yaml
-kubectl delete secret backupcredentials
-az storage account delete -n tomasbackupdbstore -g mykubeacs -y
-```
-
-## Continue in Azure
-Destroy statefulset and pvc, keep pv
-```
 kubectl delete -f statefulSetPVC.yaml
-```
-
-Go to GUI and map IaaS Volume to VM, then mount it and show content.
-```
-ssh tomas@mykubeextvm.westeurope.cloudapp.azure.com
-ls /dev/sd*
-sudo mkdir /data
-sudo mount /dev/sdc /data
-sudo ls -lh /data/pgdata/
-sudo umount /dev/sdc
-```
-
-Detach in GUI
-
-## Clean up
-```
+kubectl delete secret dbpass
+kubectl delete secret backupcredentials
+az group delete -n backups -y --no-wait
 kubectl delete pvc postgresql-volume-claim-postgresql-0
-
 ```
+
