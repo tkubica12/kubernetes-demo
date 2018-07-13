@@ -19,9 +19,9 @@ This repo contains my Kubernetes demo in Azure.
 * Ingress Basic Authentication
 * Ingress authentication against Azure Active Directory
 * Persistent Volumes with Azure Files
+* StatefulSet demo with headless Service, PostgreSQL, backup CronJob
 
 # TO DO
-* Revisit all parts to support AKS GA
 * HPA scaling with metrics from Prometheus such as requests per second
 * Upgrade to latest Istio
 * Upgrade to latest Draft
