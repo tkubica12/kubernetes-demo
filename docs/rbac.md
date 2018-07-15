@@ -82,6 +82,7 @@ kubectl config set-context user1 \
 kubectl config use-context user1
 kubectl get pods
 ```
+Note that you can also bind roles to AAD Groups.
 
 # Using private image registry
 
