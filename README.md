@@ -21,10 +21,10 @@ This repo contains my Kubernetes demo in Azure.
 * Persistent Volumes with Azure Files
 * StatefulSet demo with headless Service, PostgreSQL, backup CronJob
 * RBAC with Azure Active Directory
+* Istio 1.0.0 Service Mesh
 
 # TO DO
 * HPA scaling with metrics from Prometheus such as requests per second
-* Upgrade to latest Istio
 * Upgrade to latest Draft
 * Building custom Charts with Helm
 * Kubernetes federation
@@ -32,6 +32,7 @@ This repo contains my Kubernetes demo in Azure.
 * VSTS integration
 * Spinnaker integration
 * Brigade
+* Upgrade to latest ACS-engine
 
 # Table of Contents
 - [Deploying managed Kubernetes (AKS)](docs/aks-build.md)
