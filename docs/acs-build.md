@@ -1,7 +1,11 @@
-# Building custom ACS cluster
-Azure Container Instance is deployment, upgrade and scaling tool to get open source orchestrators up and running in Azure quickly. ACS as native embedded Azure offering (in GUI, CLI etc.) is production-grade version of open source acs-engine (deployment tool). In order to get latest features we will download acs-engine so we are able to tweek some of its parameters that are not yet available in version embedded in ACS.
+# Building custom ACS-engine cluster
+While AKS is managed Kubernetes that comes with stable features where master nodes are provided for free, ACS-engine is standalone provisioning tool to run Kubernetes on Azure. We can use it to get more control over deployment including access to master nodes and to experiment with new features that are not yet enrolled to AKS. ACS-engines can provision experimental features such as multiple node pools, Windows support, Calico or Cilium for network policy, VT-x isolated containers, KMS-encrypted secrets or selecting differenting host OS. ACS-engine can be also used to provision other orchestrators such as OpenShift, DC/OS or Docker Swarm.
 
-- [Building custom ACS cluster](#building-custom-acs-cluster)
+AKS is managed subset of ACS-engine capabilities and some of features available in ACS-engine might get at some point in time enrolled into AKS service.
+
+**Guide here is based on old ACS-engine version. To be updated for more recent versions.**
+
+- [Building custom ACS-engine cluster](#building-custom-acs-engine-cluster)
     - [Download ACS engine](#download-acs-engine)
     - [Build cluster and copy kubectl configuratio file](#build-cluster-and-copy-kubectl-configuratio-file)
         - [Mixed cluster with standard ACS networking](#mixed-cluster-with-standard-acs-networking)
@@ -10,8 +14,10 @@ Azure Container Instance is deployment, upgrade and scaling tool to get open sou
         - [Create VM for testing](#create-vm-for-testing)
         - [Access GUI](#access-gui)
 
+
 ## Download ACS engine
 ```
+cd acs-engine
 wget https://github.com/Azure/acs-engine/releases/download/v0.9.3/acs-engine-v0.9.3-linux-amd64.zip
 unzip acs-engine-v0.9.3-linux-amd64.zip
 mv acs-engine-v0.9.3-linux-amd64/acs-engine .
