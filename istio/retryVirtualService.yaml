@@ -1,0 +1,15 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: retry-vs
+spec:
+  hosts:
+  - retry-service
+  http:
+  - route:
+    - destination:
+        host: retry-service
+    timeout: 15s
+    retries:
+      attempts: 15
+      perTryTimeout: 1s

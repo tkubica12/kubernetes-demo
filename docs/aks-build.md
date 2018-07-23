@@ -72,6 +72,7 @@ az aks create -n akscluster -g $aksRg\
         --docker-bridge-address 172.17.0.1/16 \
         --dns-service-ip 192.168.4.10 \
         --service-cidr 192.168.4.0/22 \
+        --max-pods 100 \
         --enable-addons http_application_routing,monitoring \
         --workspace-resource-id $workspaceId \
         --service-principal $principal \

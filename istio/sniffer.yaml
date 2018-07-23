@@ -1,0 +1,32 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: sniffer
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: sniffer
+    spec:
+      containers:
+      - name: sniffer
+        image: tkubica/sniffer
+        env:
+        - name: args
+          value: "tcp port 80"
+        ports:
+        - containerPort: 80
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: sniffer
+spec:
+  selector:
+    app: sniffer
+  ports:
+  - protocol: TCP
+    name: http
+    port: 80
+    targetPort: 80

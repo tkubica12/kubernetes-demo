@@ -17,5 +17,5 @@ kuberesources/scaler/
 kuberesources/oauth2-proxy.yaml
 dbPassword.txt
 storageKey.txt
-istio/install/
+istio/istio*
 kuberesources/dbpassword

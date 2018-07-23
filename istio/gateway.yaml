@@ -1,0 +1,26 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: istio-gateway
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "myweb-service.domain.com"
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: gateway-service
+spec:
+  hosts:
+  - myweb-service.domain.com
+  http:
+  - route:
+    - destination:
+        host: myweb-service
