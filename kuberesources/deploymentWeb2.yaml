@@ -17,5 +17,3 @@ spec:
           value: "80"
         ports:
         - containerPort: 80
-      nodeSelector:
-        beta.kubernetes.io/os: linux

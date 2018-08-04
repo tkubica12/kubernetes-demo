@@ -41,7 +41,7 @@ kubectl use-context akscluster
 We are going to deploy simple web application with 3 instances.
 
 ```
-kubectl create -f deploymentWeb1.yaml
+kubectl apply -f deploymentWeb1.yaml
 kubectl get deployments -w
 kubectl get pods -o wide
 ```
@@ -50,8 +50,8 @@ kubectl get pods -o wide
 Create internal service and make sure it is accessible from within Kubernetes cluster. Try multiple times to se responses from different nodes in balancing pool.
 
 ```
-kubectl create -f podUbuntu.yaml
-kubectl create -f serviceWeb.yaml
+kubectl apply -f podUbuntu.yaml
+kubectl apply -f serviceWeb.yaml
 kubectl get services
 kubectl exec ubuntu -- curl -s myweb-service
 ```
@@ -60,7 +60,7 @@ kubectl exec ubuntu -- curl -s myweb-service
 In this example we make service accessible for users via Azure Load Balancer leveraging public IP address.
 
 ```
-kubectl create -f serviceWebExtPublic.yaml
+kubectl apply -f serviceWebExtPublic.yaml
 
 export extPublicIP=$(kubectl get service myweb-service-ext-public -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
 curl $extPublicIP
@@ -70,7 +70,7 @@ curl $extPublicIP
 In this example we make service accessible for internal users via Azure Load Balancer with private IP address so service only from VNET (or peered networks or on-premises network connected via S2S VPN or ExpressRoute).
 
 ```
-kubectl create -f serviceWebExtPrivate.yaml
+kubectl apply -f serviceWebExtPrivate.yaml
 ```
 
 To test we will connect to VM that runs in the same VNET.
@@ -84,14 +84,14 @@ ssh tomas@$vmIp curl $extPrivateIP
 Kubernetes Service together with Azure will assign external IP for you - either free Private IP or create new Public IP. Sometimes you might need this to be more predictable. For example you can create Public IP in your resource group in advance and setup additional systems (DNS records, whitelisting). You specify existing public or private IP in Service definition statically.
 
 ```
-kubectl create -f serviceWebExtPrivateStatic.yaml
+kubectl apply -f serviceWebExtPrivateStatic.yaml
 ```
 
 ## Using Service without balancing (headless service)
 In most cases it is best to access your balanced apps via Service providing virtual IP and balancing. Rarely your client is more clever and can implement some more advanced algorithm (metric-based balancing, sharding, ...) so you want your client to get all healthy Pod IP addresses. In other word you want to leverage service discovery capabilities of Service without using virtual IP. Let's try it. Deploy headless Service.
 
 ```
-kubectl create -f serviceWebHeadless.yaml
+kubectl apply -f serviceWebHeadless.yaml
 ```
 
 We will now try DNS request to regular service (with virtual ClusterIP) versus headless service. First returns Cluster IP A record while second returns multiple A record (one for each healthy Pod).
@@ -118,7 +118,7 @@ By default service does round robin so your client can connect to different inst
 * Your API use paging where client request data page by page and you are prefetching data from database in advance. Connecting to different instance can have performance penalty (data not prefetched)
 
 ```
-kubectl create -f serviceWebSession.yaml
+kubectl apply -f serviceWebSession.yaml
 ```
 
 Using podUbuntu from previous demos check out results. You should see different instances when talking to myweb-service, but not when talking to myweb-server-session.

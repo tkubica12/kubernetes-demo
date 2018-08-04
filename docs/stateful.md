@@ -4,7 +4,7 @@ Deployments in Kubernetes are great for stateless applications, but statful apps
 - [Stateful applications and StatefulSet with Persistent Volume](#stateful-applications-and-statefulset-with-persistent-volume)
 - [Persistent Volumes for data persistence](#persistent-volumes-for-data-persistence)
     - [Using Azure Disks as Persistent Volume](#using-azure-disks-as-persistent-volume)
-    - [Using Azure Disks as Persistent Volume](#using-azure-disks-as-persistent-volume)
+    - [Using Azure Files as Persistent Volume](#using-azure-files-as-persistent-volume)
     - [Clean up](#clean-up)
 - [Stateful applications with StatefulSets](#stateful-applications-with-statefulsets)
     - [StatefulSets](#statefulsets)
@@ -47,6 +47,7 @@ kubectl get storageclasses
 Let's create Presistent Volume Claim and check how it creates actual Persistent Volume
 
 ```
+kubectl apply -f persistentVolumeClaimDisk.yaml
 kubectl get pvc
 kubectl get pv
 ```
@@ -61,7 +62,7 @@ kubectl exec pod-pvc-disk -- bash -c 'echo My data > /mnt/azure/file.txt'
 kubectl exec pod-pvc-disk -- cat /mnt/azure/file.txt
 ```
 
-## Using Azure Disks as Persistent Volume
+## Using Azure Files as Persistent Volume
 
 First we need to create storage account in Azure. Make sure service principal used when creating AKS cluster has access to it (RBAC). If you have let this generated automatically then it is scoped to MC... resource group so we will deploy our storage account there (or add service principal to any storage account in your subscription).
 
