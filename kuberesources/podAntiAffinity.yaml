@@ -1,20 +1,31 @@
 kind: Pod
 apiVersion: v1
 metadata:
-  name: second-affinity
+  name: anti1
   labels:
-    app: second-affinity
+    app: anti1
+spec:
+  containers:
+    - name: nginx
+      image: nginx:alpine
+---
+kind: Pod
+apiVersion: v1
+metadata:
+  name: anti2
+  labels:
+    app: anti2
 spec:
   affinity:
-    podAffinity:
+    podAntiAffinity:
       requiredDuringSchedulingIgnoredDuringExecution:
       - labelSelector:
           matchExpressions:
           - key: app
             operator: In
             values:
-            - first
-        topologyKey: kubernetes.io/hostname
+            - anti1
+        topologyKey: color
   containers:
     - name: nginx
       image: nginx:alpine

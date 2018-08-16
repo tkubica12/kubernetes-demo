@@ -1,7 +1,7 @@
 # Kubernetes in Azure
 This repo contains my Kubernetes demo in Azure.
 
-# Recently added (July 2018)
+# Recently added (July/August 2018)
 * AKS GA updates
 * ConfigMaps and Secrets
 * Sigterm
@@ -22,9 +22,10 @@ This repo contains my Kubernetes demo in Azure.
 * StatefulSet demo with headless Service, PostgreSQL, backup CronJob
 * RBAC with Azure Active Directory
 * Istio 1.0.0 Service Mesh
+* Advanced scheduling (affinity, taints, priority)
 
 # TO DO
-* HPA scaling with metrics from Prometheus such as requests per second
+* HPA scaling with advanced metrics (App Insights or Prometheus)
 * Upgrade to latest Draft
 * Building custom Charts with Helm
 * Kubernetes federation
@@ -42,6 +43,7 @@ This repo contains my Kubernetes demo in Azure.
 - [Stateful applications and StatefulSet with Persistent Volume](docs/stateful.md)
 - [Advanced networking with Ingress (L7 proxy) and network policy](docs/networking.md)
 - [Scaling your apps and cluster](docs/scaling.md)
+- [Advanced scheduling](docs/scheduling.md)
 - [Operational security with RBAC, Azure Active Directory, namespaces and Azure Container Registry](docs/rbac.md)
 - [Azure Container Instances and serverless containers with Virtual Kubelet](docs/aci.md)
 - [Package applications with Helm](docs/helm.md)

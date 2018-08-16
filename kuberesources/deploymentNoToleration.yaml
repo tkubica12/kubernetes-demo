@@ -1,0 +1,14 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: notoleration
+spec:
+  replicas: 5
+  template:
+    metadata:
+      labels:
+        app: notoleration
+    spec:
+      containers:
+      - name: myweb
+        image: nginx:alpine

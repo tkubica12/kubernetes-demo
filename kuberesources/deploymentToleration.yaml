@@ -1,0 +1,18 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: toleration
+spec:
+  replicas: 5
+  template:
+    metadata:
+      labels:
+        app: toleration
+    spec:
+      containers:
+      - name: myweb
+        image: nginx:alpine
+      tolerations:
+      - key: "devonly"
+        operator: "Exists"
+        effect: "NoSchedule"

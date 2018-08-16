@@ -6,7 +6,5 @@ metadata:
     app: first
 spec:
   containers:
-    - name: ubuntu
-      image: ubuntu
-      command: ["tail"]
-      args: ["-f", "/dev/null"]
+    - name: nginx
+      image: nginx:alpine
