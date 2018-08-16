@@ -94,6 +94,41 @@ kubectl apply -f podAntiAffinity.yaml
 kubectl get pods -o wide
 ```
 
+Clean up
+```
+kubectl delete -f podAffinity1.yaml
+kubectl delete -f podAffinity2.yaml
+kubectl delete -f podAntiAffinity.yaml
+```
+
 # Pod priority
 
-TBD
+Let's start by applying Deployment that requests resources that are too much for our cluster.
+
+```
+kubectl apply -f deploymentStandardPriority.yaml
+kubectl get pods
+```
+
+Some out of 10 requested replicas will stay in Pending state because there are not enough cores in our cluster. Suppose we have Pods running that do batch jobs that can wait, but because they we cannot schedule business critical Pod as result.
+
+```
+kubectl apply -f podStandardPriority.yaml
+```
+
+Our critical Pod is now Pending causing business issues.
+
+We will create new PriorityClass and Pod assign to it. We will see that Pod will preempt existing lower priority Pods and gets into Running state.
+```
+kubectl apply -f podPriorityClass.yaml
+kubectl apply -f podPriority.yaml
+kubectl get pods
+```
+
+Clean up
+```
+kubectl delete -f deploymentStandardPriority.yaml
+kubectl delete -f podStandardPriority.yaml
+kubectl delete -f podPriorityClass.yaml
+kubectl delete -f podPriority.yaml
+```
