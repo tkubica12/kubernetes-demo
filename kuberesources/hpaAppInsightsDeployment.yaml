@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: appinsightsdemo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: appinsightsdemo
+  template:
+    metadata:
+      labels:
+        app: appinsightsdemo
+    spec:
+      containers:
+      - name: appinsightsdemo
+        image: tkubica/nodejs-appinsights:latest
+        ports:
+        - containerPort: 80
+        env:
+        - name: APPINSIGHTS_INSTRUMENTATIONKEY
+          valueFrom:
+            secretKeyRef:
+              name: appinsights
+              key: APPINSIGHTS_INSTRUMENTATIONKEY
+        - name: PORT
+          value: "80"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: appinsightsdemo
+spec:
+  ports:
+  - name: http-port
+    port: 80
+    targetPort: 80
+  selector:
+    app: appinsightsdemo
+  type: LoadBalancer

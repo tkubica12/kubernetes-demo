@@ -19,3 +19,10 @@ dbPassword.txt
 storageKey.txt
 istio/istio*
 kuberesources/dbpassword
+kuberesources/azure
+bus-sender/obj/
+bus-sender/bin/
+bus-receiver/obj/
+bus-receiver/bin/
+kuberesources/AZURE_CLIENT_ID
+kuberesources/AZURE_CLIENT_SECRET

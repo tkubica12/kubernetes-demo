@@ -1,0 +1,16 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: bus-sender
+spec:
+  containers:
+    - name: bus-sender
+      image: tkubica/bus-sender:latest
+      env:
+      - name: SERVICEBUS_CONNECTION
+        valueFrom:
+            secretKeyRef:
+              name: servicebus
+              key: SERVICEBUS_CONNECTION
+      - name: SERVICEBUS_QUEUE
+        value: myqueue

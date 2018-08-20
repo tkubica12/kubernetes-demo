@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bus-receiver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bus-receiver
+  template:
+    metadata:
+      labels:
+        app: bus-receiver
+    spec:
+      containers:
+      - name: bus-receiver
+        image: tkubica/bus-receiver:latest
+        env:
+        - name: SERVICEBUS_CONNECTION
+          valueFrom:
+              secretKeyRef:
+                name: servicebus
+                key: SERVICEBUS_CONNECTION
+        - name: SERVICEBUS_QUEUE
+          value: myqueue

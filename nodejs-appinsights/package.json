@@ -1,0 +1,10 @@
+{
+    "name": "appinsightsdemo",
+    "main": "server.js",
+    "scripts": {
+        "start": "node server.js"
+    },
+    "dependencies": {
+        "applicationinsights": "^1.0.3"
+    }
+}

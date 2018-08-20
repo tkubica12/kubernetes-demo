@@ -1,0 +1,25 @@
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: bus-scaler-demo
+spec:
+  scaleTargetRef:
+    apiVersion: extensions/v1beta1
+    kind: Deployment
+    name: bus-receiver
+  minReplicas: 1
+  maxReplicas: 10
+  metrics:
+    - type: External
+      external:
+        metricName: queuemessages
+        metricSelector:
+          matchLabels:
+            metricName: Messages
+            resourceGroup: aksgroup
+            resourceName: myaksservicebus
+            resourceProviderNamespace: Microsoft.Servicebus
+            resourceType: namespaces
+            aggregation: Total
+            filter: EntityName_eq_myqueue
+        targetValue: 30

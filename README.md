@@ -2,6 +2,7 @@
 This repo contains my Kubernetes demo in Azure.
 
 # Recently added (July/August 2018)
+* Advanced metrics for autoscaler (Azure Monitor, Application Insights)
 * AKS GA updates
 * ConfigMaps and Secrets
 * Sigterm
@@ -25,7 +26,6 @@ This repo contains my Kubernetes demo in Azure.
 * Advanced scheduling (affinity, taints, priority)
 
 # TO DO
-* HPA scaling with advanced metrics (App Insights or Prometheus)
 * Upgrade to latest Draft
 * Building custom Charts with Helm
 * Kubernetes federation
