@@ -1,7 +1,7 @@
 - [Service catalog to automatically provision and inject PaaS services from Azure](#service-catalog-to-automatically-provision-and-inject-paas-services-from-azure)
-    - [Installing service catalog and Azure OSB](#installing-service-catalog-and-azure-osb)
+    - [Installing Service Catalog and Azure OSB](#installing-service-catalog-and-azure-osb)
         - [Install Service Catalog CLI](#install-service-catalog-cli)
-        - [Install Kubernetes Service Catalog](#install-kubernetes-service-catalog)
+        - [Install Kubernetes Service Catalog with Helm](#install-kubernetes-service-catalog-with-helm)
         - [Install Open Service Broker for Azure](#install-open-service-broker-for-azure)
     - [Getting started with Service Catalog and Azure services using CLI](#getting-started-with-service-catalog-and-azure-services-using-cli)
     - [Starting application in declarative way](#starting-application-in-declarative-way)
@@ -13,31 +13,24 @@
 
 Kubernetes Service Catalog provides easy to use tooling to provision resources outside of Kubernetes cluster. Especially when running Kubernetes in cloud you might be better served using fully managed platforms for databases, queing or caching rather than building this yourself inside Kubernetes cluster using StatefulSets (you typically gain features such as scaling, patch management, high availability, regional replication, backups, encryption etc.). Service Catalog talks to cloud providers via Open Service Broker standard. We will now explore Service Catalog with Open Service Broker for Azure.
 
-## Installing service catalog and Azure OSB
+## Installing Service Catalog and Azure OSB
 ### Install Service Catalog CLI
 You can work with Service Catalog using kubectl, but currently that is not very user friendly. Azure team has introduced open source CLI for Service Catalog - in this demo we are going to use it.
 
 ```
-curl -sLO https://servicecatalogcli.blob.core.windows.net/cli/latest/Linux/x86_64/svcat
+curl -sLO https://download.svcat.sh/cli/latest/linux/amd64/svcat
 chmod +x ./svcat
 sudo mv ./svcat /usr/local/bin/
-svcat --version
+svcat version --client
 ```
 
-### Install Kubernetes Service Catalog
-AKS currently does not come with RBAC so skip this step if you use AKS. For ACS clusters with RBAC enabled create proper binding first:
-
-```
-kubectl create clusterrolebinding tiller-cluster-admin \
-    --clusterrole=cluster-admin \
-    --serviceaccount=kube-system:default
-```
-
-Install Service Catalog. For AKS keep rbacEnable on false as AKS currently does not come with RBAC.
+### Install Kubernetes Service Catalog with Helm
 
 ```
 helm repo add svc-cat https://svc-catalog-charts.storage.googleapis.com
-helm install svc-cat/catalog --name catalog --namespace services --set rbacEnable=false
+helm install svc-cat/catalog --name catalog \
+    --namespace services \
+    --set controllerManager.healthcheck.enabled=false
 ```
 
 ### Install Open Service Broker for Azure
@@ -49,32 +42,30 @@ helm install azure/open-service-broker-azure --name azurebroker --namespace serv
   --set azure.subscriptionId=$subscription \
   --set azure.tenantId=$tenant \
   --set azure.clientId=$principal \
-  --set azure.clientSecret=$client_secret \
-  --set basicAuth.password=somePrettyGoodPassword \
-  --set encryptionKey=someRealyGoodKey
+  --set azure.clientSecret=$client_secret
 ```
 
 ## Getting started with Service Catalog and Azure services using CLI
-First we will investigate Ayure services available for consumption via Open Service Broker for Azure. Then we will use imperative method (svcat CLI) to test provisioning of Azure services.
+First we will investigate Azure services available for consumption via Open Service Broker for Azure. Then we will use imperative method (svcat CLI) to test provisioning of Azure services.
 
 Check Azure broker is visible, initiate sync and after some time list available classes (Azure services)
 ```
 svcat get brokers
-svcat sync broker osba
 svcat get classes
 ```
 
-Azure services come with different price/performance tiers. This is reflected in Kubernetes Service Catalog as Plans.
+Azure services come with different price/performance tiers. This is reflected in Kubernetes Service Catalog as Plans and each plan have a lot of parameters that can be specified such as number of cores, DB size or firewall settings.
 ```
-svcat describe class -t azure-postgresqldb
-svcat describe class -t azure-cosmos-mongo-db
-svcat describe class -t azure-mysqldb
-svcat describe class -t azure-sqldb
+svcat get plans --class azure-postgresql-9-6
+svcat describe plan azure-postgresql-9-6/general-purpose
 ```
 
 Use CLI to provision service
 ```
-svcat provision myfirstdb --class azure-postgresqldb --plan basic50 -p location=westeurope
+svcat provision myfirstdb --class azure-postgresql-9-6 \
+    --plan general-purpose \
+    -p location=westeurope \
+    -p resourceGroup=aksgroup
 svcat get instances
 ```
 
@@ -109,15 +100,14 @@ printf 'Password: ' && kubectl get secret myfirstdb2 -o json | jq -r .data.passw
 Clean up
 ```
 svcat unbind myfirstdb
-svcat unbind myfirstdb2
-svcat unprovision myfirstdb
+svcat deprovision myfirstdb
 ```
 
 ## Starting application in declarative way
 In more real situation we will use declarative methods to run our application and let Azure resources be created. We can create Service Catalog Instance and Binding using Kubernetes declarative syntax and then create pod that will get access to service.
 
 ```
-kubectl create -f serviceCatalogDemo.yaml
+kubectl apply -f serviceCatalogDemo.yaml
 ```
 
 Print environmental variables in pod

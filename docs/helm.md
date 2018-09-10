@@ -16,8 +16,10 @@ tar -zxvf helm-v2.9.1-linux-amd64.tar.gz
 sudo cp linux-amd64/helm /usr/local/bin
 rm -rf linux-amd64/
 ```
+
 ## Prepare RBAC rule for Tiller service account
 ```
+cd ../kuberesources
 kubectl apply -f tiller-rbac.yaml
 ```
 

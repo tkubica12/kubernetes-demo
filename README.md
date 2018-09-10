@@ -1,29 +1,8 @@
 # Kubernetes in Azure
 This repo contains my Kubernetes demo in Azure.
 
-# Recently added (July/August 2018)
-* Advanced metrics for autoscaler (Azure Monitor, Application Insights)
-* AKS GA updates
-* ConfigMaps and Secrets
-* Sigterm
-* Liveness and readiness probes
-* Session affinity
-* Init containers
-* Multi-process containers, multi-container Pods and pod affinity
-* Canary releases with multiple Deployments under single Service
-* Headless services
-* Services with no selector
-* Ingress with cert-manager to auto-enroll letsencrypt certificates
-* Ingress session cookie persistence
-* Ingress rate limit
-* Ingress custom errors
-* Ingress Basic Authentication
-* Ingress authentication against Azure Active Directory
-* Persistent Volumes with Azure Files
-* StatefulSet demo with headless Service, PostgreSQL, backup CronJob
-* RBAC with Azure Active Directory
-* Istio 1.0.0 Service Mesh
-* Advanced scheduling (affinity, taints, priority)
+# Recently added (September 2018)
+* Refresh to latest Service Catalog and OSBA
 
 # TO DO
 * Upgrade to latest Draft
