@@ -8,5 +8,3 @@ spec:
       image: tutum/curl
       command: ["tail"]
       args: ["-f", "/dev/null"]
-  nodeSelector:
-    beta.kubernetes.io/os: linux

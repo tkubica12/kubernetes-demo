@@ -3,6 +3,7 @@ This repo contains my Kubernetes demo in Azure.
 
 # Recently added (September 2018)
 * Refresh to latest Service Catalog and OSBA
+* Ingress - https backends
 
 # TO DO
 * Upgrade to latest Draft

@@ -1,0 +1,57 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: test
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: test
+    spec:
+      containers:
+      - name: test
+        image: eboraas/apache
+        ports:
+        - containerPort: 443
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: test
+spec:
+  selector:
+    app: test
+  ports:
+  - protocol: TCP
+    port: 443
+    targetPort: 443
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    nginx.org/server-snippet: "proxy_ssl_verify off;"
+  name: myweb-ingress
+spec:
+  rules:
+    - host: mykubeapp.azure.tomaskubica.cz
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: test
+              servicePort: 443
+    - host: portal.mykubeapp.azure.tomaskubica.cz
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: test
+              servicePort: 443
+  tls:
+      - hosts:
+          - mykubeapp.azure.tomaskubica.cz
+        secretName: mycert

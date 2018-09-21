@@ -11,6 +11,7 @@ We have seen a lot of networking already: internal ballancing and service discov
     - [Create ingress for our service](#create-ingress-for-our-service)
     - [Autoenroll Let's encrypt certificates with cert-manager](#autoenroll-lets-encrypt-certificates-with-cert-manager)
   - [Advanced Ingress configuration](#advanced-ingress-configuration)
+    - [HTTPS backends](#https-backends)
     - [Source IP whitelisting](#source-ip-whitelisting)
     - [Sticky session](#sticky-session)
     - [Custom errors](#custom-errors)
@@ -39,7 +40,9 @@ Please refer to this chapter for installing Helm:
 First we need to deploy L7 proxy that will work as Kubernetes Ingress balancer. We are using Helm to easily install complete package.
 
 ```
-helm install --name ingress stable/nginx-ingress --set rbac.create=true 
+helm install --name ingress stable/nginx-ingress \
+  --set rbac.create=true \
+  --set controller.image.tag=0.18.0
 ```
 
 ### Create DNS record
@@ -119,11 +122,31 @@ curl -v https://mykubeapp.azure.tomaskubica.cz
 ## Advanced Ingress configuration
 We have covered what is currently available as part of Kubernetes Ingress object definition. NGINX implementation does offer more capabilities that can be configured using annotations.
 
+### HTTPS backends
+In previous examples we have used Ingress to terminate TLS and estabilish backend session via HTTP. Sometimes you need to bring existing containers that already use TLS. Ingress can be configured in SSL passthrow mode or terminating TLS with client, but use HTTPS when talking to backend services. Later is the one we will demonstrate.
+
+Make sure you have prepared mycert Kubernetes Secret with your certificate. We will deploy new Deployment with HTTPS application, Service and Ingress rules. We will use annotation to enable HTTPS backend and configuration to ignore untrusted certificates on backend (something we are doing because backend is using self-signed certificate).
+
+```
+kubectl apply -f ingressHttpsBackend.yaml
+```
+
 ### Source IP whitelisting
 There are scenarios when access to your application needs to be limited based on client source IP. In order get this working we need to keep client source IP when traffic reaches Ingress controller (which runs as Kubernetes Service). We need to deploy this Service with externalTrafficPolicy local, which we can do when using helm install.
 
 ```
-helm install --name ingress stable/nginx-ingress --set controller.service.externalTrafficPolicy=Local
+helm install --name ingress stable/nginx-ingress \
+  --set controller.service.externalTrafficPolicy=Local \
+  --set rbac.create=true \
+  --set controller.image.tag=0.18.0
+```
+
+If you have Ingress already installed, you can use upgrade command.
+```
+helm upgrade ingress stable/nginx-ingress \
+  --set controller.service.externalTrafficPolicy=Local \
+  --set rbac.create=true \
+  --set controller.image.tag=0.18.0
 ```
 
 Then you can use whitelisting in your ingress definitions:
