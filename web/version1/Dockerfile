@@ -1,7 +1,7 @@
-FROM ubuntu
+FROM debian:9-slim
 
 COPY web /usr/local/bin/web
 
-RUN chmod +x /usr/local/bin/web && apt-get update && apt-get install uuid-runtime
+RUN chmod +x /usr/local/bin/web
 
 CMD ["/usr/local/bin/web"] 

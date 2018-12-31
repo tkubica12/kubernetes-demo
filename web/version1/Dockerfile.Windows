@@ -1,0 +1,5 @@
+FROM mcr.microsoft.com/windows/nanoserver:1809_amd64
+
+COPY web.exe /app
+
+CMD ["/app/web.exe"] 

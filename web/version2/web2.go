@@ -2,19 +2,19 @@ package main
 
 import (
    "github.com/go-martini/martini"
-   "os/exec"
+   "github.com/satori/go.uuid"
 )
 
 func main() {
   m := martini.Classic()
 
-  uuid, err := exec.Command("uuidgen").Output()
+  id, err := uuid.NewV4()
   if err != nil {
     panic("Unable to generate uuid")
   }
 
   m.Get("/", func() string {
-    return "<h1>Welcome to Version 2<br><br>This is server " + string(uuid) + "</h1>"
+    return "Version 2: server id " + id.String()
   })
 
   m.Run()
