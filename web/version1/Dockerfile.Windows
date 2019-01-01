@@ -1,5 +1,5 @@
 FROM mcr.microsoft.com/windows/nanoserver:1803
 
-COPY web.exe /app
+COPY web.exe .
 
-CMD ["/app/web.exe"] 
+CMD ["web.exe"] 
