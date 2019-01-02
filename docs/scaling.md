@@ -3,21 +3,21 @@ In this section we will explore Pod scaling and cluster scaling.
 
 - [Scaling your apps and cluster](#scaling-your-apps-and-cluster)
 - [Horizontal Pod auto-scaling](#horizontal-pod-auto-scaling)
-    - [Example container](#example-container)
-    - [Gathering CPU metrics](#gathering-cpu-metrics)
-    - [Using horizontal scaling](#using-horizontal-scaling)
-    - [Advanced metrics from Azure services](#advanced-metrics-from-azure-services)
-        - [Application Insights](#application-insights)
-        - [Azure Monitor (Service Bus example)](#azure-monitor-service-bus-example)
-    - [Clean up](#clean-up)
+  - [Example container](#example-container)
+  - [Gathering CPU metrics](#gathering-cpu-metrics)
+  - [Using horizontal scaling](#using-horizontal-scaling)
+  - [Advanced metrics from Azure services](#advanced-metrics-from-azure-services)
+    - [Application Insights](#application-insights)
+    - [Azure Monitor (Service Bus example)](#azure-monitor-service-bus-example)
+  - [Clean up](#clean-up)
 - [Cluster scaling](#cluster-scaling)
-    - [Deploy application](#deploy-application)
-    - [Scale cluster and check results](#scale-cluster-and-check-results)
-    - [Clean up](#clean-up)
+  - [Deploy application](#deploy-application)
+  - [Scale cluster and check results](#scale-cluster-and-check-results)
+  - [Clean up](#clean-up-1)
 - [Cluster auto-scaling](#cluster-auto-scaling)
-    - [Prepare configuration details as Secret](#prepare-configuration-details-as-secret)
-    - [Deploy cluster autoscaler](#deploy-cluster-autoscaler)
-    - [Cleanup](#cleanup)
+  - [Prepare configuration details as Secret](#prepare-configuration-details-as-secret)
+  - [Deploy cluster autoscaler](#deploy-cluster-autoscaler)
+  - [Cleanup](#cleanup)
 
 # Horizontal Pod auto-scaling
 For unpredictable workloads we might want to scale number of instances in Deployment based on some metric. Kubernetes comes with built-in auto-scaling capability. In our example we will use simple CPU load metric, but it is also possible to have custom metric including something maintained in application itself.
@@ -25,7 +25,7 @@ For unpredictable workloads we might want to scale number of instances in Deploy
 In order for scaling to be effective we need to define resources for our pods, namely specify number of CPUs (can beeither full CPU or CPU share like 0.2) and memory. This instruct scheduler to place Pods on nodes with enough resources.
 
 ## Example container
-In order to test reaction on CPU load we will use the following container that generate periodic CPU load (number of seconds as period lenght are configured via environmental variable): https://github.com/tkubica12/cpu-stress-docker
+In order to test reaction on CPU load we will use the following container that generate periodic CPU load (number of seconds as period lenght are configured via environmental variable) with source in folder cpu-stress.
 
 ## Gathering CPU metrics
 Integrated HPA is using metrics-server to gather CPU load, but scaler can be configured to support customer metrics also.
