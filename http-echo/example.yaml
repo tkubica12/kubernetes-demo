@@ -1,0 +1,34 @@
+# Use downward API to pass information to echo container
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: httpecho
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: httpecho
+    spec:
+      containers:
+      - name: httpecho
+        image: tkubica/httpecho
+        ports:
+        - containerPort: 5000
+        env:
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: NODE_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP
