@@ -1,20 +1,30 @@
-# Stateful applications and StatefulSet with Persistent Volume
+# Stateful applications, StatefulSets, Persistent Volume, Backup and DR with Heptio Ark
 Deployments in Kubernetes are great for stateless applications, but statful apps, eg. databases. might require different handling. For example we want to use persistent storage and make sure, that when pod fails, new is created mapped to the same persistent volume (so data are persisted). Also in stateful applications we want to keep identifiers like network (IP address, DNS) when pod fails and needs to be rescheduled. Also when multiple replicas are used we need to start them one by one, because aften first instance is going to be master and others slave (so we need to wait for first one to come up first). If we need to scale down, we want to do this from last instance (not to scale down by killing first instance which is likely to be master). More details can be found in documentation.
 
-- [Stateful applications and StatefulSet with Persistent Volume](#stateful-applications-and-statefulset-with-persistent-volume)
+- [Stateful applications, StatefulSets, Persistent Volume, Backup and DR with Heptio Ark](#stateful-applications-statefulsets-persistent-volume-backup-and-dr-with-heptio-ark)
 - [Persistent Volumes for data persistence](#persistent-volumes-for-data-persistence)
-    - [Using Azure Disks as Persistent Volume](#using-azure-disks-as-persistent-volume)
-    - [Using Azure Files as Persistent Volume](#using-azure-files-as-persistent-volume)
-    - [Clean up](#clean-up)
+  - [Using Azure Disks as Persistent Volume](#using-azure-disks-as-persistent-volume)
+  - [Using Azure Files as Persistent Volume](#using-azure-files-as-persistent-volume)
+  - [Clean up](#clean-up)
 - [Stateful applications with StatefulSets](#stateful-applications-with-statefulsets)
-    - [StatefulSets](#statefulsets)
-    - [Create StatefulSet with Volume template for Postgresql](#create-statefulset-with-volume-template-for-postgresql)
-    - [Periodically backup DB to Azure Blob with CronJob](#periodically-backup-db-to-azure-blob-with-cronjob)
-        - [Create storage and container, get credentials](#create-storage-and-container-get-credentials)
-        - [Container image for backup job](#container-image-for-backup-job)
-        - [Prepare secrets](#prepare-secrets)
-        - [Use CronJob to schedule backup job](#use-cronjob-to-schedule-backup-job)
-        - [Clean up](#clean-up)
+  - [StatefulSets](#statefulsets)
+  - [Create StatefulSet with Volume template for Postgresql](#create-statefulset-with-volume-template-for-postgresql)
+  - [Periodically backup DB to Azure Blob with CronJob](#periodically-backup-db-to-azure-blob-with-cronjob)
+    - [Create storage and container, get credentials](#create-storage-and-container-get-credentials)
+    - [Container image for backup job](#container-image-for-backup-job)
+    - [Prepare secrets](#prepare-secrets)
+    - [Use CronJob to schedule backup job](#use-cronjob-to-schedule-backup-job)
+    - [Clean up](#clean-up-1)
+- [Heptio Ark - business continuity solution](#heptio-ark---business-continuity-solution)
+  - [Gather all details and prepare resources in Azure](#gather-all-details-and-prepare-resources-in-azure)
+  - [Deploy Ark](#deploy-ark)
+  - [Download Ark client](#download-ark-client)
+  - [Create stateful application](#create-stateful-application)
+  - [Backups with Volume snapshots](#backups-with-volume-snapshots)
+    - [Create backup](#create-backup)
+    - [Test accidental delete and restore](#test-accidental-delete-and-restore)
+    - [Deploy in different AKS cluster](#deploy-in-different-aks-cluster)
+  - [Backup with Restic](#backup-with-restic)
 
 In this demo we will deploy single instance of PostgreSQL.
 
@@ -22,18 +32,18 @@ In this demo we will deploy single instance of PostgreSQL.
 In order to deploy stateful services we first need to make sure we gain persistency of data storage. Without Persistent Volumes all data is stored on Kubernetes nodes that could fail at any time. Should Pods write data that need to be persistent we need to store them differently. Azure comes with 2 different implementations - Azure Disk or Azure Files and both come with advantages and disadvantages.
 
 Azure Disk
-* Can get very high performance when Premium storage is used (SSD-based)
+* Full support for standard a premium storage
 * Full Linux file system compatibility including permissions etc.
 * Cannot be shared with multiple Pods
 * Cannot be access directly outside of Kubernetes cluster (unless disk is disconnected and connected to Linux VM in Azure)
 * There is limit on number of Disk that can be attached to VM depending on VM size/SKU. When using small VMs you might hit this.
-* It might take few minutes to create and attach disk (Pod will be pending)
+* It might take few minutes to create and attach disk (Pod will be pending), not ideal when you use singleton (eg. single mysql instance) rather than cluster and expect fast recovery
 
 Azure Files (implemented via SMB as a service)
 * Can be shared by multiple Pods (eg. for quorum or static web content)
 * Can be accessed from outside of Kubernetes cluster via SMB protocol (including apps, VMs in Azure, PaaS services, client notebooks or on-premises resources)
 * Due to SMB/CIFS limitations is not compatible with full Linuf FS features (eg. cannot store Linux permissions data)
-* Cannot achieve as low latency and IOPS as Premium storage SSD drives
+* High performance available with Premium Files, but that is currently in preview only
 * No limitations in number of Volumes that could be attached
 * Fast attach
 
@@ -236,3 +246,137 @@ az group delete -n backups -y --no-wait
 kubectl delete pvc postgresql-volume-claim-postgresql-0
 ```
 
+# Heptio Ark - business continuity solution
+## Gather all details and prepare resources in Azure
+We need to create Resource Group and storage account for backups including container. Next we will gather all login and configuration details and store it as Kubernetes Secret.
+
+```
+AZURE_BACKUP_RESOURCE_GROUP=aks-backups
+az group create -n $AZURE_BACKUP_RESOURCE_GROUP --location westeurope
+
+AZURE_STORAGE_ACCOUNT_ID="aksbackupsva4ai"
+az storage account create \
+    --name $AZURE_STORAGE_ACCOUNT_ID \
+    --resource-group $AZURE_BACKUP_RESOURCE_GROUP \
+    --sku Standard_GRS \
+    --encryption-services blob \
+    --https-only true \
+    --kind BlobStorage \
+    --access-tier Hot
+az storage container create -n ark --public-access off --account-name $AZURE_STORAGE_ACCOUNT_ID
+```
+
+Deploy CRDs, namespace and rbac
+
+```
+cd ark
+kubectl apply -f 00-prereqs.yaml
+```
+
+```
+AZURE_RESOURCE_GROUP=MC_aks_aks_westeurope
+kubectl create secret generic cloud-credentials \
+    --namespace heptio-ark \
+    --from-literal AZURE_SUBSCRIPTION_ID=$subscription \
+    --from-literal AZURE_TENANT_ID=$tenant \
+    --from-literal AZURE_CLIENT_ID=$principal \
+    --from-literal AZURE_CLIENT_SECRET=$client_secret \
+    --from-literal AZURE_RESOURCE_GROUP=${AZURE_RESOURCE_GROUP}
+```
+
+## Deploy Ark
+Deploy Ark components
+
+```
+kubectl apply -f 00-ark-deployment.yaml
+```
+
+Make sure to modify 05-ark-backupstoragelocation.yaml to fit your container name, storage account and resource group, where storage account is deployed. Apply it and also deploy snapshot location.
+
+```
+kubectl apply -f 05-ark-backupstoragelocation.yaml
+kubectl apply -f 06-ark-volumesnapshotlocation.yaml
+```
+
+## Download Ark client
+
+```
+wget https://github.com/heptio/ark/releases/download/v0.10.0/ark-v0.10.0-linux-amd64.tar.gz
+sudo tar xvf  ./ark-v0.10.0-linux-amd64.tar.gz -C /usr/local/bin ark 
+rm ark-v0.10.0-linux-amd64.tar.gz
+```
+
+## Create stateful application
+We will use Wordpress Helm chart (please see [Helm](./helm.md) chapter) in specific namespace.
+
+```
+kubectl create namespace wp
+helm install --namespace wp \
+    --name myblog stable/wordpress \
+    --set persistence.storageclass=default \
+    --set wordpressPassword=Azure12345678
+```
+
+When deployment is finished you can go ahead and write a blog post.
+
+## Backups with Volume snapshots
+Ark will backup objects descriptions to Blob storage and can use native Azure Disk Snapshot technology to provide extremly fast solution (based on copy on write). Disadvantage is that snapshots can live only in the same region as original disk. This solution is therefore very good for backups to protect from accidental delete, data corruption or need to migrate to different cluster and is very fast so can be done often for low RPO/RTO. Nevertheless should complete region fail snapshot might became unavailable and restore in different region not possible, so this solution is not ideal for cross-region Disaster Recovery purposes.
+
+### Create backup
+Ark can schedule backup to run automatically. In our example we will trigger manual backup now.
+
+```
+ark backup create --include-namespaces wp --snapshot-volumes -w mybackup
+```
+
+### Test accidental delete and restore
+In this scenario we will simulate accidental delete of our resources, data coruption due to application bug or any other condition. Delete complete wp namespace.
+
+```
+kubectl delete namespace wp
+```
+
+Restore from backup
+
+```
+ark restore create myrestore --from-backup mybackup -w
+```
+
+### Deploy in different AKS cluster
+In this scenario we will use backup from one AKS cluster to deploy in different AKS cluster. Such procedure might be useful during migrations to different cluster (different VM sizing, configuration, networking) or to create clone of production application in testing cluster.
+
+Create different AKS cluster and follow the same deployment procedure (do not forget to reflect to new AZURE_RESOURCE_GROUP) as with first one except for 00-ark-deployment.yaml which you will replace by 00-ark-deployment-read-only.yaml. This is safer choice as any potential configuration error on new cluster cannot corrupt your backup.
+
+```
+ark backup get
+ark restore create mytransfer --from-backup mybackup -w
+```
+
+## Backup with Restic
+Alternative to snapshot technology integrated with Azure Disk Snapshot is backup on file system level via Restic. This exports content of Volume using universal format and store it in Azure Blob. As opposed to snapshot technology this allows to backup Azure Files which have no Ark specific implementation. Potentialy it my allow recovery to different region or different storage type (cloud), but that does not work at time of writing this.
+
+First we deploy restic DaemonSet.
+```
+kubectl apply -f 20-restic-daemonset.yaml
+```
+
+Ark will by default use snapshot technology. There are annotations that need to be added to Pods to instruct it to use restic. We should modify Helm chart accordingly, but for now let's just add annotations to running Pods (just for demo purposes).
+
+```
+kubectl annotate pods -n wp -l app=mariadb backup.ark.heptio.com/backup-volumes=data
+kubectl annotate pods -n wp -l app=myblog-wordpress backup.ark.heptio.com/backup-volumes=wordpress-data
+```
+
+Now initiate new backup
+```
+ark backup create --include-namespaces wp --snapshot-volumes -w resticbackup
+```
+
+Follow our previous examples to restore from backup. Note that Ark adds init containers to our Pods for them to wait till Restic restore finish.
+
+```
+ark backup get
+ark restore create newrestore --from-backup resticbackup -w
+```
+
+I have created different AKS cluster in different region and used procedure described previously to install Ark in read only mode. Now it is time to do recovery.

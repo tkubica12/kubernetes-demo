@@ -26,3 +26,4 @@ bus-receiver/obj/
 bus-receiver/bin/
 kuberesources/AZURE_CLIENT_ID
 kuberesources/AZURE_CLIENT_SECRET
+aks.code-workspace
