@@ -15,6 +15,13 @@ spec:
       mountPath: /usr/share/nginx/html
     ports:
       - containerPort: 80
+    resources:
+      requests:
+        cpu: 100m
+        memory: 64M
+      limits:
+        cpu: 500m
+        memory: 256M
   - name: downloader
     image: tutum/curl
     volumeMounts:
@@ -22,3 +29,10 @@ spec:
       mountPath: /pod-data
     command: ["curl"]
     args: ["https://en.wikipedia.org/wiki/Single-page_application", "-o", "/pod-data/index.html"]
+    resources:
+      requests:
+        cpu: 100m
+        memory: 64M
+      limits:
+        cpu: 500m
+        memory: 256M

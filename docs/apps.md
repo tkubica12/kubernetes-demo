@@ -2,49 +2,84 @@
 This set of demos focus on stateless applications like APIs or web frontend. We will deploy application, balance it internally and externally, do rolling upgrade, deploy both Linux and Windows containers and make sure they can access each other.
 
 - [Deploying apps with Pods, Deployments and Services](#deploying-apps-with-pods-deployments-and-services)
-    - [Switch to our AKS cluster](#switch-to-our-aks-cluster)
-    - [Deploy multiple pods with Deployment](#deploy-multiple-pods-with-deployment)
-    - [Create service to balance traffic internally](#create-service-to-balance-traffic-internally)
-    - [Create externally accessible service with Azure LB with Public IP](#create-externally-accessible-service-with-azure-lb-with-public-ip)
-    - [Create externally accessible service with Azure LB with Private IP](#create-externally-accessible-service-with-azure-lb-with-private-ip)
-    - [Predictable (static) external IP addresses](#predictable-static-external-ip-addresses)
-    - [Using Service without balancing (headless service)](#using-service-without-balancing-headless-service)
-    - [Using Service for balancing apps deployed outside Kubernetes cluster](#using-service-for-balancing-apps-deployed-outside-kubernetes-cluster)
-    - [Session persistence](#session-persistence)
-    - [Preserving client source IP](#preserving-client-source-ip)
-        - [Why Kubernetes do SNAT by default](#why-kubernetes-do-snat-by-default)
-        - [How can you preserve client IP and what are negative implications](#how-can-you-preserve-client-ip-and-what-are-negative-implications)
-        - [Recomendation of using this with Ingress only and then use X-Forwarded-For](#recomendation-of-using-this-with-ingress-only-and-then-use-x-forwarded-for)
-    - [Rolling upgrade](#rolling-upgrade)
-    - [Canary releases with multiple deployments under single Service](#canary-releases-with-multiple-deployments-under-single-service)
-    - [Using liveness and readiness probes to monitor Pod status](#using-liveness-and-readiness-probes-to-monitor-pod-status)
-        - [Reacting on dead instances with liveness probe](#reacting-on-dead-instances-with-liveness-probe)
-        - [Signal overloaded instance with readiness probe](#signal-overloaded-instance-with-readiness-probe)
-    - [Pod inicialization with init containers](#pod-inicialization-with-init-containers)
-    - [Reacting to SIGTERM in your application](#reacting-to-sigterm-in-your-application)
-    - [Running processes close to each other](#running-processes-close-to-each-other)
-        - [Multiple processes in single container](#multiple-processes-in-single-container)
-        - [Multiple containers in single Pod](#multiple-containers-in-single-pod)
-        - [Pods affinity](#pods-affinity)
-    - [Deploy IIS on Windows pool (currently only for ACS mixed cluster, no AKS)](#deploy-iis-on-windows-pool-currently-only-for-acs-mixed-cluster-no-aks)
-    - [Test Linux to Windows communication (currently only for ACS mixed cluster, no AKS)](#test-linux-to-windows-communication-currently-only-for-acs-mixed-cluster-no-aks)
-    - [Clean up](#clean-up)
-
-Most parts of this demo works in AKS except for Windows containers, for which we currently need to use custom ACS engine.
-
-## Switch to our AKS cluster
-```
-kubectl use-context akscluster
-```
+  - [Deploy multiple pods with Deployment](#deploy-multiple-pods-with-deployment)
+  - [Create service to balance traffic internally](#create-service-to-balance-traffic-internally)
+  - [Create externally accessible service with Azure LB with Public IP](#create-externally-accessible-service-with-azure-lb-with-public-ip)
+  - [Create externally accessible service with Azure LB with Private IP](#create-externally-accessible-service-with-azure-lb-with-private-ip)
+  - [Predictable (static) external IP addresses](#predictable-static-external-ip-addresses)
+  - [Using Service without balancing (headless service)](#using-service-without-balancing-headless-service)
+  - [Using Service for balancing apps deployed outside Kubernetes cluster](#using-service-for-balancing-apps-deployed-outside-kubernetes-cluster)
+  - [Session persistence](#session-persistence)
+  - [Preserving client source IP](#preserving-client-source-ip)
+    - [Why Kubernetes do SNAT by default](#why-kubernetes-do-snat-by-default)
+    - [How can you preserve client IP and what are negative implications](#how-can-you-preserve-client-ip-and-what-are-negative-implications)
+    - [Recomendation of using this with Ingress only and then use X-Forwarded-For](#recomendation-of-using-this-with-ingress-only-and-then-use-x-forwarded-for)
+  - [Rolling upgrade](#rolling-upgrade)
+  - [Canary releases with multiple deployments under single Service](#canary-releases-with-multiple-deployments-under-single-service)
+  - [Using liveness and readiness probes to monitor Pod status](#using-liveness-and-readiness-probes-to-monitor-pod-status)
+    - [Reacting on dead instances with liveness probe](#reacting-on-dead-instances-with-liveness-probe)
+    - [Signal overloaded instance with readiness probe](#signal-overloaded-instance-with-readiness-probe)
+  - [Pod inicialization with init containers](#pod-inicialization-with-init-containers)
+  - [Reacting to SIGTERM in your application](#reacting-to-sigterm-in-your-application)
+  - [Running processes close to each other](#running-processes-close-to-each-other)
+    - [Multiple processes in single container](#multiple-processes-in-single-container)
+    - [Multiple containers in single Pod](#multiple-containers-in-single-pod)
+    - [Pods affinity](#pods-affinity)
+  - [Deploy IIS on Windows pool](#deploy-iis-on-windows-pool)
+  - [Test Linux to Windows communication (currently only for ACS mixed cluster, no AKS)](#test-linux-to-windows-communication-currently-only-for-acs-mixed-cluster-no-aks)
+  - [Clean up](#clean-up)
 
 ## Deploy multiple pods with Deployment
 We are going to deploy simple web application with 3 instances.
 
-```
+```bash
 kubectl apply -f deploymentWeb1.yaml
 kubectl get deployments -w
 kubectl get pods -o wide
 ```
+
+We will now kill our Pod and see how Kubernetes will make sure our environment is consistent with desired state (which means create Pod again).
+
+```bash
+kubectl delete pod myweb-deployment-7cd8bbd97c-9c26b    # replace with your Pod name
+kubectl get pods
+```
+
+Now let's play a little bit with labels. There are few ways how you can print it on output or filter by label. Try it out.
+
+```bash
+# print all labels
+kubectl get pods --show-labels    
+
+# filter by label
+kubectl get pods -l app=todo
+
+# add label column
+kubectl get pods -L app
+```
+
+Note that the way how ReplicaSet (created by Deployment) is checking whether environment comply with desired state is by looking at labels. Look for Selector in output.
+
+```bash
+kubectl get rs
+kubectl describe rs myweb-deployment-7cd8bbd97c   # put your actual rs name here
+```
+
+Suppose now that one of your Pods behaves strangely. You want to get it out, but not kill it, so you can do some more troubleshooting. We can edit Pod and change its label app: myweb to something else such as app: mywebisolated. What you expect to happen?
+
+```bash
+kubectl edit pod myweb-deployment-7cd8bbd97c-gnkq2    # change to your Pod name
+kubectl get pods --show-labels
+```
+
+What happened? As we have changed label ReplicaSet controller no longer see 3 instances with desired labels, just 2. Therefore it created one additional instance. What will happen if you change label back to its original value?
+
+```bash
+kubectl edit pod myweb-deployment-7cd8bbd97c-gnkq2    # change to your Pod name
+kubectl get pods --show-labels
+```
+
+Kubernetes have killed one of your Pods. Now we have 4 instances, but desired state is 3, so controller removed one of those.
 
 ## Create service to balance traffic internally
 Create internal service and make sure it is accessible from within Kubernetes cluster. Try multiple times to se responses from different nodes in balancing pool.
@@ -96,7 +131,6 @@ kubectl apply -f serviceWebHeadless.yaml
 
 We will now try DNS request to regular service (with virtual ClusterIP) versus headless service. First returns Cluster IP A record while second returns multiple A record (one for each healthy Pod).
 ```
-kubectl exec ubuntu -- bash -c 'apt update && apt install dnsutils -y'
 kubectl exec ubuntu -- dig myweb-service.default.svc.cluster.local
 kubectl exec ubuntu -- dig myweb-service-headless.default.svc.cluster.local
 ```
@@ -156,8 +190,6 @@ kubectl apply -f preserveClientIp.yaml
 export extPreserveIp=$(kubectl get service httpecho -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
 curl $extPreserveIp
 ```
-
-Note: as time of this writing this setting works well with AKS with standard networking, but currently IP address is still NATed with Advanced Networking (Azure CNI)
 
 ### Recomendation of using this with Ingress only and then use X-Forwarded-For
 Good solution if you need client IP information is to use it for [Ingress](docs/networking.md), but not for other Services. By deploying ingress controller in Service with externalTrafficPolicy Local, your nginx proxy will see client IP. This means you can do whitelisting (source IP filters) in you Ingress definition. Traffic distribution problem is virtualy non existent because you typically run ingress on one or few nodes in cluster, but rarely you want more replicas then number of nodes.
@@ -412,7 +444,7 @@ kubectl apply -f podAffinity2.yaml
 kubectl get pods -o wide
 ```
 
-## Deploy IIS on Windows pool (currently only for ACS mixed cluster, no AKS)
+## Deploy IIS on Windows pool
 Let's now deploy Windows container with IIS.
 
 ```

@@ -5,6 +5,11 @@ metadata:
 spec:
   containers:
     - name: ubuntu
-      image: tutum/curl
-      command: ["tail"]
-      args: ["-f", "/dev/null"]
+      image: tkubica/mybox
+      resources:
+        requests:
+          cpu: 100m
+          memory: 64M
+        limits:
+          cpu: 500m
+          memory: 256M

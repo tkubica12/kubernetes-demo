@@ -18,3 +18,10 @@ spec:
   containers:
     - name: nginx
       image: nginx:alpine
+      resources:
+        requests:
+          cpu: 100m
+          memory: 64M
+        limits:
+          cpu: 500m
+          memory: 256M

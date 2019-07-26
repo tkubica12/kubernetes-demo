@@ -11,6 +11,10 @@ spec:
       volumeMounts:
       - mountPath: "/mnt/azure"
         name: volume
+      resources:
+        limits:
+          cpu: 100m
+          memory: 128M
   volumes:
     - name: volume
       persistentVolumeClaim:

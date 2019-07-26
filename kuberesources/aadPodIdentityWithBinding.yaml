@@ -1,0 +1,15 @@
+apiVersion: "aadpodidentity.k8s.io/v1"
+kind: AzureIdentity
+metadata:
+ name: tomas-fromkube
+spec:
+ type: 1
+ ClientID: ecdb2ddd-6253-4ba0-bda5-1913e5e26efe 
+---
+apiVersion: "aadpodidentity.k8s.io/v1"
+kind: AzureIdentityBinding
+metadata:
+  name: demo-azure-id-binding
+spec: 
+  AzureIdentity: tomas-fromkube
+  Selector: aadDemo

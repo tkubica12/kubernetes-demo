@@ -1,19 +1,8 @@
 # Kubernetes in Azure
 This repo contains my Kubernetes demo in Azure.
 
-# Recently added (September 2018)
-* Refresh to latest Service Catalog and OSBA
-* Ingress - https backends
-
-# TO DO
-* Upgrade to latest Draft
-* Building custom Charts with Helm
-* Kubernetes federation
-* AKS cluster upgrade demo
-* VSTS integration
-* Spinnaker integration
-* Brigade
-* Upgrade to latest ACS-engine
+# Recently added (July 2019)
+* Refresh for AKS 1.14
 
 # Table of Contents
 - [Deploying managed Kubernetes (AKS)](docs/aks-build.md)
@@ -35,8 +24,8 @@ This repo contains my Kubernetes demo in Azure.
 
 
 # Author
-Tomas Kubica, linkedin.com/in/tkubica, Twittter: @tkubica
+Tomas Kubica, LinkedId: [tkubica](linkedin.com/in/tkubica), Twittter: [@tkubica](https://twitter.com/tkubica)
 
-Blog in Czech: https://tomaskubica.cz
+Blog in Czech: [https://www.tomaskubica.cz](https://www.tomaskubica.cz)
 
 Looking forward for your feedback and suggestions!

@@ -1,0 +1,27 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: shared-volume
+spec:
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: shared-volume
+    spec:
+      containers:
+        - name: ubuntu
+          image: tutum/curl
+          command: ["tail"]
+          args: ["-f", "/dev/null"]
+          volumeMounts:
+          - mountPath: "/mnt/azure"
+            name: volume
+          resources:
+            limits:
+              cpu: 100m
+              memory: 128M
+      volumes:
+        - name: volume
+          persistentVolumeClaim:
+            claimName: myvolume-files-claim
