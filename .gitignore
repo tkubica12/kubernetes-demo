@@ -28,3 +28,11 @@ kuberesources/AZURE_CLIENT_ID
 kuberesources/AZURE_CLIENT_SECRET
 aks.code-workspace
 kuberesources/identity1.yaml
+devspaces/frontend/.dockerignore
+devspaces/frontend/Dockerfile
+devspaces/frontend/azds.yaml
+devspaces/frontend/charts/
+devspaces/backend/.dockerignore
+devspaces/backend/Dockerfile
+devspaces/backend/azds.yaml
+devspaces/backend/charts/

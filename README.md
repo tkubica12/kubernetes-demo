@@ -16,7 +16,7 @@ This repo contains my Kubernetes demo in Azure.
 - [Operational security with RBAC, Azure Active Directory, namespaces and Azure Container Registry](docs/rbac.md)
 - [Azure Container Instances and serverless containers with Virtual Kubelet](docs/aci.md)
 - [Package applications with Helm](docs/helm.md)
-- [Develop apps on Kubernetes with Draft](docs/draft.md)
+- [Develop apps on AKS with DevSpaces](docs/devspaces.md)
 - [Deploy CI/CD with Jenkins and agents in containers](docs/jenkins.md)
 - [Creating service mesh with Istio](docs/istio.md)
 - [Automatically provision Azure services with Service Catalog](docs/servicecatalog.md)
