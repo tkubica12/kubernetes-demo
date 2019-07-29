@@ -11,8 +11,7 @@ As container should be immutable you might to pass information to so you can hav
 - [External options](#external-options)
   - [Using AAD Pod Identity to access Azure Key Vault](#using-aad-pod-identity-to-access-azure-key-vault)
   - [Azure Key Vault FlexVolume](#azure-key-vault-flexvolume)
-  - [Using Azure App Configuration Service](#using-azure-app-configuration-service)
-  - [External Etcd with Azure Cosmos DB Etcd APIs](#external-etcd-with-azure-cosmos-db-etcd-apis)
+  - [Using Azure App Configuration Service,](#using-azure-app-configuration-service)
 - [Cleanup](#cleanup)
 
 # Environmental variables
@@ -189,14 +188,44 @@ kubectl apply -f podKeyVaultVolume.yaml -n app1
 kubectl exec keyvaulttest -n app1 -- cat /kvmnt/mysecret
 ```
 
+## Using Azure App Configuration Service,
+Azure Key Vault is universal way to store secrets such as keys and certificates that can be used from any environment and programming language - Kubernetes Pods, virtual machines, Javascript clients or native mobile apps. Nevertheless it is not designed for storing complex configurations and feature flags.
 
-## Using Azure App Configuration Service
+What is alternative to ConfigMaps that could be managed outside of Kubernetes for more universal configuration management of your apps? We will now test Azure App Configuration Service - simple key-valut store and feature flag management as a service.
 
-## External Etcd with Azure Cosmos DB Etcd APIs
+Create App Configuration (make sure you have latest Azure CLI installed as appconfig is pretty new as time of this writing).
+
+```bash
+az appconfig create -n tomasappconfig123 \
+    -g aks \
+    -l westeurope
+az appconfig kv set -y --name tomasappconfig123 \
+    --key myconfigkey1 \
+    --value myvalue1
+```
+
+Store can be accessed using AAD Pod Identity / Managed Service Identity (resources running in Azure), AAD Service Principal or simple key. We will use AAD Pod Identity in this example. We can use various languages SDKs, but for simplicity we will use just azure CLI.
+
+Grant our identity created previously Reader role on our App Configuration resource.
+
+```bash
+az role assignment create --role Contributor \
+    --assignee-object-id $(az identity show -n myaccount1 -g aks --query principalId -o tsv) \
+    --scope $(az appconfig show -g aks -n tomasappconfig123 --query id -o tsv)
+```
+
+Connect to mybox in app1 namespace we previously configured for AAD Pod Identity. Authenticate Azure CLI using managed identity and get configuration.
+
+```bash
+kubectl exec -ti -n app1 mybox -- bash
+az login --identity
+az appconfig kv list --name tomasappconfig123 --key myconfigkey1
+```
 
 # Cleanup
 
 ```
+kubectl delete namespace app1
 kubectl delete -f podEnv.yaml
 kubectl delete -f podCm1.yaml
 kubectl delete -f podCm2.yaml
