@@ -1,8 +1,8 @@
-# Operational security with RBAC, Azure Active Directory, namespaces and Azure Container Registry
+# Operational security with RBAC, AAD, namespaces and registry
 
 When using Kubernetes in enterprise there might be need to role based access control and strong authentication. In this demo we will see how to to use namespaces in Kubernetes to isolate resources from control plane level, how to authenticate user with strong Azure Active Directory authentication and how to authorize what each user can do with Kubernetes RBAC. Also we will look into private registry, how to secure it and make sure company provided images are used.
 
-- [Operational security with RBAC, Azure Active Directory, namespaces and Azure Container Registry](#operational-security-with-rbac-azure-active-directory-namespaces-and-azure-container-registry)
+- [Operational security with RBAC, AAD, namespaces and registry](#operational-security-with-rbac-aad-namespaces-and-registry)
 - [Role-based access control, Azure Active Directory and Kubernetes Namespaces](#role-based-access-control-azure-active-directory-and-kubernetes-namespaces)
   - [Namespaces](#namespaces)
   - [Authenticating with Azure Active Directory](#authenticating-with-azure-active-directory)
