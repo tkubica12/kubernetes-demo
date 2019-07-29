@@ -9,8 +9,10 @@ As container should be immutable you might to pass information to so you can hav
 - [ConfigMaps](#configmaps)
 - [Secrets](#secrets)
 - [External options](#external-options)
-    - [Azure KeyVault](#azure-keyvault)
-    - [External Etcd or Consul](#external-etcd-or-consul)
+  - [Using AAD Pod Identity to access Azure Key Vault](#using-aad-pod-identity-to-access-azure-key-vault)
+  - [Azure Key Vault FlexVolume](#azure-key-vault-flexvolume)
+  - [Using Azure App Configuration Service](#using-azure-app-configuration-service)
+  - [External Etcd with Azure Cosmos DB Etcd APIs](#external-etcd-with-azure-cosmos-db-etcd-apis)
 - [Cleanup](#cleanup)
 
 # Environmental variables
@@ -106,15 +108,35 @@ kubectl exec sec -- env | grep SECRET
 ```
 
 # External options
-There might be reasons not to bound any of that with Kubernetes system. Maybe you have very high standards for storing and managing secrets in dedicated hardware-supported (HSM) solutions like Azure KeyVault. Or you have complex configurations you want to centralize and make available not only for apps running in single Kubernetes cluster, but many clusters, Azure Container Instances, VMs or PaaS. In that case you might consider deploying centralized configuration store such as Etcd or Consul.
+There might be reasons not to bound any of that with Kubernetes system. Maybe you have very high standards for storing and managing secrets in dedicated hardware-supported (HSM) solutions like Azure Key Vault. Or you have complex configurations you want to centralize and make available not only for apps running in single Kubernetes cluster, but many clusters, Azure Container Instances, VMs or PaaS. In that case you might consider deploying centralized configuration store such as Azure App Configration Service, Etcd or Consul.
 
-## Azure KeyVault
+## Using AAD Pod Identity to access Azure Key Vault
+First configure AAD Pod Identity in your cluster using [this guide](docs/rbac.md#aad-pod-identity-to-access-azure-resources)
 
-TBD
+Create Azure Key Vault, store some secret and grant myaccount1 access.
 
-## External Etcd or Consul
+```bash
+export keyvaultname=tomasvault123
+az keyvault create -n $keyvaultname -g aks
+az keyvault secret set -n mysecret --vault-name $keyvaultname --value superpassword
+az keyvault set-policy -n $keyvaultname \
+    --object-id $(az identity show -g aks -n myaccount1 --query principalId -o tsv) \
+    --secret-permissions get 
+```
 
-TBD
+Use AAD Pod Identity to get access token for Key Vault and get secret.
+
+```bash
+kubectl exec -ti mybox -n app1 -- bash
+export token=$(curl -s http://169.254.169.254/metadata/identity/oauth2/token?resource=https://vault.azure.net | jq -r '.access_token')
+curl -H "Authorization: Bearer ${token}" https://tomasvault123.vault.azure.net/secrets/mysecret?api-version=7.0
+```
+
+## Azure Key Vault FlexVolume
+
+## Using Azure App Configuration Service
+
+## External Etcd with Azure Cosmos DB Etcd APIs
 
 # Cleanup
 
