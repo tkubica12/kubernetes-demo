@@ -4,14 +4,15 @@ When using Kubernetes in enterprise there might be need to role based access con
 
 - [Operational security with RBAC, Azure Active Directory, namespaces and Azure Container Registry](#operational-security-with-rbac-azure-active-directory-namespaces-and-azure-container-registry)
 - [Role-based access control, Azure Active Directory and Kubernetes Namespaces](#role-based-access-control-azure-active-directory-and-kubernetes-namespaces)
-    - [Namespaces](#namespaces)
-    - [Authenticating with Azure Active Directory](#authenticating-with-azure-active-directory)
-    - [Authorizing AAD users](#authorizing-aad-users)
+  - [Namespaces](#namespaces)
+  - [Authenticating with Azure Active Directory](#authenticating-with-azure-active-directory)
+  - [Authorizing AAD users](#authorizing-aad-users)
 - [Using private image registry](#using-private-image-registry)
-    - [Create Azure Container Registry](#create-azure-container-registry)
-    - [Push images to registry](#push-images-to-registry)
-    - [Run Kubernetes Pod from Azure Container Registry](#run-kubernetes-pod-from-azure-container-registry)
-    - [Clean up](#clean-up)
+  - [Create Azure Container Registry](#create-azure-container-registry)
+  - [Push images to registry](#push-images-to-registry)
+  - [Run Kubernetes Pod from Azure Container Registry](#run-kubernetes-pod-from-azure-container-registry)
+  - [Clean up](#clean-up)
+- [AAD Pod Identity to access Azure resources](#aad-pod-identity-to-access-azure-resources)
 
 # Role-based access control, Azure Active Directory and Kubernetes Namespaces
 In this section we will explore namespaces that can group Kubernetes objects and role-based access control to manage what users or service accounts can do with the system.
@@ -124,3 +125,57 @@ docker.exe rmi tomascontainers.azurecr.io/web:2
 docker.exe rmi tomascontainers.azurecr.io/private/web:1
 
 ```
+
+# AAD Pod Identity to access Azure resources
+Azure supports Managed Service Identity to provide secure way for applications to get AAD tokens. MSI is designed for VMs and Azure App Services, but with AKS such granularity is not enough. We need mechanism to manage such access on per-pod basis. This is solved with AAD Pod Identity.
+
+First install AAD Pod Identity.
+
+```bash
+kubectl create -f https://raw.githubusercontent.com/Azure/aad-pod-identity/master/deploy/infra/deployment-rbac.yaml
+```
+
+Next we will create one or more managed identities - AAD service principal accounts with lifecycle managed throw Azure Resource Manager and with no secret (account will be used only via AAD Pod Identity to get tokens, will not be available for anything outside this system). AKS needs to have Managed Identity Operator rights for this identity, which is by default available in AKS resources group (such as MC_...). You can create identity in that resource group or in other one if you grant Managed Identity Operator role for your AKS principal.
+
+```bash
+az identity create -g aks -n myaccount1
+```
+
+Prepare AzureIdenity YAML definition. We will use namespaced object.
+
+```bash
+cat > identity1.yaml << EOF
+apiVersion: "aadpodidentity.k8s.io/v1"
+kind: AzureIdentity
+metadata:
+  name: identity1
+  annotations:
+    aadpodidentity.k8s.io/Behavior: namespaced
+spec:
+  type: 0
+  ResourceID: $(az identity show -g aks -n myaccount1 --query id -o tsv)
+  ClientID: $(az identity show -g aks -n myaccount1 --query clientId -o tsv)
+EOF
+```
+
+Let's now create AzureIdentity and also apply AzureIdentityBinding to one namespace. AAD Pod Identity is using labels to select what identity is available in what Pod. In our example we will use selector identity1.
+
+```bash
+kubectl create namespace app1
+kubectl apply -f identity1.yaml -n app1
+kubectl apply -f identity1Binding.yaml -n app1
+```
+
+Create Pod with label identity1 to associate it with identity.
+
+```bash
+kubectl apply -f podIdentity.yaml -n app1
+```
+
+We can now use MSI endpoint to get access token.
+
+```bash
+kubectl exec -ti mybox -n app1 -- curl http://169.254.169.254/metadata/identity/oauth2/token?resource=https://management.azure.com
+```
+
+We have got AAD token. Our identity at this point has no RBAC associated, but we can give it access to Azure resources as use this token to make ARM API calls. You might also want to generate token for different resources such as Azure Key Vault.
