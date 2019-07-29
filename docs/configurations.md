@@ -133,6 +133,62 @@ curl -H "Authorization: Bearer ${token}" https://tomasvault123.vault.azure.net/s
 ```
 
 ## Azure Key Vault FlexVolume
+In previous example we have used AAD Pod Identity to get token for Azure Key Vault and access secrets via API. This requires your code to have such support. Sometimes it is not feasible to change your code. That can be solved with Key Vault FlexVolume driver which handles getting secret from Key Vault and mapping to container as file.
+
+Make sure you completed previous lab with AAD Pod Identity and Key Vault. There is one addition permission needed. In prevous lab we access Key Vault secret directly so we needed just permission as part of Key Vault (set-policy). Flex Volume driver also needs Read access to Key Vault ARM resources. Let's add it.
+
+```bash
+az role assignment create --role Reader \
+    --assignee-object-id $(az identity show -n myaccount1 -g aks --query principalId -o tsv) \
+    --scope $(az keyvault show -n $keyvaultname -g aks --query id -o tsv)
+```
+
+Install Key Vault FlexVolume driver.
+
+```bash
+kubectl create -f https://raw.githubusercontent.com/Azure/kubernetes-keyvault-flexvol/master/deployment/kv-flexvol-installer.yaml
+```
+
+```bash
+cat > podKeyVaultVolume.yaml << EOF
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: keyvaulttest
+    aadpodidbinding: identity1
+  name: keyvaulttest
+spec:
+  containers:
+  - name: keyvaulttest
+    image: tkubica/mybox:latest
+    volumeMounts:
+    - name: test
+      mountPath: /kvmnt
+      readOnly: true
+  volumes:
+  - name: test
+    flexVolume:
+      driver: "azure/kv"
+      options:
+        usepodidentity: "true"
+        keyvaultname: $keyvaultname    
+        keyvaultobjectnames: mysecret
+        keyvaultobjecttypes: secret
+        keyvaultobjectversions: ""
+        resourcegroup: aks 
+        subscriptionid: $(az account show --query id -o tsv)
+        tenantid: $(az account show --query tenantId -o tsv)
+EOF
+```
+
+Apply Pod and test password file was mapped to container file system.
+
+```bash
+kubectl apply -f podKeyVaultVolume.yaml -n app1
+kubectl exec keyvaulttest -n app1 -- cat /kvmnt/mysecret
+```
+
 
 ## Using Azure App Configuration Service
 
