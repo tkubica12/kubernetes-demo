@@ -18,6 +18,7 @@ We have seen a lot of networking already: internal ballancing and service discov
     - [Rate limiting](#rate-limiting)
     - [Basic authentication](#basic-authentication)
     - [External authentication using OAuth 2.0 and Azure Active Directory](#external-authentication-using-oauth-20-and-azure-active-directory)
+  - [Azure Application Gateway WAF as ingress](#azure-application-gateway-waf-as-ingress)
   - [Cleanup](#cleanup)
 - [Network policy with Calico](#network-policy-with-calico)
     - [I will reference my kubectl config pointing to Calico-enabled cluster](#i-will-reference-my-kubectl-config-pointing-to-calico-enabled-cluster)
@@ -264,6 +265,46 @@ kubectl apply -f ingressWebAADAuth.yaml
 ```
 
 To check it out open our app in your browser on https://mykubeapp.azure.tomaskubica.cz/
+
+## Azure Application Gateway WAF as ingress
+Azure comes with reverse proxy implementation Application Gateway that includes Web Application Firewall for more security. You can deploy ingress controller that implements App Gw as data plane. Use following steps to deploy solution and note it is better to create ARM template to automate infrastructure configuration:
+1. Deploy static public IP and specify some DNS name
+2. Deploy Azure Application Gateway v2 in dedicated subnet of your VNET (can be automated with ARM template)
+3. Create user managed identity in Azure in your AKS resource group (can be automated with ARM template)
+4. Assign Reader role to this identity for your AKS resource group (can be automated with ARM template)
+5. Assign Contributor role to this identity for your Application Gateway (can be automated with ARM template)
+6. Make sure Helm is installed according to [docs/helm.md](docs/helm.md)
+7. Install AAD Pod Identity according to [docs/rbac.md](docs/rbac.md)
+
+Next step is to use Helm to install AppGw ingress controller.
+
+```bash
+helm repo add application-gateway-kubernetes-ingress https://appgwingress.blob.core.windows.net/ingress-azure-helm-package/
+helm repo update
+helm install application-gateway-kubernetes-ingress/ingress-azure \
+  --set appgw.subscriptionId=$(az account show --query id -o tsv) \
+  --set appgw.resourceGroup=aks \
+  --set appgw.name=appgw \
+  --set kubernetes.watchNamespace="" \
+  --set armAuth.type=aadPodIdentity \
+  --set armAuth.identityResourceID=$(az identity show -n tomasManagedIdentity -g aks --query id -o tsv)  \
+  --set armAuth.identityClientID=$(az identity show -n tomasManagedIdentity -g aks --query clientId -o tsv) \
+  --set rbac.enabled=true
+```
+
+Deploy application, ClusterIP Service and AppGw Ingress. Make sure you modify ingressAppGw.yaml host field with DNS name of your AppGw public IP.
+
+```bash
+kubectl apply -f deploymentWeb1.yaml
+kubectl apply -f serviceWeb.yaml
+kubectl apply -f ingressAppGw.yaml
+```
+
+Make sure you can access application via AppGw.
+
+```bash
+curl mujkube123.westeurope.cloudapp.azure.com
+```
 
 ## Cleanup
 
