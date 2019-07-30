@@ -306,10 +306,58 @@ Make sure you can access application via AppGw.
 curl mujkube123.westeurope.cloudapp.azure.com
 ```
 
+Check AppGw backend pool. You will see that AppGw pool consist of Pod IP addresses. Due to Azure CNI (Advanced Networking) Pod are getting IPs directly from VNET so AppGw can address them directly and do load balancing there including features such as session cookie persistence.
+
+We will now use cert-manager to automatically create Let's Encrypt certificates and deploy HTTPS endpoint.
+
+First you need to create DNS A record in your domain (in our case managed in Azure DNS).
+
+```bash
+export appgwip=$(az network public-ip show -n appgw-ip -g aks --query ipAddress -o tsv)
+az network dns record-set a add-record -a $appgwip -n appgw -g shared-services -z azure.tomaskubica.cz
+az network dns record-set a add-record -a $appgwip -n "*.appgw" -g shared-services -z azure.tomaskubica.cz
+```
+
+Install and configure cert-manager.
+
+```bash
+kubectl apply -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.8/deploy/manifests/00-crds.yaml
+
+kubectl create namespace cert-manager
+kubectl label namespace cert-manager certmanager.k8s.io/disable-validation=true
+helm repo add jetstack https://charts.jetstack.io
+helm repo update
+
+helm install \
+  --name cert-manager \
+  --namespace cert-manager \
+  --version v0.8.0 \
+  jetstack/cert-manager
+```
+
+Now we need to deploy certificate issuer. Please modify yaml file to include your email address.
+```
+kubectl apply -f certIssuer.yaml
+```
+
+Now we can deploy Ingress with HTTPS.
+
+```
+kubectl apply -f ingressAppGwCert.yaml
+```
+
+Wait few minutes and test HTTPS access.
+
+```bash
+curl -v https://appgw.azure.tomaskubica.cz
+```
+
+
 ## Cleanup
 
 ```
 kubectl delete -f ingressWeb.yaml
+kubectl delete -f ingressAppGwCert.yaml
 helm delete ingress --purge
 kubectl delete secret mycert
 kubectl delete -f cert.yaml
