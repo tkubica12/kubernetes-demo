@@ -14,14 +14,8 @@ As container should be immutable you might to pass information to so you can hav
   - [Deploy AAD Pod Identity solution](#deploy-aad-pod-identity-solution)
   - [Deploy identity and identity binding](#deploy-identity-and-identity-binding)
 - [External options](#external-options)
-<<<<<<< HEAD
   - [Azure KeyVault](#azure-keyvault)
   - [External Etcd or Consul](#external-etcd-or-consul)
-=======
-  - [Using AAD Pod Identity to access Azure Key Vault](#using-aad-pod-identity-to-access-azure-key-vault)
-  - [Azure Key Vault FlexVolume](#azure-key-vault-flexvolume)
-  - [Using Azure App Configuration Service,](#using-azure-app-configuration-service)
->>>>>>> b0561eb679c2f138f6fe75160a4c763324e96abf
 - [Cleanup](#cleanup)
 
 # Environmental variables

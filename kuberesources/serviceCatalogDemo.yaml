@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 apiVersion: servicecatalog.k8s.io/v1beta1
 kind: ServiceInstance
 metadata:
@@ -56,63 +55,4 @@ spec:
         valueFrom:
           secretKeyRef:
             name: my-mysqldb-secret
-=======
-apiVersion: servicecatalog.k8s.io/v1beta1
-kind: ServiceInstance
-metadata:
-  name: my-mysqldb-instance
-  namespace: default
-spec:
-  clusterServiceClassExternalName: azure-mysql-5-7
-  clusterServicePlanExternalName: basic
-  parameters:
-    location: westeurope
-    resourceGroup: aks
----
-apiVersion: servicecatalog.k8s.io/v1beta1
-kind: ServiceBinding
-metadata:
-  name: my-mysqldb-binding
-  namespace: default
-spec:
-  instanceRef:
-    name: my-mysqldb-instance
-  secretName: my-mysqldb-secret
----
-kind: Pod
-apiVersion: v1
-metadata:
-  name: env
-spec:
-  containers:
-    - name: ubuntu
-      image: tutum/curl
-      command: ["tail"]
-      args: ["-f", "/dev/null"]
-      env:
-      - name: "DB_HOST"
-        valueFrom:
-          secretKeyRef:
-            name: my-mysqldb-secret
-            key: host
-      - name: "DB_PORT"
-        valueFrom:
-          secretKeyRef:
-            name: my-mysqldb-secret
-            key: port
-      - name: "DB_DB"
-        valueFrom:
-          secretKeyRef:
-            name: my-mysqldb-secret
-            key: database
-      - name: "DB_USERNAME"
-        valueFrom:
-          secretKeyRef:
-            name: my-mysqldb-secret
-            key: username
-      - name: "DB_PASSWORD"
-        valueFrom:
-          secretKeyRef:
-            name: my-mysqldb-secret
->>>>>>> b0561eb679c2f138f6fe75160a4c763324e96abf
             key: password
