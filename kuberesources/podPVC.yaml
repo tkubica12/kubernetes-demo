@@ -7,7 +7,6 @@ spec:
     - name: postgresql-pv-storage
       persistentVolumeClaim:
        claimName: postgresql-pv-claim
-
   containers:
     - name: postgresql-pv-container
       image: postgres
@@ -22,5 +21,7 @@ spec:
       volumeMounts:
       - mountPath: "/var/lib/postgresql/data"
         name: postgresql-pv-storage
-  nodeSelector:
-    agentpool: linuxpool
+      resources:
+        limits:
+          cpu: 1
+          memory: 512M

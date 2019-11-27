@@ -1,4 +1,4 @@
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: lf
@@ -20,3 +20,10 @@ spec:
             port: 5000
           initialDelaySeconds: 3
           periodSeconds: 2
+        resources:
+          requests:
+            cpu: 100m
+            memory: 64M
+          limits:
+            cpu: 500m
+            memory: 256M

@@ -1,0 +1,14 @@
+FROM golang:stretch AS build
+RUN apt-get update && apt-get install git -y && go get github.com/go-martini/martini
+RUN mkdir /build 
+ADD . /build/
+WORKDIR /build 
+RUN go build -o app .
+
+FROM ubuntu:latest AS final
+RUN groupadd -r standardgroup && useradd --no-log-init -u 12000 -r -g standardgroup standarduser
+RUN apt-get update && apt-get install iputils-ping curl -y
+USER standarduser
+COPY --chown=standarduser:standardgroup --from=build /build/app /app/
+WORKDIR /app
+CMD ["./app"]

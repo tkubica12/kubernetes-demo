@@ -1,0 +1,30 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: app
+  labels:
+    app: myweb
+spec:
+  serviceAccountName: noaccess
+  containers:
+    - name: app
+      image: tkubica/app:user
+      env:
+      - name: PORT
+        value: "12345"
+      ports:
+      - containerPort: 12345
+      resources:
+        requests:
+          cpu: 100m
+          memory: 64M
+        limits:
+          cpu: 500m
+          memory: 256M
+      securityContext:
+        readOnlyRootFilesystem: true
+        runAsNonRoot: true
+        runAsUser: 12000
+        capabilities:
+          drop:
+            - all

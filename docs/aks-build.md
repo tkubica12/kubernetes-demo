@@ -25,10 +25,15 @@ az network vnet create -g $netRg \
 	--address-prefix 192.168.0.0/20 \
 	--subnet-name aks-subnet \
 	--subnet-prefix 192.168.0.0/22
+az network vnet subnet create -n nodeless-subnet \
+        -g $netRg \
+        --vnet-name aks-network \
+        --address-prefix 192.168.4.0/22
 az network vnet subnet create -n testingvm-subnet \
         -g $netRg \
         --vnet-name aks-network \
         --address-prefix 192.168.8.0/24
+
 
 ```
 
@@ -48,6 +53,18 @@ Azure CLI currently do not support creating Log Analytics workspace, so we will 
 
 Azure CLI will create service principal account for you that is neccessary to deploy AKS. In order to have this under direct control we will use existing service principal account. If you wish CLI to create one for you please remove --service-principal and --client-secret from az aks create command.
 
+In order to use network policy which is currently in preview we need to register this feature and update resource provider.
+
+```
+az feature register --name EnableNetworkPolicy --namespace Microsoft.ContainerService
+az feature register --name VMSSPreview --namespace Microsoft.ContainerService
+az feature list -o table --query "[?contains(name, 'Microsoft.ContainerService/EnableNetworkPolicy')].{Name:name,State:properties.state}"
+az feature list -o table --query "[?contains(name, 'Microsoft.ContainerService/VMSSPreview')].{Name:name,State:properties.state}"
+
+
+az provider register --namespace Microsoft.ContainerService
+```
+
 ```
 export aksRg=aks
 export location=westeurope
@@ -62,25 +79,42 @@ export client_secret=YOUR_SERVICE_PRINCIPAL_SECRET
 
 az group create -n $aksRg -l $location
 
+az extension add --name aks-preview
 az aks create -n aks -g $aksRg\
         --no-ssh-key \
-        --kubernetes-version 1.11.5 \
-        --node-count 3 \
+        --kubernetes-version 1.12.6 \
+        --node-count 1 \
         --node-vm-size Standard_B2s \
         --network-plugin azure \
+        --network-policy azure \
         --vnet-subnet-id $subnetId \
         --docker-bridge-address 172.17.0.1/16 \
         --dns-service-ip 192.168.4.10 \
         --service-cidr 192.168.4.0/22 \
         --max-pods 100 \
-        --enable-addons http_application_routing,monitoring \
+        --enable-addons monitoring \
         --workspace-resource-id $workspaceId \
         --service-principal $principal \
         --client-secret $client_secret \
         --aad-server-app-id $aadserverid \
         --aad-server-app-secret $aadserverkey \
         --aad-client-app-id $aadclientid \
-        --aad-tenant-id $aadtenantid
+        --aad-tenant-id $aadtenantid \
+        --enable-vmss
+# Autoscaler
+#         \
+#        --enable-cluster-autoscaler \
+#        --min-count 1 \
+#        --max-count 3
+
+# Enable Virtual Nodes
+az extension add --source https://aksvnodeextension.blob.core.windows.net/aks-virtual-node/aks_virtual_node-0.2.0-py2.py3-none-any.whl
+
+az aks enable-addons \
+    --resource-group $aksRg \
+    --name aks \
+    --addons virtual-node \
+    --subnet-name nodeless-subnet
 ```
 
 ### Get credentials

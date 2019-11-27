@@ -1,13 +1,18 @@
 kind: Pod
 apiVersion: v1
 metadata:
-  name: first
+  name: app
   labels:
-    app: first
+    app: myweb
 spec:
   containers:
-    - name: nginx
-      image: nginx:alpine
+    - name: app
+      image: tkubica/app:root
+      env:
+      - name: PORT
+        value: "12345"
+      ports:
+      - containerPort: 12345
       resources:
         requests:
           cpu: 100m

@@ -8,9 +8,14 @@ As container should be immutable you might to pass information to so you can hav
 - [Environmental variables](#environmental-variables)
 - [ConfigMaps](#configmaps)
 - [Secrets](#secrets)
+- [Passing Azure credentials to Pods](#passing-azure-credentials-to-pods)
+  - [Prepare resource group with tagged resources](#prepare-resource-group-with-tagged-resources)
+  - [Prepare AAD identity (Service Principal)](#prepare-aad-identity-service-principal)
+  - [Deploy AAD Pod Identity solution](#deploy-aad-pod-identity-solution)
+  - [Deploy identity and identity binding](#deploy-identity-and-identity-binding)
 - [External options](#external-options)
-    - [Azure KeyVault](#azure-keyvault)
-    - [External Etcd or Consul](#external-etcd-or-consul)
+  - [Azure KeyVault](#azure-keyvault)
+  - [External Etcd or Consul](#external-etcd-or-consul)
 - [Cleanup](#cleanup)
 
 # Environmental variables
@@ -102,8 +107,43 @@ rm ./password.txt
 We can use Secret in Pod in similar way to ConfigMaps either via env or files.
 ```
 kubectl apply -f podSecret.yaml
-kubectl exec sec -- env | grep SECRET
+kubectl exec sec -- env | grep SECR
 ```
+
+# Passing Azure credentials to Pods
+Sometimes you might need to access Azure resources from Pod for example to read tags of other resources, create records in Azure DNS, reconfigure Traffic Manager priorities or access secrets in Azure Key Vault from your code. Sure you can create AAD Service Principal and pass username and password to Pod via Kubernetes Secret, but you might need even more secure way to do that. With VMs or WebApps there is concept of Managed Service Identity, when you do pass password directly, but leverage local endpoint to get time-restricted token. With AAD Pod Identity you can do this with Pods also.
+
+## Prepare resource group with tagged resources
+For our demo we will create Resource Group with two public IPs with tags. We will want to read those tags from our application in Pod later on.
+
+```
+az group create -n mygroup -l westeurope
+az network public-ip create -g mygroup -n myip1 --tags key1=value1,key2=value1
+az network public-ip create -g mygroup -n myip2 --tags key1=value2,key2=value2
+```
+
+## Prepare AAD identity (Service Principal)
+Let's create new identity in AAD with no password (so service principal cannot be used with simple authnetication, only via token get within Pod) in MC group (that is group that was automatically created for you during AKS deployment) with read rights for our resource group.
+
+```
+export resourceGroup=mygroup
+export MCgroupName=MC_aksgroup_akscluster_westeurope
+export subscription=xxx-xxx-xxx
+export principalid=$(az identity create --name tomas-fromkube --resource-group $MCgroupName --query 'principalId' -o tsv)
+az role assignment create --role Reader --assignee $principalid --scope /subscriptions/$subscription/resourcegroups/$mygroup
+```
+
+## Deploy AAD Pod Identity solution
+```
+kubectl apply -f https://github.com/Azure/aad-pod-identity/raw/master/deploy/infra/deployment-rbac.yaml
+```
+
+## Deploy identity and identity binding
+```
+kubectl apply -f aadPodIdentityWithBinding.yaml
+```
+
+
 
 # External options
 There might be reasons not to bound any of that with Kubernetes system. Maybe you have very high standards for storing and managing secrets in dedicated hardware-supported (HSM) solutions like Azure KeyVault. Or you have complex configurations you want to centralize and make available not only for apps running in single Kubernetes cluster, but many clusters, Azure Container Instances, VMs or PaaS. In that case you might consider deploying centralized configuration store such as Etcd or Consul.

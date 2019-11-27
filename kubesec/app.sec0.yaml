@@ -1,0 +1,15 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: app
+  labels:
+    app: myweb
+spec:
+  containers:
+    - name: app
+      image: tkubica/app:root
+      env:
+      - name: PORT
+        value: "12345"
+      ports:
+      - containerPort: 12345
