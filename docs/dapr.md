@@ -1,6 +1,3 @@
-# DAPR demo
-This repo contains simple DAPR demos
-
 # Install DAPR CLI
 First install DAPR CLI
 

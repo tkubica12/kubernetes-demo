@@ -1,8 +1,14 @@
 # Kubernetes in Azure
 This repo contains my Kubernetes demo in Azure.
 
-# Recently added (July 2019)
-* Refresh for AKS 1.14
+# Recently added (November 2019)
+* DAPR
+
+# TODO
+- RUDR
+- KEDA with Azure Functions
+- Flagger for automated canary releases
+- Azure Monitor Prometheus support
 
 # Table of Contents
 - [Deploying managed Kubernetes (AKS)](docs/aks-build.md)
@@ -17,7 +23,7 @@ This repo contains my Kubernetes demo in Azure.
 - [Package applications with Helm](docs/helm.md)
 - [Develop apps on AKS with DevSpaces](docs/devspaces.md)
 - [Deploy CI/CD with Jenkins and agents in containers](docs/jenkins.md)
-- [Creating service mesh with Istio](docs/istio.md)
+- [Service Mesh](docs/servicemesh.md)
 - [Automatically provision Azure services with Service Catalog](docs/servicecatalog.md)
 - [Monitoring](docs/monitoring.md)
 - [DAPR - distributed application runtime](docs/dapr.md)
