@@ -1,6 +1,8 @@
 # Deploying managed Kubernetes (AKS)
 In this section we are going to deploy managed Kubernetes service in Azure. Make sure you have latest version of Azure CLI 2.0 installed. 
 
+**To be refreshed for 1.14**
+
 - [Deploying managed Kubernetes (AKS)](#deploying-managed-kubernetes-aks)
     - [Get credentials](#get-credentials)
     - [Download kubectl](#download-kubectl)

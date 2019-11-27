@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 apiVersion: v1
 kind: Pod
 metadata:
@@ -37,3 +38,44 @@ spec:
       limits:
         cpu: 500m
         memory: 256M
+=======
+apiVersion: v1
+kind: Pod
+metadata:
+  name: initdemo
+spec:
+  restartPolicy: Never
+  volumes:
+  - name: shared-data
+    emptyDir: {}
+  containers:
+  - name: nginx
+    image: nginx
+    volumeMounts:
+    - name: shared-data
+      mountPath: /usr/share/nginx/html
+    ports:
+      - containerPort: 80
+    resources:
+      requests:
+        cpu: 100m
+        memory: 64M
+      limits:
+        cpu: 500m
+        memory: 256M
+  initContainers:
+  - name: downloader
+    image: tutum/curl
+    volumeMounts:
+    - name: shared-data
+      mountPath: /pod-data
+    command: ["/bin/bash"]
+    args: ["-c", "curl https://en.wikipedia.org/wiki/Single-page_applicatio -o /pod-data/index.html; sleep 5"]
+    resources:
+      requests:
+        cpu: 100m
+        memory: 64M
+      limits:
+        cpu: 500m
+        memory: 256M
+>>>>>>> b0561eb679c2f138f6fe75160a4c763324e96abf

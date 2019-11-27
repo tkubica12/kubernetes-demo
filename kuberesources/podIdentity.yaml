@@ -1,0 +1,17 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: mybox
+  labels:
+    aadpodidbinding: identity1
+spec:
+  containers:
+    - name: mybox
+      image: tkubica/mybox
+      resources:
+        requests:
+          cpu: 10m
+          memory: 32M
+        limits:
+          cpu: 1
+          memory: 256M

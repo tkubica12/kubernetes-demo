@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -33,4 +34,41 @@ spec:
   ports:
   - protocol: TCP
     port: 80
+=======
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lf
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: lf
+    spec:
+      containers:
+      - name: lf-container
+        image: tkubica/lifecycleweb
+        ports:
+        - containerPort: 5000
+        resources:
+          requests:
+            cpu: 100m
+            memory: 64M
+          limits:
+            cpu: 500m
+            memory: 256M
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: lf
+spec:
+  selector:
+    app: lf
+  type: LoadBalancer
+  ports:
+  - protocol: TCP
+    port: 80
+>>>>>>> b0561eb679c2f138f6fe75160a4c763324e96abf
     targetPort: 5000

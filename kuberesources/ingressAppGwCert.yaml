@@ -1,0 +1,20 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: azure/application-gateway
+    certmanager.k8s.io/cluster-issuer: letsencrypt-prod
+  name: myweb-appgw
+spec:
+  rules:
+    - host: appgw.azure.tomaskubica.cz
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: myweb-service
+              servicePort: 80
+  tls:
+    - hosts:
+      - appgw.azure.tomaskubica.cz
+      secretName: tls-secret

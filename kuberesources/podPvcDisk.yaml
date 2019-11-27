@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 kind: Pod
 apiVersion: v1
 metadata:
@@ -18,4 +19,26 @@ spec:
   volumes:
     - name: volume
       persistentVolumeClaim:
+=======
+kind: Pod
+apiVersion: v1
+metadata:
+  name: pod-pvc-disk
+spec:
+  containers:
+    - name: ubuntu
+      image: tutum/curl
+      command: ["tail"]
+      args: ["-f", "/dev/null"]
+      volumeMounts:
+      - mountPath: "/mnt/azure"
+        name: volume
+      resources:
+        limits:
+          cpu: 100m
+          memory: 128M
+  volumes:
+    - name: volume
+      persistentVolumeClaim:
+>>>>>>> b0561eb679c2f138f6fe75160a4c763324e96abf
         claimName: myvolume-disk-claim

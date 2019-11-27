@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 apiVersion: v1
 kind: Pod
 metadata:
@@ -23,4 +24,31 @@ spec:
         memory: 64M
       limits:
         cpu: 500m
+=======
+apiVersion: v1
+kind: Pod
+metadata:
+  name: sidecar2
+spec:
+  containers:
+  - name: app
+    image: tutum/curl
+    command: ["tail"]
+    args: ["-f", "/dev/null"]
+    resources:
+      requests:
+        cpu: 100m
+        memory: 64M
+      limits:
+        cpu: 500m
+        memory: 256M
+  - name: ambassador
+    image: nginx
+    resources:
+      requests:
+        cpu: 100m
+        memory: 64M
+      limits:
+        cpu: 500m
+>>>>>>> b0561eb679c2f138f6fe75160a4c763324e96abf
         memory: 256M

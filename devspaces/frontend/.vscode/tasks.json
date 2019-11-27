@@ -1,0 +1,37 @@
+{
+    "tasks": [
+        {
+            "label": "azds: prelaunch",
+            "command": "azds",
+            "args": [
+                "up",
+                "--port=55760:9229",
+                "--await-exec",
+                "--keep-alive"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "azds: preattach",
+            "command": "azds",
+            "args": [
+                "up",
+                "--port=55760:9229",
+                "--sync-only",
+                "--keep-alive",
+                "--command=node_modules/.bin/nodemon",
+                "--",
+                "--inspect=0.0.0.0:9229",
+                "--nolazy",
+                "server.js"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": []
+        }
+    ]
+}

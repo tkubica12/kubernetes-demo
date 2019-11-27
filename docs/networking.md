@@ -18,6 +18,7 @@ We have seen a lot of networking already: internal ballancing and service discov
     - [Rate limiting](#rate-limiting)
     - [Basic authentication](#basic-authentication)
     - [External authentication using OAuth 2.0 and Azure Active Directory](#external-authentication-using-oauth-20-and-azure-active-directory)
+  - [Azure Application Gateway WAF as ingress](#azure-application-gateway-waf-as-ingress)
   - [Cleanup](#cleanup)
 - [Network policy with Calico](#network-policy-with-calico)
     - [I will reference my kubectl config pointing to Calico-enabled cluster](#i-will-reference-my-kubectl-config-pointing-to-calico-enabled-cluster)
@@ -265,10 +266,98 @@ kubectl apply -f ingressWebAADAuth.yaml
 
 To check it out open our app in your browser on https://mykubeapp.azure.tomaskubica.cz/
 
+## Azure Application Gateway WAF as ingress
+Azure comes with reverse proxy implementation Application Gateway that includes Web Application Firewall for more security. You can deploy ingress controller that implements App Gw as data plane. Use following steps to deploy solution and note it is better to create ARM template to automate infrastructure configuration:
+1. Deploy static public IP and specify some DNS name
+2. Deploy Azure Application Gateway v2 in dedicated subnet of your VNET (can be automated with ARM template)
+3. Create user managed identity in Azure in your AKS resource group (can be automated with ARM template)
+4. Assign Reader role to this identity for your AKS resource group (can be automated with ARM template)
+5. Assign Contributor role to this identity for your Application Gateway (can be automated with ARM template)
+6. Make sure Helm is installed according to [docs/helm.md](docs/helm.md)
+7. Install AAD Pod Identity according to [docs/rbac.md](docs/rbac.md)
+
+Next step is to use Helm to install AppGw ingress controller.
+
+```bash
+helm repo add application-gateway-kubernetes-ingress https://appgwingress.blob.core.windows.net/ingress-azure-helm-package/
+helm repo update
+helm install application-gateway-kubernetes-ingress/ingress-azure \
+  --set appgw.subscriptionId=$(az account show --query id -o tsv) \
+  --set appgw.resourceGroup=aks \
+  --set appgw.name=appgw \
+  --set kubernetes.watchNamespace="" \
+  --set armAuth.type=aadPodIdentity \
+  --set armAuth.identityResourceID=$(az identity show -n tomasManagedIdentity -g aks --query id -o tsv)  \
+  --set armAuth.identityClientID=$(az identity show -n tomasManagedIdentity -g aks --query clientId -o tsv) \
+  --set rbac.enabled=true
+```
+
+Deploy application, ClusterIP Service and AppGw Ingress. Make sure you modify ingressAppGw.yaml host field with DNS name of your AppGw public IP.
+
+```bash
+kubectl apply -f deploymentWeb1.yaml
+kubectl apply -f serviceWeb.yaml
+kubectl apply -f ingressAppGw.yaml
+```
+
+Make sure you can access application via AppGw.
+
+```bash
+curl mujkube123.westeurope.cloudapp.azure.com
+```
+
+Check AppGw backend pool. You will see that AppGw pool consist of Pod IP addresses. Due to Azure CNI (Advanced Networking) Pod are getting IPs directly from VNET so AppGw can address them directly and do load balancing there including features such as session cookie persistence.
+
+We will now use cert-manager to automatically create Let's Encrypt certificates and deploy HTTPS endpoint.
+
+First you need to create DNS A record in your domain (in our case managed in Azure DNS).
+
+```bash
+export appgwip=$(az network public-ip show -n appgw-ip -g aks --query ipAddress -o tsv)
+az network dns record-set a add-record -a $appgwip -n appgw -g shared-services -z azure.tomaskubica.cz
+az network dns record-set a add-record -a $appgwip -n "*.appgw" -g shared-services -z azure.tomaskubica.cz
+```
+
+Install and configure cert-manager.
+
+```bash
+kubectl apply -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.8/deploy/manifests/00-crds.yaml
+
+kubectl create namespace cert-manager
+kubectl label namespace cert-manager certmanager.k8s.io/disable-validation=true
+helm repo add jetstack https://charts.jetstack.io
+helm repo update
+
+helm install \
+  --name cert-manager \
+  --namespace cert-manager \
+  --version v0.8.0 \
+  jetstack/cert-manager
+```
+
+Now we need to deploy certificate issuer. Please modify yaml file to include your email address.
+```
+kubectl apply -f certIssuer.yaml
+```
+
+Now we can deploy Ingress with HTTPS.
+
+```
+kubectl apply -f ingressAppGwCert.yaml
+```
+
+Wait few minutes and test HTTPS access.
+
+```bash
+curl -v https://appgw.azure.tomaskubica.cz
+```
+
+
 ## Cleanup
 
 ```
 kubectl delete -f ingressWeb.yaml
+kubectl delete -f ingressAppGwCert.yaml
 helm delete ingress --purge
 kubectl delete secret mycert
 kubectl delete -f cert.yaml

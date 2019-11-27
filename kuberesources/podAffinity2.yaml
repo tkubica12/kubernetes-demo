@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 kind: Pod
 apiVersion: v1
 metadata:
@@ -24,4 +25,32 @@ spec:
           memory: 64M
         limits:
           cpu: 500m
+=======
+kind: Pod
+apiVersion: v1
+metadata:
+  name: second-affinity
+  labels:
+    app: second-affinity
+spec:
+  affinity:
+    podAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+          - key: app
+            operator: In
+            values:
+            - first
+        topologyKey: kubernetes.io/hostname
+  containers:
+    - name: nginx
+      image: nginx:alpine
+      resources:
+        requests:
+          cpu: 100m
+          memory: 64M
+        limits:
+          cpu: 500m
+>>>>>>> b0561eb679c2f138f6fe75160a4c763324e96abf
           memory: 256M
