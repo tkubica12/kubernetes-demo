@@ -20,6 +20,7 @@ This repo contains my Kubernetes demo in Azure.
 - [Creating service mesh with Istio](docs/istio.md)
 - [Automatically provision Azure services with Service Catalog](docs/servicecatalog.md)
 - [Monitoring](docs/monitoring.md)
+- [DAPR - distributed application runtime](docs/dapr.md)
 
 
 # Author
