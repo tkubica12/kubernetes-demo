@@ -51,6 +51,7 @@ istioctl dashboard envoy <pod-name>.<namespace>
 Let's now deploy our demo services with Istio Service Mesh.
 
 ```
+kubectl label namespace default istio-injection=enabled
 kubectl apply -f client.yaml
 kubectl apply -f retryBackend.yaml
 kubectl apply -f canary.yaml

@@ -4,6 +4,9 @@ metadata:
   name: retry-backend
 spec:
   replicas: 3
+  selector:
+    matchLabels:
+      app: retry
   template:
     metadata:
       labels:
