@@ -22,10 +22,8 @@ spec:
           value: "80"
         ports:
         - containerPort: 80
-      nodeSelector:
-        beta.kubernetes.io/os: linux
 ---
-apiVersion: apps/v1beta2
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: myweb-deployment-v2
@@ -49,8 +47,6 @@ spec:
           value: "80"
         ports:
         - containerPort: 80
-      nodeSelector:
-        beta.kubernetes.io/os: linux
 ---
 kind: Service
 apiVersion: v1
