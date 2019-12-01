@@ -1,0 +1,18 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: pod1
+  annotations:
+    dapr.io/enabled: "true"
+    dapr.io/id: "pod1"
+spec:
+  containers:
+    - name: ubuntu
+      image: tkubica/mybox
+      resources:
+        requests:
+          cpu: 10m
+          memory: 32M
+        limits:
+          cpu: 100M
+          memory: 128M

@@ -1,0 +1,13 @@
+cosmosdb:
+  url: <CosmosDB_URL>
+  masterKey: <CosmosDB_keyL>
+  database: <CosmosDB_db>
+  collection: <CosmosDB_col>
+serviceBus:
+  connectionString: <serviceBus_connectionString>
+blob:
+  storageAccount: <blob_storageAccount>
+  key: <blob_key>
+  container: <blob_container>
+eventHub:
+  connectionString: <eventHub_connectionString>

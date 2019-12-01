@@ -1,0 +1,23 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: python1
+  annotations:
+    dapr.io/enabled: "true"
+    dapr.io/id: "python1"
+    dapr.io/port: "5000"
+spec:
+  containers:
+    - name: python
+      image: python:3
+      command: ["/bin/sh"]
+      args: ["-c", "pip install flask flask_cors && tail -f /dev/null"]
+      ports:
+        - containerPort: 5000
+      resources:
+        requests:
+          cpu: 10m
+          memory: 32M
+        limits:
+          cpu: 100M
+          memory: 512M

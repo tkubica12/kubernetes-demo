@@ -1,0 +1,21 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: nginx1
+  annotations:
+    dapr.io/enabled: "true"
+    dapr.io/id: "nginx1"
+    dapr.io/port: "80"
+spec:
+  containers:
+    - name: nginx
+      image: nginx
+      ports:
+        - containerPort: 80
+      resources:
+        requests:
+          cpu: 10m
+          memory: 32M
+        limits:
+          cpu: 100M
+          memory: 128M

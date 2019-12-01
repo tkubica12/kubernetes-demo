@@ -1,0 +1,15 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: dapr-state-cosmosdb
+spec:
+  type: state.azure.cosmosdb
+  metadata:
+  - name: url
+    value: {{ .Values.cosmosdb.url }}
+  - name: masterKey
+    value: {{ .Values.cosmosdb.masterKey }}
+  - name: database
+    value: {{ .Values.cosmosdb.database }}
+  - name: collection
+    value: {{ .Values.cosmosdb.collection }}
