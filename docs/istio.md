@@ -92,14 +92,14 @@ Istio allows you to have better control over routing your traffic to different v
 
 In our example we have 3 instances of v1 and 3 instances of v2 so we are 50% likely to hit v2.
 ```
-while true; do kubectl exec $clientPod -c client -- curl -s myweb-service; done
+kubectl exec $clientPod -c client -- bash -c 'while true; do curl -s myweb-service; echo; done'
 ```
 
 Let's now configure Istio to send just 10% of traffic to v2. We will define DestinationRule where we configure two subsets (versions) identified by labels version: v1 and version: v2. Then we configure VirtualService that reference those two subsets and use 90 weight for v1 and 10 weight for v2. We should hit v2 only in 10% of requests.
 
 ```
 kubectl apply -f canary10percent.yaml
-while true; do kubectl exec $clientPod -c client -- curl -s myweb-service; done
+kubectl exec $clientPod -c client -- bash -c 'while true; do curl -s myweb-service; echo; done'
 ```
 
 What about serving v2 only for user with specific cookie? First let's remove our previous policy.
