@@ -137,7 +137,7 @@ kubectl exec $clientPod -c client -- curl -vs httpbin.org/ip
 
 Let's now define ServiceEntry for your Istio Service Mesh to allow access to httpbin.org and try again.
 
-```
+```bash
 kubectl create -f serviceEntry.yaml
 kubectl exec $clientPod -c client -- curl -vs httpbin.org/ip
 ```
@@ -146,44 +146,47 @@ kubectl exec $clientPod -c client -- curl -vs httpbin.org/ip
 As all traffic between services might be encrypted outside users cannot access services directly. In order to expose service such as web frontend to users outside of cluster we will use Istio Gateway. This is in principle similar to Kubernetes Ingress, but Istio provides specific implementation for entering services managed by Istio Service Mesh.
 
 Deploy Gateway to make service accessible from outside of our cluster.
-```
+
+```bash
 kubectl delete -f canary10percent.yaml
 kubectl create -f gateway.yaml
 ```
 
 Find out on which IP address Istio Ingress is running (Helm chart created service instanci of ty LoadBalancer so Azure provided external address to it).
-```
+
+```bash
 export istioGwIp=$(kubectl get service istio-ingressgateway -n istio-system -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
 ```
 
 Check access to service extrenally.
-```
+
+```bash
 curl -i $istioGwIp -H "Host:myweb-service.domain.com"
 ```
 
 In order to deploy URL paths and TLS certificates please refer to [this part of demo](docs/networking.md)
 
 ## Load-balancing algorithms
-Istio comes with three load-balancing algorithms. Round robin, random and wighted least requests. Also if session stickiness is required consistent hash option is available based on some information from header such as Cookie or specific Header entry or via client source IP. Let's see couple of examples.
+Istio comes with multiple load-balancing algorithms. If session stickiness is required consistent hash option is available based on some information from header such as Cookie or specific Header entry or via client source IP.
 
 First we will deploy policy for round robin. We expect to see responses in sequences (one by one and again).
-```
+
+```bash
 kubectl delete -f canary10percent.yaml
-kubectl apply -f lbRoundRobin.yaml
-while true; do kubectl exec $clientPod -c client -- curl -s myweb-service; done
-```
-
-Now we will configure LB algorithm random and test it.
-```
 kubectl apply -f lbRandom.yaml
-while true; do kubectl exec $clientPod -c client -- curl -s myweb-service; done
+kubectl exec $clientPod -c client -- bash -c 'while true; do curl -s myweb-service; echo; sleep 0.2; done'
 ```
 
-Last example will be consistent hash. We will setup persistence based on header key Me. When key is not specified Istio to fall back to Random mode, when key is present we will get response from the same node for all subsequent calls (unless instance fails).
-```
+Suppose we need caller to be always routed to the same Pod. There might be two reasons for this:
+* Your application code is "traditional" and keeps state such as user session in memory rather than in external system such as Redis
+* Your application needs to keep local cache in memory due to performance reasons and sending user to the same instance increase cache hit ration
+
+We will setup persistence based on header key User. When key is not specified Istio will fall back to Random mode. If key is present we will get response from the same node for all subsequent calls (unless instance fails).
+
+```bash
 kubectl apply -f lbHeaderHash.yaml
-while true; do kubectl exec $clientPod -c client -- curl -s myweb-service; done
-while true; do kubectl exec $clientPod -c client -- curl -H "User: tomas" -s myweb-service; done
+kubectl exec $clientPod -c client -- bash -c 'while true; do curl -s myweb-service; echo; sleep 0.2; done'
+kubectl exec $clientPod -c client -- bash -c 'while true; do curl -H "User: tomas" -s myweb-service; echo; sleep 0.2; done'
 ```
 
 ## Circuit Breaker to protect from overloading
