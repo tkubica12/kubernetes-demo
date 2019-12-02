@@ -58,7 +58,7 @@ kubectl apply -f canary.yaml
 ```
 
 ## Retry functionality
-First run client without any policy defined. There is 50% change of getting no response and container crash.
+First run client without any policy defined. We are using retry backend application that acceps failRate as argument and based on this percentage will either respond or crash the Pod. We will use 50% chance of getting no response and container crash.
 
 ```
 export clientPod=$(kubectl get pods -l app=client -o jsonpath="{.items[0].metadata.name}")
@@ -75,16 +75,16 @@ kubectl exec $clientPod -c client -- curl -vs -m 10 retry-service?failRate=50
 As you can see you now get response even if your first request causes container to crash. This demonstrates retry functionality in Istio.
 
 ## Copy traffic
-Sometimes it might be useful to get copy of traffic for troubleshooting for example to copy production API requests to beta service. 
+Sometimes it might be useful to get copy of traffic for troubleshooting for example to copy production API requests to beta service. We will deploy sniffer, which is simple image that runs tcpdump on port 80 and use Istio VirtualService to copy traffic between client and retry-service to sniffer.
 
 ```
-kubectl create -f <(istioctl kube-inject -i istio-system -f sniffer.yaml)
+kubectl apply -f sniffer.yaml
 kubectl apply -f copyVirtualService.yaml
 
 export clientPod=$(kubectl get pods -l app=client -o jsonpath="{.items[0].metadata.name}")
 kubectl exec $clientPod -c client -- bash -c 'for x in {0..20}; do curl -s retry-service?failRate=1; done'
 export snifferPod=$(kubectl get pods -l app=sniffer -o jsonpath="{.items[0].metadata.name}")
-kubectl logs $snifferPod
+kubectl logs $snifferPod -c sniffer
 ```
 
 ## Canary deployments

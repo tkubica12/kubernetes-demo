@@ -4,6 +4,9 @@ metadata:
   name: sniffer
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: sniffer
   template:
     metadata:
       labels:
