@@ -50,7 +50,7 @@ istioctl dashboard envoy <pod-name>.<namespace>
 # Deploy with istio
 Let's now deploy our demo services with Istio Service Mesh.
 
-```
+```bash
 kubectl label namespace default istio-injection=enabled
 kubectl apply -f client.yaml
 kubectl apply -f retryBackend.yaml
@@ -60,14 +60,14 @@ kubectl apply -f canary.yaml
 ## Retry functionality
 First run client without any policy defined. We are using retry backend application that acceps failRate as argument and based on this percentage will either respond or crash the Pod. We will use 50% chance of getting no response and container crash.
 
-```
+```bash
 export clientPod=$(kubectl get pods -l app=client -o jsonpath="{.items[0].metadata.name}")
 kubectl exec $clientPod -c client -- curl -vs -m 10 retry-service?failRate=50
 ```
 
 Now apply Istio policy to retry.
 
-```
+```bash
 kubectl apply -f retryVirtualService.yaml
 kubectl exec $clientPod -c client -- curl -vs -m 10 retry-service?failRate=50
 ```
@@ -77,7 +77,7 @@ As you can see you now get response even if your first request causes container 
 ## Copy traffic
 Sometimes it might be useful to get copy of traffic for troubleshooting for example to copy production API requests to beta service. We will deploy sniffer, which is simple image that runs tcpdump on port 80 and use Istio VirtualService to copy traffic between client and retry-service to sniffer.
 
-```
+```bash
 kubectl apply -f sniffer.yaml
 kubectl apply -f copyVirtualService.yaml
 
@@ -91,35 +91,47 @@ kubectl logs $snifferPod -c sniffer
 Istio allows you to have better control over routing your traffic to different versions of services independently of infrastructure configuration (eg. number of pods with each service).
 
 In our example we have 3 instances of v1 and 3 instances of v2 so we are 50% likely to hit v2.
-```
+```bash
 kubectl exec $clientPod -c client -- bash -c 'while true; do curl -s myweb-service; echo; done'
 ```
 
 Let's now configure Istio to send just 10% of traffic to v2. We will define DestinationRule where we configure two subsets (versions) identified by labels version: v1 and version: v2. Then we configure VirtualService that reference those two subsets and use 90 weight for v1 and 10 weight for v2. We should hit v2 only in 10% of requests.
 
-```
+```bash
 kubectl apply -f canary10percent.yaml
 kubectl exec $clientPod -c client -- bash -c 'while true; do curl -s myweb-service; echo; done'
 ```
 
 What about serving v2 only for user with specific cookie? First let's remove our previous policy.
 
-```
+```bash
 kubectl delete -f canary10percent.yaml
 ```
 
 In order to achieve what we need to configure two rules in our VirtualService. First (v2) will have match statement that will check cookie for usertype-tester. If there is no match second (default) one (v1) will be used for ordinary users.
 
-```
+```bash
 kubectl apply -f canaryCookie.yaml
 kubectl exec $clientPod -c client -- curl -s myweb-service
 kubectl exec $clientPod -c client -- curl -s --cookie "usertype=tester" myweb-service
 ```
 
 ## Managing access to services outside Istio with ServiceEntry
-By default services in Istio mesh have no access to external world as we can test:
+By default services in Istio mesh can access external systems without any restrictions. You can test following curl command works.
 
+```bash
+kubectl exec $clientPod -c client -- curl -vs httpbin.org/ip
 ```
+
+We will now change policy to deny all services unless some are explicitly allowed. Reconfigure Istio:
+
+```bash
+kubectl get configmap istio -n istio-system -o yaml | sed 's/mode: ALLOW_ANY/mode: REGISTRY_ONLY/g' | kubectl replace -n istio-system -f -
+```
+
+Test access from Pod now - it should fail with 502 Bas Gateway.
+
+```bash
 kubectl exec $clientPod -c client -- curl -vs httpbin.org/ip
 ```
 
