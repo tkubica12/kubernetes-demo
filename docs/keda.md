@@ -124,7 +124,7 @@ kubectl get pods -w
 ## Cleanup
 rm -rf ~/keda-webapi
 rm -rf ~/keda-worker
-kubectl delete deploy keda-webapi
+kubectl delete deploy keda-webapi-http
 kubectl delete deploy keda-worker
 kubectl delete service keda-webapi-http
 kubectl delete deploy keda-worker
