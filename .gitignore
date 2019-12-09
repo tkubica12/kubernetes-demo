@@ -38,3 +38,6 @@ devspaces/backend/azds.yaml
 devspaces/backend/charts/
 kuberesources/podKeyVaultVolume.yaml
 rudr/rudr/
+keda/packages-microsoft-prod.deb
+keda/keda-webapi
+keda/keda-worker
