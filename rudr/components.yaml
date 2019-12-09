@@ -1,0 +1,93 @@
+apiVersion: core.oam.dev/v1alpha1
+kind: ComponentSchematic
+metadata:
+  name: web
+spec:
+  workloadType: core.oam.dev/v1alpha1.Server
+  containers:
+    - name: server
+      image: nginx:latest
+      env:
+        - name: LOG_LEVEL
+          fromParam: log_level
+      ports:
+        - name: http
+          containerPort: 80
+          protocol: TCP
+      resources:
+        cpu:
+          required: 0.05
+        memory:
+          required: "128"
+  parameters:
+    - name: log_level
+      type: string
+      default: Error
+---
+apiVersion: core.oam.dev/v1alpha1
+kind: ComponentSchematic
+metadata:
+  name: backendapi1
+spec:
+  workloadType: core.oam.dev/v1alpha1.Server
+  containers:
+    - name: server
+      image: nginx:latest
+      ports:
+        - name: http
+          containerPort: 80
+          protocol: TCP
+      resources:
+        cpu:
+          required: 0.05
+        memory:
+          required: "128"
+---
+apiVersion: core.oam.dev/v1alpha1
+kind: ComponentSchematic
+metadata:
+  name: backendapi2
+spec:
+  workloadType: core.oam.dev/v1alpha1.Server
+  containers:
+    - name: server
+      image: nginx:latest
+      ports:
+        - name: http
+          containerPort: 80
+          protocol: TCP
+      resources:
+        cpu:
+          required: 0.05
+        memory:
+          required: "128"
+---
+apiVersion: core.oam.dev/v1alpha1
+kind: ComponentSchematic
+metadata:
+  name: job
+spec:
+  workloadType: core.oam.dev/v1alpha1.Task
+  containers:
+    - name: job
+      image: alpine:latest
+      resources:
+        cpu:
+          required: 0.05
+        memory:
+          required: "32"
+---
+apiVersion: core.oam.dev/v1alpha1
+kind: ComponentSchematic
+metadata:
+  name: worker
+spec:
+  workloadType: core.oam.dev/v1alpha1.Worker
+  containers:
+    - name: server
+      image: nginx:latest
+      resources:
+        cpu:
+          required: 0.05
+        memory:
+          required: "128"

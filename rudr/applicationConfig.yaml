@@ -1,0 +1,46 @@
+apiVersion: core.oam.dev/v1alpha1
+kind: ApplicationConfiguration
+metadata:
+  name: myapp
+spec:
+  components:
+    - componentName: web
+      instanceName: myapp-web
+      parameterValues:
+        - name: log_level
+          value: Info
+      traits:
+        - name: autoscaler
+          parameterValues:
+            - name: minimum
+              value: 2
+            - name: maximum
+              value: 5
+            - name: cpu
+              value: 90
+        - name: ingress
+          parameterValues:
+            - name: hostname
+              value: web.example.com
+            - name: service_port
+              value: 80
+            - name: path
+              value: /    
+    - componentName: backendapi1
+      instanceName: myapp-api1
+      traits:
+        - name: manual-scaler
+          parameterValues:
+            - name: replicaCount
+              value: 2
+    - componentName: backendapi2
+      instanceName: myapp-api2
+      traits:
+        - name: manual-scaler
+          parameterValues:
+            - name: replicaCount
+              value: 2
+    - componentName: job
+      instanceName: myapp-task
+    - componentName: worker
+      instanceName: myapp-worker

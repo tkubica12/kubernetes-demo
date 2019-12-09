@@ -37,3 +37,4 @@ devspaces/backend/Dockerfile
 devspaces/backend/azds.yaml
 devspaces/backend/charts/
 kuberesources/podKeyVaultVolume.yaml
+rudr/rudr/
