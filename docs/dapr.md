@@ -155,7 +155,7 @@ kubectl delete -f pod1.yaml
 ```
 
 # Input binding from Event Hub
-In this example we will have input binding from Azure Event Hub. Run Python container, jump to python process and copy and paste code in binding.py. Generate some event in Event Hub and watch your code being called by DAPR and message content passed.
+In this example we will have input binding from Azure Event Hub. Run Python container, jump to python process and copy and paste code in binding.py. Generate some event in Event Hub (eg. using summer.azure-event-hub-explorer extension in VS Code) and watch your code being called by DAPR and message content passed.
 
 ```
 kubectl apply -f python.yaml
