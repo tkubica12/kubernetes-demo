@@ -1,16 +1,18 @@
 # Kubernetes in Azure
 This repo contains my Kubernetes demo in Azure.
 
-# Recently added (November 2019)
+# Recently added (late 2019)
 - DAPR
+- KEDA with Azure Functions
+- Istio refresh
+- RUDR
 
 # TODO
-- RUDR
-- KEDA with Azure Functions
 - Flagger for automated canary releases
 - Azure Monitor Prometheus support
 - Service Mesh Interface
 - Linkerd
+- Azure DevOps
 
 # Table of Contents
 - [Deploying managed Kubernetes (AKS)](docs/aks-build.md)
