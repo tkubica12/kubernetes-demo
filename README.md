@@ -29,6 +29,7 @@ This repo contains my Kubernetes demo in Azure.
 - [Automatically provision Azure services with Service Catalog](docs/servicecatalog.md)
 - [Monitoring](docs/monitoring.md)
 - [DAPR - distributed application runtime](docs/dapr.md)
+- [RUDR - Open Application Model framework for Kubernetes](docs/rudr.md)
 
 
 # Author
