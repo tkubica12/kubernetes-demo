@@ -7,8 +7,6 @@
   - [Managing access to services outside Istio with ServiceEntry](#managing-access-to-services-outside-istio-with-serviceentry)
   - [Managing access to services in Istio from outside with Gateway](#managing-access-to-services-in-istio-from-outside-with-gateway)
   - [Load-balancing algorithms](#load-balancing-algorithms)
-  - [Circuit Breaker to protect from overloading](#circuit-breaker-to-protect-from-overloading)
-    - [Service authentication and encryption](#service-authentication-and-encryption)
 - [Clean up](#clean-up)
 
 # Install Istio
@@ -188,22 +186,6 @@ kubectl apply -f lbHeaderHash.yaml
 kubectl exec $clientPod -c client -- bash -c 'while true; do curl -s myweb-service; echo; sleep 0.2; done'
 kubectl exec $clientPod -c client -- bash -c 'while true; do curl -H "User: tomas" -s myweb-service; echo; sleep 0.2; done'
 ```
-
-## Circuit Breaker to protect from overloading
-To be updated for Istio 1.0.0
-
-```
-kubectl create -f <(istioctl kube-inject -i istio-system -f siege.yaml)
-export siegePod=$(kubectl get pods -l app=siege -o jsonpath="{.items[0].metadata.name}")
-kubectl exec $siegePod -c siege -- curl -vs -m 10 retry-service?failRate=50
-
-kubectl exec -it $clientPod -c client -- bash -c 'while true; do curl -o /dev/null -w "%{http_code}..." -s myweb-service; sleep 0.1; done'
-
-kubectl apply -f policyConnections.yaml
-```
-
-### Service authentication and encryption
-TBD
 
 # Clean up
 ```
