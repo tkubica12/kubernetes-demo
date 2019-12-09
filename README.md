@@ -30,6 +30,7 @@ This repo contains my Kubernetes demo in Azure.
 - [Monitoring](docs/monitoring.md)
 - [DAPR - distributed application runtime](docs/dapr.md)
 - [RUDR - Open Application Model framework for Kubernetes](docs/rudr.md)
+- [Azure Functions with KEDA - serverless with Kubernetes](docs/keda.md)
 
 
 # Author
