@@ -1,3 +1,8 @@
+- [Install RUDR](#install-rudr)
+- [As infrastructure operator install Ingress and KEDA](#as-infrastructure-operator-install-ingress-and-keda)
+- [As developer declare component schematic](#as-developer-declare-component-schematic)
+- [As application operator define instance details and deploy](#as-application-operator-define-instance-details-and-deploy)
+
 # Install RUDR
 git clone https://github.com/oam-dev/rudr.git
 

@@ -1,3 +1,11 @@
+- [KEDA - Kubernetes-based Event Driven Autoscaling](#keda---kubernetes-based-event-driven-autoscaling)
+  - [Install Azure Functions Tools on Ubuntu 18.04](#install-azure-functions-tools-on-ubuntu-1804)
+  - [Install KEDA](#install-keda)
+  - [Prepare Azure Container Registry](#prepare-azure-container-registry)
+  - [Creating Function to consume messages from Storage Queue](#creating-function-to-consume-messages-from-storage-queue)
+  - [Creating Function to react on HTTP request](#creating-function-to-react-on-http-request)
+  - [Cleanup](#cleanup)
+
 # KEDA - Kubernetes-based Event Driven Autoscaling
 KEDA is autoscaling component for Kubernetes with scale-to-zero functionality and ability to bring metrics from various components such as Azure Service Bus and others.
 
