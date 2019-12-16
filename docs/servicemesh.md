@@ -6,10 +6,11 @@ Service Mesh technologies can bring intelligent network behavior to platform so 
 
 # Scenarios
 - [Istio](istio.md)
+- [Istio](linkerd.md)
 
 TBD:
-- Linkerd
 - Service Mesh Interface
+- Consul Connect
 
 # Why Service Mesh?
 First let's deploy simple services and investigate limitations of plain Kubernetes.

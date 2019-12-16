@@ -3,7 +3,7 @@
 - [Deploy with istio](#deploy-with-istio)
   - [Retry functionality](#retry-functionality)
   - [Copy traffic](#copy-traffic)
-  - [Canary deployments](#canary-deployments)
+  - [Canary deployments (traffic split)](#canary-deployments-traffic-split)
   - [Managing access to services outside Istio with ServiceEntry](#managing-access-to-services-outside-istio-with-serviceentry)
   - [Managing access to services in Istio from outside with Gateway](#managing-access-to-services-in-istio-from-outside-with-gateway)
   - [Load-balancing algorithms](#load-balancing-algorithms)
@@ -60,16 +60,15 @@ First run client without any policy defined. We are using retry backend applicat
 
 ```bash
 export clientPod=$(kubectl get pods -l app=client -o jsonpath="{.items[0].metadata.name}")
-kubectl exec $clientPod -c client -- curl -vs -m 10 retry-service?failRate=50
+kubectl exec $clientPod -c client -- curl -vs -m 30 retry-service?failRate=50
 ```
 
 Now apply Istio policy to retry.
 
 ```bash
 kubectl apply -f retryVirtualService.yaml
-kubectl exec $clientPod -c client -- curl -vs -m 10 retry-service?failRate=50
+kubectl exec $clientPod -c client -- curl -vs -m 30 retry-service?failRate=50
 ```
-
 As you can see you now get response even if your first request causes container to crash. This demonstrates retry functionality in Istio.
 
 ## Copy traffic
@@ -85,7 +84,7 @@ export snifferPod=$(kubectl get pods -l app=sniffer -o jsonpath="{.items[0].meta
 kubectl logs $snifferPod -c sniffer
 ```
 
-## Canary deployments
+## Canary deployments (traffic split)
 Istio allows you to have better control over routing your traffic to different versions of services independently of infrastructure configuration (eg. number of pods with each service).
 
 In our example we have 3 instances of v1 and 3 instances of v2 so we are 50% likely to hit v2.

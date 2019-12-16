@@ -2,6 +2,7 @@
 - [As infrastructure operator install Ingress and KEDA](#as-infrastructure-operator-install-ingress-and-keda)
 - [As developer declare component schematic](#as-developer-declare-component-schematic)
 - [As application operator define instance details and deploy](#as-application-operator-define-instance-details-and-deploy)
+- [Cleanup](#cleanup)
 
 # Install RUDR
 git clone https://github.com/oam-dev/rudr.git
@@ -24,3 +25,8 @@ kubectl get componentschematic
 
 # As application operator define instance details and deploy
 kubectl apply -f applicationConfig.yaml
+
+# Cleanup
+kubectl delete -f applicationConfig.yaml
+kubectl delete -f components.yaml
+helm delete rudr
