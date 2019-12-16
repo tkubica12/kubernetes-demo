@@ -6,7 +6,7 @@ Service Mesh technologies can bring intelligent network behavior to platform so 
 
 # Scenarios
 - [Istio](istio.md)
-- [Istio](linkerd.md)
+- [Linkerd](linkerd.md)
 
 TBD:
 - Service Mesh Interface
