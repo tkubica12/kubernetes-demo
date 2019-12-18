@@ -5,6 +5,7 @@
   - [Retry functionality](#retry-functionality)
   - [Canary deployments (traffic split)](#canary-deployments-traffic-split)
 - [Load balancing](#load-balancing)
+- [mTLS between services and using Linkerd tap for troubleshooting](#mtls-between-services-and-using-linkerd-tap-for-troubleshooting)
 
 # Install Linkerd CLI
 ```bash
@@ -75,4 +76,35 @@ kubectl delete -f canary10percent.yaml
 Linkerd and SMI currently does not support header or cookie based routing between services in mesh. But if user traffic is concerned this can be done on Ingress implementation and automated for example with Flagger or Azure DevOps.
 
 # Load balancing
-Linkerd uses exponentially weighted moving average algorythm to load-balance traffic and support scenarios with HTTP/2 and gRPC where standard balancing in Kubernetes is not very effective.
+Linkerd uses exponentially weighted moving average algorithm to load-balance traffic and support scenarios with HTTP/2 and gRPC where standard balancing in Kubernetes is not very effective.
+
+#  mTLS between services and using Linkerd tap for troubleshooting
+Linkerd enables creation of tap to listen for packets for troubleshooting. All communications between services are TLS encrypted (mTLS) that are part of Service Mesh. note that communications outside of service mesh szstem are note encrypted.
+
+In one window do port forwarding to our service.
+
+```bash
+kubectl port-forward service/myweb-service 12345:80
+```
+
+In different window run linkerd tap and watch traffic
+```bash
+export clientPod=$(kubectl get pods -l app=client -o jsonpath="{.items[0].metadata.name}")
+
+# Structured with full details
+linkerd tap pod/$clientPod -o json
+
+# Basic details
+linkerd tap pod/$clientPod
+
+# See only traffic that was not encrypted my service mesh
+linkerd tap pod/$clientPod | grep -v tls=true
+```
+
+You will see a lot of traffic and can generate more traffic between services.
+
+```bash
+export clientPod=$(kubectl get pods -l app=client -o jsonpath="{.items[0].metadata.name}")
+kubectl exec $clientPod -c client -- curl -s myweb-service
+kubectl exec $clientPod -c client -- curl www.tomaskubica.cz
+```
