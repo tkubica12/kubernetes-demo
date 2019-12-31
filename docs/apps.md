@@ -13,7 +13,7 @@ This set of demos focus on stateless applications like APIs or web frontend. We 
   - [Preserving client source IP](#preserving-client-source-ip)
     - [Why Kubernetes do SNAT by default](#why-kubernetes-do-snat-by-default)
     - [How can you preserve client IP and what are negative implications](#how-can-you-preserve-client-ip-and-what-are-negative-implications)
-    - [Recomendation of using this with Ingress only and then use X-Forwarded-For](#recomendation-of-using-this-with-ingress-only-and-then-use-x-forwarded-for)
+    - [Using preserving source IP only with Ingress and X-Forwarded-For](#using-preserving-source-ip-only-with-ingress-and-x-forwarded-for)
   - [Rolling upgrade](#rolling-upgrade)
   - [Canary releases with multiple deployments under single Service](#canary-releases-with-multiple-deployments-under-single-service)
   - [Using liveness and readiness probes to monitor Pod status](#using-liveness-and-readiness-probes-to-monitor-pod-status)
@@ -26,7 +26,7 @@ This set of demos focus on stateless applications like APIs or web frontend. We 
     - [Multiple containers in single Pod](#multiple-containers-in-single-pod)
     - [Pods affinity](#pods-affinity)
   - [Deploy IIS on Windows pool](#deploy-iis-on-windows-pool)
-  - [Test Linux to Windows communication (currently only for ACS mixed cluster, no AKS)](#test-linux-to-windows-communication-currently-only-for-acs-mixed-cluster-no-aks)
+  - [Test Linux to Windows communication](#test-linux-to-windows-communication)
   - [Clean up](#clean-up)
 
 ## Deploy multiple pods with Deployment
@@ -191,7 +191,7 @@ export extPreserveIp=$(kubectl get service httpecho -o jsonpath='{.status.loadBa
 curl $extPreserveIp
 ```
 
-### Recomendation of using this with Ingress only and then use X-Forwarded-For
+### Using preserving source IP only with Ingress and X-Forwarded-For
 Good solution if you need client IP information is to use it for [Ingress](docs/networking.md), but not for other Services. By deploying ingress controller in Service with externalTrafficPolicy Local, your nginx proxy will see client IP. This means you can do whitelisting (source IP filters) in you Ingress definition. Traffic distribution problem is virtualy non existent because you typically run ingress on one or few nodes in cluster, but rarely you want more replicas then number of nodes.
 
 ## Rolling upgrade
@@ -239,7 +239,7 @@ Even we have more control over process compared to Deployment roling upgrade the
 * You might require selecting who gets v2 by matching some header in request (eg. testers or beta customers)
 
 If you need even more control you can either:
-* Deploy Istio for Service Mesh [see here](docs/istio.md)
+* Deploy Istio for Service Mesh [see here](docs/servicemesh.md)
 * Create two separate services and solve this using reverse proxy such as NGINX, Envoy or Traefik
 
 ## Using liveness and readiness probes to monitor Pod status
@@ -452,7 +452,7 @@ kubectl create -f IIS.yaml
 kubectl get service
 ```
 
-## Test Linux to Windows communication (currently only for ACS mixed cluster, no AKS)
+## Test Linux to Windows communication
 In this demo we want to make sure our Linux and Windows containers can talk to each other. Connect from Linux container to internal service endpoint of IIS.
 
 ```
