@@ -15,22 +15,21 @@ This repo contains my Kubernetes demo in Azure.
 - Azure DevOps
 
 # Table of Contents
-- [Deploying managed Kubernetes (AKS)](docs/aks-build.md)
+- [Deploying managed Kubernetes on Azure (AKS)](docs/aks-build.md)
 - [Deploying apps (Pods, Deployments, Services)](docs/apps.md)
 - [Passing secrets and configurations (ConfigMap, Secrets, Key Vault)](docs/configurations.md)
 - [Stateful applications (StatefulSets, Persistent Volume, Backup and DR)](docs/stateful.md)
 - [Advanced networking (Ingress, Network Policy, Service Mesh)](docs/networking.md)
-- [Scaling your apps and cluster](docs/scaling.md)
+- [Package and deploy applications (Helm, OAM, RUDR)](docs/packaging.md)
 - [Advanced scheduling](docs/scheduling.md)
+- [Scaling your apps and cluster](docs/scaling.md)
 - [Operational security (RBAC, AAD, namespaces, registry)](docs/rbac.md)
 - [VM-less Kubernetes (ACI, Virtual Kubelet)](docs/aci.md)
-- [Package and deploy applications (Helm)](docs/helm.md)
 - [Develop apps on AKS with DevSpaces](docs/devspaces.md)
 - [Deploy CI/CD with Jenkins and agents in containers](docs/jenkins.md)
 - [Automatically provision Azure services with Service Catalog](docs/servicecatalog.md)
 - [Monitoring](docs/monitoring.md)
 - [Distributed application runtime (DAPR)](docs/dapr.md)
-- [Open Application Model deployment (RUDR)](docs/rudr.md)
 - [Serverless with Kubernetes (Azure Functions, KEDA)](docs/keda.md)
 
 
