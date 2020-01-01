@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myweb-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: myweb
+  template:
+    metadata:
+      labels:
+        app: myweb
+    spec:
+      containers:
+      - name: myweb
+        image: tkubica/web:1
+        env:
+        - name: PORT
+          value: "80"
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            cpu: 1
+            memory: 64M
+          limits:
+            cpu: 1
+            memory: 64M
+      tolerations:
+      - key: "virtual-kubelet.io/provider"
+        operator: Equal
+        value: azure
+        effect: NoSchedule
+      nodeSelector:
+        kubernetes.io/role: agent
+        beta.kubernetes.io/os: linux
+        type: virtual-kubelet

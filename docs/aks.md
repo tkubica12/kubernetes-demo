@@ -19,7 +19,7 @@ In this section we are going to deploy managed Kubernetes service in Azure. Make
 - [Virtual Nodes](#virtual-nodes)
 - [Windows nodes](#windows-nodes)
 
-You can build basic simple cluster as simple as running this command:
+You can build basic cluster as simple as running this command:
 
 ```bash
 az aks create -g MyResourceGroup -n MyManagedCluster
@@ -286,14 +286,41 @@ kubectl describe pod myclusterscaling-deployment-9dbd69c78-ktqjv
 After few minutes you should see additional node come up and all Pods in Running state. When you delete deployment cluster will scale back.
 
 # Virtual Nodes
-az extension add --source https://aksvnodeextension.blob.core.windows.net/aks-virtual-node/aks_virtual_node-0.2.0-py2.py3-none-any.whl
+Enable virtual node addon.
 
-```
+```bash
 az aks enable-addons \
     --resource-group $aksRg \
     --name aks \
     --addons virtual-node \
     --subnet-name nodeless-subnet
+```
+
+This addon has deployed project Virtual Kubelet and we should see virtual node ready:
+
+```bash
+kubectl get nodes
+kubectl describe node virtual-node-aci-linux
+```
+
+Note there is Taint on this node (virtual-kubelet.io/provider=azure:NoSchedule) so only Pods that explicitly tolerate this taint can be scheduled. Check [Advanced scheduling](./scheduling.md) for more details.
+
+Deploy web application on virtual node.
+
+```bash
+kubectl apply -f deploymentWebVirtualNode.yaml
+kubectl apply -f serviceWebExtPublic.yaml
+```
+
+Cleanup
+
+```bash
+kubectl delete -f deploymentWebVirtualNode.yaml
+kubectl delete -f serviceWebExtPublic.yaml
+az aks disable-addons \
+    --resource-group $aksRg \
+    --name aks \
+    --addons virtual-node
 ```
 
 # Windows nodes
