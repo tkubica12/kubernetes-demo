@@ -15,14 +15,13 @@ This repo contains my Kubernetes demo in Azure.
 - Azure DevOps
 
 # Table of Contents
-- [Deploying managed Kubernetes on Azure (AKS)](docs/aks-build.md)
+- [Deploying and operating Kubernetes on Azure (provisioning, scaling, VM-less cluster)](docs/aks.md)
 - [Deploying apps (Pods, Deployments, Services)](docs/apps.md)
 - [Passing secrets and configurations (ConfigMap, Secrets, Key Vault)](docs/configurations.md)
 - [Stateful applications (StatefulSets, Persistent Volume, Backup and DR)](docs/stateful.md)
 - [Advanced networking (Ingress, Network Policy, Service Mesh)](docs/networking.md)
 - [Package and deploy applications (Helm, OAM, RUDR)](docs/packaging.md)
 - [Advanced scheduling](docs/scheduling.md)
-- [Scaling your apps and cluster](docs/scaling.md)
 - [Operational security (RBAC, AAD, namespaces, registry)](docs/rbac.md)
 - [VM-less Kubernetes (ACI, Virtual Kubelet)](docs/aci.md)
 - [Develop apps on AKS with DevSpaces](docs/devspaces.md)

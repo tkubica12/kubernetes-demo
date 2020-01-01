@@ -24,8 +24,13 @@ spec:
     spec:
       containers:
       - name: myiis
-        image: microsoft/iis:nanoserver
+        image: mcr.microsoft.com/windows/servercore/iis:windowsservercore-ltsc2019
         ports:
         - containerPort: 80
+      tolerations:
+      - key: os
+        operator: Equal
+        value: windows
+        effect: NoSchedule
       nodeSelector:
         beta.kubernetes.io/os: windows
