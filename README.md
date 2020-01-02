@@ -22,7 +22,7 @@ This repo contains my Kubernetes demo in Azure.
 - [Advanced networking (Ingress, Network Policy, Service Mesh)](docs/networking.md)
 - [Package and deploy applications (Helm, OAM, RUDR)](docs/packaging.md)
 - [Advanced scheduling](docs/scheduling.md)
-- [Operational security (RBAC, AAD, namespaces, registry)](docs/rbac.md)
+- [Security](docs/security.md)
 - [Develop apps on AKS with DevSpaces](docs/devspaces.md)
 - [Deploy CI/CD with Jenkins and agents in containers](docs/jenkins.md)
 - [Automatically provision Azure services with Service Catalog](docs/servicecatalog.md)
