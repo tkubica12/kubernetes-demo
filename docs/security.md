@@ -180,8 +180,73 @@ kubectl exec -ti mybox -n app1 -- curl http://169.254.169.254/metadata/identity/
 We have got AAD token. Our identity at this point has no RBAC associated, but we can give it access to Azure resources as use this token to make ARM API calls. You might also want to generate token for different resources such as Azure Key Vault.
 
 # Checking security best practices with Kubesec
+[kubesec.io](kubesec.io) is one of tools to check Kubernetes YAML objects against security best practicies. It is available online (that is what we will use for simplicity), but also downloadable as binary or container to integrate into your CI/CD pipeline.
 
-TODO
+I have created two Docker images. One running as root and one running as user and pushed to Docker Hub. You can build those yourself and push to your repository:
+
+```bash
+cd kubesec/app
+
+# build as root
+docker build . -t tkubica/app:root
+
+# build as user
+docker build . -t tkubica/app:user -f Dockerfile.user
+
+docker push tkubica/app:root
+docker push tkubica/app:user
+```
+
+In folder kubesec there are couple of YAMLs starting with not very secure ones and fixing issues found by kubesec as we go. Always make sure result is still deployable and will run properly.
+
+```bash
+kubectl apply -f service.yaml
+kubectl apply -f app.sec0.yaml
+```
+
+Check first attempt.
+
+```bash
+curl -X POST --data-binary @app.sec0.yaml https://v2.kubesec.io/scan
+```
+
+First fix missing requests (important for efficient scheduling) and limits (important for DoS prevention).
+
+```bash
+curl -X POST --data-binary @app.sec1.yaml https://v2.kubesec.io/scan
+```
+
+Next fix running as root. Note we need different image build and set non-root user (preferably with high ID number). Also we will make container file system read only which often prevents malware from extracting and persisting.
+
+```bash
+curl -X POST --data-binary @app.sec2.yaml https://v2.kubesec.io/scan
+```
+
+There are still more Linux capabilities enabled that we need. Eg. we still can do NET_RAW packet processing (such as for ping) for trusted applications with SID flag (such as ping). Should attacker get his application into our image with SID flag (attack container build time) he may get more privilleges. Drop all capabilities and make sure ping no longe works inside container.
+
+```bash
+curl -X POST --data-binary @app.sec3.yaml https://v2.kubesec.io/scan
+```
+
+In Kubernetes Pods will get default identity (and mount its token to container file system) which does not add any RBAC to cluster. Should attacker trick cluster operator to add permissions to default account atacker cat use container to authanticate to Kubernetes API. Let's that. Add RBAC to default account and from within container try to access Kubernetes API.
+
+```bash
+kubectl apply -f clusterRoleForDefaultAccount.yaml
+
+export header="Authorization: Bearer $(cat /var/run/secrets/kubernetes.io/serviceaccount/token)"
+curl -k -H "$header" https://aks-33zzj5uvr5jfa-736f4ae8.hcp.westeurope.azmk8s.io:443/api/v1/namespaces/default/pods
+curl -k -H "$header" https://aks-33zzj5uvr5jfa-736f4ae8.hcp.westeurope.azmk8s.io:443/api/v1/nodes
+```
+
+To prevent this accident we will use explicit identity when creating Pod and this identity will not mount token to Pod by default. With this we are using non-default identity, not mounting secrets and also not assign any RBAC to this account.
+
+```bash
+kubectl apply -f noaccessAccount.yaml
+kubectl delete pod app
+kubectl apply -f app.sec4.yaml
+
+curl -X POST --data-binary @app.sec4.yaml https://v2.kubesec.io/scan
+```
 
 # Image vulnerability scanning
 
