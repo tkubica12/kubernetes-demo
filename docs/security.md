@@ -6,6 +6,7 @@ When using Kubernetes in secure way there are couple of areas to consider:
 - Container security (eg. not running as root)
 - Images access and security
 
+Table of Contents:
 - [Security](#security)
 - [Namespaces](#namespaces)
 - [Authenticating with Azure Active Directory](#authenticating-with-azure-active-directory)

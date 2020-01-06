@@ -7,11 +7,11 @@ This repo contains my Kubernetes demo in Azure.
 - Istio refresh
 - Linkerd
 - RUDR
+- Flagger
 
 # TODO
-- Flagger for automated canary releases
-- Azure Monitor Prometheus support
-- Service Mesh Interface
+- Azure Monitor and Prometheus
+- More on Service Mesh Interface
 - Azure DevOps
 
 # Table of Contents
