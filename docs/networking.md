@@ -17,6 +17,10 @@ We have seen a lot of networking already: internal balancing and service discove
     - [Installation](#installation)
     - [Canary](#canary)
     - [A/B testing](#ab-testing)
+  - [Flagger with Istio](#flagger-with-istio)
+    - [Install Istio](#install-istio)
+    - [Install Flagger](#install-flagger)
+    - [Canary release](#canary-release)
 
 # Externally accessible service with L7 proxy (Kubernetes Ingress)
 In case we want L7 balancing, URL routing and SSL acceleration we can use Ingress controler. There are many implementations such as NGINX ingress (kind of "default" solution), Traefik or controller for Azure Application Gateway.
@@ -171,13 +175,19 @@ kubectl describe canary myweb
 Upgrade application to new version and observ Flagger rolling out release.
 
 ```bash
+# Upgrade app to version 2
 helm upgrade -i ingress-app-canary . \
     --set imagetag="2" \
     --reuse-values
 
+# Check canary object
 kubectl describe canary myweb
 
+# Continuously test what gets returned
 while true; do curl 51.105.168.86.xip.io; echo; done
+
+# Check Flagger logs
+kubectl logs $(kubectl get pods -l app.kubernetes.io/name=flagger -o jsonpath="{.items[0].metadata.name}") -f | jq .msg
 ```
 
 Clean up
@@ -199,7 +209,7 @@ kubectl describe canary myweb
 ```
 
 
-Upgrade application to new version and observ Flagger using A/B testing.
+Upgrade application to new version and observe Flagger using A/B testing.
 
 ```bash
 helm upgrade -i ingress-app-ab . \
@@ -208,6 +218,8 @@ helm upgrade -i ingress-app-ab . \
 
 kubectl describe canary myweb
 
+# Check Flagger logs
+kubectl logs $(kubectl get pods -l app.kubernetes.io/name=flagger -o jsonpath="{.items[0].metadata.name}") -f | jq .msg
 ```
 
 Standard requests are going to v1.
@@ -227,4 +239,124 @@ Clean up.
 
 ```bash
 helm delete ingress-app-ab
+helm delete flagger
+kubectl delete crd canaries.flagger.app
+```
+
+## Flagger with Istio
+NGINX Ingress implementation is great and easy to use, but limited to test changes in services exposed outside of your cluster such as frontend or APIs accessed from client etc. Should you need to use canary or A/B testing for communication between two internal services within Kubernetes cluster, Service Mesh can be used to achieve this.
+
+### Install Istio
+First download istioctl.
+
+```
+cd ./istio
+wget https://github.com/istio/istio/releases/download/1.4.2/istioctl-1.4.2-linux.tar.gz
+tar -xvf istioctl-1.4.2-linux.tar.gz
+sudo mv ./istioctl /usr/local/bin/
+rm -rf istioctl-1.4.2-linux.tar.gz
+```
+
+Deploy Secrets to configure Grafana and Kiali username/password. File in this repo containers user/Azure12345678.
+
+```bash
+kubectl create namespace istio-system --save-config
+kubectl apply -f grafanaSecret.yaml
+kubectl apply -f kialiSecret.yaml
+```
+
+Deploy Istio using basic settings provided here in istioConfig.yaml.
+
+```bash
+istioctl manifest apply -f istioConfig.yaml
+```
+
+### Install Flagger
+Install Flagger
+
+```bash
+# Add Flagger repo
+helm repo add flagger https://flagger.app
+
+# Install Flagger
+helm upgrade -i flagger flagger/flagger \
+    --set metricsServer=http://prometheus.istio-system:9090 \
+    --set meshProvider=istio
+
+# Optionaly add webhook to Microsoft Teams for notifications
+export teamsHook=https://outlook.office.com/webhook/blabla
+
+helm upgrade -i flagger flagger/flagger \
+--reuse-values \
+--set msteams.url=$teamsHook
+
+# You can use Prometheus GUI to check on metrics
+kubectl port-forward svc/prometheus -n istio-system 12345:9090
+```
+
+### Canary release
+
+Deploy services.
+
+```bash
+cd flagger/istio-canary/
+kubectl label namespace default istio-injection=enabled
+helm upgrade -i istio-app-canary . \
+    --set imagetag="1"
+```
+
+Test internal communication.
+
+```bash
+kubectl exec -ti \
+    $(kubectl get pods -l app=client -o jsonpath="{.items[0].metadata.name}") \
+    -- curl myweb
+
+kubectl describe canary myweb
+```
+
+Upgrade application to new version and observe Flagger advancing rollout.
+
+```bash
+# Upgrade app to version 2
+helm upgrade -i istio-app-canary . \
+    --set imagetag="2" \
+    --reuse-values
+
+# Check canary object
+kubectl describe canary myweb
+
+# Continuous testing of communication from one service to another
+kubectl exec -ti \
+    $(kubectl get pods -l app=client -o jsonpath="{.items[0].metadata.name}") \
+    -- bash -c 'while true; do curl myweb; sleep 0.2; echo; done'
+
+# Check Flagger logs
+kubectl logs $(kubectl get pods -l app.kubernetes.io/name=flagger -o jsonpath="{.items[0].metadata.name}") -f | jq .msg
+```
+
+Simulate "failing upgrade" by using non-existing image tag. Flagger will not advance rollout if success rate (200 response code) is less than 99% of requests to canary (as per our configuration) and will rollback after timeout.
+
+```bash
+# Upgrade to error version that returns 503
+helm upgrade -i istio-app-canary . \
+    --set imagetag="error" \
+    --reuse-values
+
+# Check canary object
+kubectl describe canary myweb
+
+# Continuous testing of communication from one service to another
+kubectl exec -ti \
+    $(kubectl get pods -l app=client -o jsonpath="{.items[0].metadata.name}") \
+    -- bash -c 'while true; do curl myweb; sleep 0.2; echo; done'
+
+# Check Flagger logs
+kubectl logs $(kubectl get pods -l app.kubernetes.io/name=flagger -o jsonpath="{.items[0].metadata.name}") -f | jq .msg
+```
+
+Clean up
+
+```bash
+helm delete istio-app-canary
 ```
