@@ -12,6 +12,11 @@ We have seen a lot of networking already: internal balancing and service discove
     - [Not enough control on egress](#not-enough-control-on-egress)
     - [Other issues](#other-issues)
     - [Clean up](#clean-up)
+- [Automated canary releases with Flagger and Ingress or Service Mesh](#automated-canary-releases-with-flagger-and-ingress-or-service-mesh)
+  - [Flagger with NGINX Ingress](#flagger-with-nginx-ingress)
+    - [Installation](#installation)
+    - [Canary](#canary)
+    - [A/B testing](#ab-testing)
 
 # Externally accessible service with L7 proxy (Kubernetes Ingress)
 In case we want L7 balancing, URL routing and SSL acceleration we can use Ingress controler. There are many implementations such as NGINX ingress (kind of "default" solution), Traefik or controller for Azure Application Gateway.
@@ -96,4 +101,130 @@ There are more things that need to be solved in code. For example mutual TLS aut
 kubectl delete -f retryBackend.yaml
 kubectl delete -f client.yaml
 kubectl delete -f canary.yaml
+```
+
+# Automated canary releases with Flagger and Ingress or Service Mesh
+You might want to run current and next version of your application component for some period of time to slowly introduce change, monitor telemetry, gather feedback and only if no issues are found in production continue with deployment. There are couple ways to achieve this:
+- If your app is mostly about REST APIs access from frontend you might use features of API management solution such as Azure API Management. Non-breaking changes can be introduced with concept of revision a beta frontend can explicitely ask for different than default revision. Breaking changes can be rolled using concept of versioning. APIM is responsible for routing traffic to correct instance of the service.
+- You can use Ingress to implement traffic split based on probability, cookie or other methods. This is useful for traffic between consumers outside of Kubernetes (eg. frontend) and inside.
+- Service Mesh can implement intelligent routing and traffic split based on probability or in some cases more complicated rules based on header etc. This is possible even for communication of services inside cluster.
+- You are looking for different scenario then production, eg. testing new version of microservice in UAT environment. This is solved with Azure DevSpaces
+
+We might distinguish three slightly different scenarios:
+- Canary release as sending some percentage of traffic to newer version
+- A/B testing as sending some users to different version, eg. based on header or cookie (beta testers, certain users)
+- Green/Blue deployment as provisioning new version while keep existing one running and "releasing" by switching traffic to newer version
+
+In this demo we will focus on Ingress and Service Mesh options and use Flagger to automate graduating next version based on telemetry and other patterns.
+
+## Flagger with NGINX Ingress
+
+**Note: as of NGINX Ingress version 0.26.1 canary metrics are not reported to Prometheus so Flagger cannot use default request-success-rate metrics**
+
+### Installation
+
+Install NGINX Ingress controller and enable telemetry export via Prometheus.
+
+```bash
+helm upgrade -i nginx-ingress stable/nginx-ingress \
+--set controller.stats.enabled=true \
+--set controller.metrics.enabled=true \
+--set controller.podAnnotations."prometheus\.io/scrape"=true \
+--set controller.podAnnotations."prometheus\.io/port"=10254
+```
+
+Install Flagger
+
+```bash
+# Add Flagger repo
+helm repo add flagger https://flagger.app
+
+# Install Flagger
+helm upgrade -i flagger flagger/flagger \
+--set prometheus.install=true \
+--set meshProvider=nginx
+
+# Optionaly add webhook to Microsoft Teams for notifications
+export teamsHook=https://outlook.office.com/webhook/blabla
+
+helm upgrade -i flagger flagger/flagger \
+--reuse-values \
+--set msteams.url=$teamsHook
+
+# You can use Prometheus GUI to check on metrics
+kubectl port-forward svc/flagger-prometheus 12345:9090
+```
+
+### Canary
+
+Deploy app and make sure Flagger has initiated.
+
+```bash
+cd /flagger/ingress-app-canary
+helm upgrade -i ingress-app-canary . \
+    --set imagetag="1" \
+    --set ingressip=$(kubectl get svc nginx-ingress-controller -o jsonpath={.status.loadBalancer.ingress[0].ip})
+
+kubectl describe canary myweb
+```
+
+Upgrade application to new version and observ Flagger rolling out release.
+
+```bash
+helm upgrade -i ingress-app-canary . \
+    --set imagetag="2" \
+    --reuse-values
+
+kubectl describe canary myweb
+
+while true; do curl 51.105.168.86.xip.io; echo; done
+```
+
+Clean up
+
+```bash
+helm delete ingress-app-canary
+```
+
+### A/B testing
+Deploy app and make sure Flagger has initiated.
+
+```bash
+cd /flagger/ingress-app-ab
+helm upgrade -i ingress-app-ab . \
+    --set imagetag="1" \
+    --set ingressip=$(kubectl get svc nginx-ingress-controller -o jsonpath={.status.loadBalancer.ingress[0].ip})
+
+kubectl describe canary myweb
+```
+
+
+Upgrade application to new version and observ Flagger using A/B testing.
+
+```bash
+helm upgrade -i ingress-app-ab . \
+    --set imagetag="2" \
+    --reuse-values
+
+kubectl describe canary myweb
+
+```
+
+Standard requests are going to v1.
+
+```bash
+curl 51.105.168.86.xip.io
+```
+
+We can use header or cookie to get to v2.
+
+```bash
+curl -H 'tester: true' 51.105.168.86.xip.io
+curl -b 'tester=always' 51.105.168.86.xip.io
+```
+
+Clean up.
+
+```bash
+helm delete ingress-app-ab
 ```

@@ -1,0 +1,27 @@
+apiVersion: flagger.app/v1alpha3
+kind: Canary
+metadata:
+  name: myweb
+spec:
+  provider: nginx
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: myweb
+  ingressRef:
+    apiVersion: extensions/v1beta1
+    kind: Ingress
+    name: myweb-ingress
+  progressDeadlineSeconds: 60
+  service:
+    port: 80
+    targetPort: 80
+  canaryAnalysis:
+    interval: 10s
+    threshold: 10
+    maxWeight: 50
+    stepWeight: 5
+    metrics:
+    - name: request-success-rate
+      threshold: 99
+      interval: 1m

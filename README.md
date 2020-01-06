@@ -19,7 +19,7 @@ This repo contains my Kubernetes demo in Azure.
 - [Deploying apps (Pods, Deployments, Services)](docs/apps.md)
 - [Passing secrets and configurations (ConfigMap, Secrets, Key Vault)](docs/configurations.md)
 - [Stateful applications (StatefulSets, Persistent Volume, Backup and DR)](docs/stateful.md)
-- [Advanced networking (Ingress, Network Policy, Service Mesh)](docs/networking.md)
+- [Advanced networking (Ingress, Network Policy, Service Mesh, Canary releases)](docs/networking.md)
 - [Package and deploy applications (Helm, OAM, RUDR)](docs/packaging.md)
 - [Advanced scheduling](docs/scheduling.md)
 - [Security](docs/security.md)
