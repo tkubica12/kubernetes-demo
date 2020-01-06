@@ -1,0 +1,5 @@
+FROM mcr.microsoft.com/windows/nanoserver:1803
+
+COPY weberror.exe .
+
+CMD ["weberror.exe"] 
