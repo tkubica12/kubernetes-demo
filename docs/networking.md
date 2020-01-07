@@ -22,7 +22,7 @@ We have seen a lot of networking already: internal balancing and service discove
     - [Install Flagger](#install-flagger)
     - [Canary release](#canary-release)
     - [A/B testing](#ab-testing-1)
-    - [Clean uo](#clean-uo)
+    - [Clean up](#clean-up-1)
 
 # Externally accessible service with L7 proxy (Kubernetes Ingress)
 In case we want L7 balancing, URL routing and SSL acceleration we can use Ingress controler. There are many implementations such as NGINX ingress (kind of "default" solution), Traefik or controller for Azure Application Gateway.
@@ -410,7 +410,7 @@ Clean up
 helm delete istio-app-ab
 ```
 
-### Clean uo
+### Clean up
 ```bash
 cd ./istio
 istioctl manifest generate -f istioConfig.yaml | kubectl delete -n istio-system -f -
