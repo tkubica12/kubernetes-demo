@@ -21,6 +21,8 @@ We have seen a lot of networking already: internal balancing and service discove
     - [Install Istio](#install-istio)
     - [Install Flagger](#install-flagger)
     - [Canary release](#canary-release)
+    - [A/B testing](#ab-testing-1)
+    - [Clean uo](#clean-uo)
 
 # Externally accessible service with L7 proxy (Kubernetes Ingress)
 In case we want L7 balancing, URL routing and SSL acceleration we can use Ingress controler. There are many implementations such as NGINX ingress (kind of "default" solution), Traefik or controller for Azure Application Gateway.
@@ -359,4 +361,59 @@ Clean up
 
 ```bash
 helm delete istio-app-canary
+```
+
+### A/B testing
+
+Deploy services.
+
+```bash
+cd flagger/istio-ab/
+kubectl label namespace default istio-injection=enabled
+helm upgrade -i istio-app-ab . \
+    --set imagetag="1"
+```
+
+Test internal communication.
+
+```bash
+kubectl exec -ti \
+    $(kubectl get pods -l app=client -o jsonpath="{.items[0].metadata.name}") \
+    -- curl myweb
+
+kubectl describe canary myweb
+```
+
+Upgrade application to new version and observe Flagger advancing A/B testing.
+
+```bash
+# Upgrade app to version 2
+helm upgrade -i istio-app-ab . \
+    --set imagetag="2" \
+    --reuse-values
+
+# Check canary object
+kubectl describe canary myweb
+
+# Test accessing new version
+kubectl exec -ti \
+    $(kubectl get pods -l app=client -o jsonpath="{.items[0].metadata.name}") \
+    -- curl -H 'tester: true' myweb
+
+# Check Flagger logs
+kubectl logs $(kubectl get pods -l app.kubernetes.io/name=flagger -o jsonpath="{.items[0].metadata.name}") -f | jq .msg
+```
+
+Clean up
+
+```bash
+helm delete istio-app-ab
+```
+
+### Clean uo
+```bash
+cd ./istio
+istioctl manifest generate -f istioConfig.yaml | kubectl delete -n istio-system -f -
+kubectl get secret --all-namespaces -o json | jq '.items[].metadata | ["kubectl delete secret -n", .namespace, .name] | join(" ")' -r | fgrep "istio." | xargs -t0 bash -c
+helm delete flagger
 ```
