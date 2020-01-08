@@ -67,13 +67,7 @@ kubectl apply -f canary10percent.yaml
 kubectl exec $clientPod -c client -- bash -c 'while true; do curl -s myweb-service; echo; done'
 ```
 
-What about serving v2 only for user with specific cookie? First let's remove our previous policy.
-
-```bash
-kubectl delete -f canary10percent.yaml
-```
-
-Linkerd and SMI currently does not support header or cookie based routing between services in mesh. But if user traffic is concerned this can be done on Ingress implementation and automated for example with Flagger or Azure DevOps.
+What about serving v2 only for user with specific cookie? Linkerd and SMI currently does not support header or cookie based routing between services in mesh. But if user traffic is concerned this can be done on Ingress implementation and automated for example with Flagger or Azure DevOps.
 
 # Load balancing
 Linkerd uses exponentially weighted moving average algorithm to load-balance traffic and support scenarios with HTTP/2 and gRPC where standard balancing in Kubernetes is not very effective.
