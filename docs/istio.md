@@ -58,15 +58,11 @@ kubectl apply -f canary.yaml
 ## Retry functionality
 First run client without any policy defined. We are using retry backend application that acceps failRate as argument and based on this percentage will either respond or crash the Pod. We will use 50% chance of getting no response and container crash.
 
-```bash
-export clientPod=$(kubectl get pods -l app=client -o jsonpath="{.items[0].metadata.name}")
-kubectl exec $clientPod -c client -- curl -vs -m 30 retry-service?failRate=50
-```
-
 Now apply Istio policy to retry.
 
 ```bash
 kubectl apply -f retryVirtualService.yaml
+export clientPod=$(kubectl get pods -l app=client -o jsonpath="{.items[0].metadata.name}")
 kubectl exec $clientPod -c client -- curl -vs -m 30 retry-service?failRate=50
 ```
 As you can see you now get response even if your first request causes container to crash. This demonstrates retry functionality in Istio.
