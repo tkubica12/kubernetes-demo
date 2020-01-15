@@ -75,13 +75,7 @@ Linkerd uses exponentially weighted moving average algorithm to load-balance tra
 #  mTLS between services and using Linkerd tap for troubleshooting
 Linkerd enables creation of tap to listen for packets for troubleshooting. All communications between services are TLS encrypted (mTLS) that are part of Service Mesh. note that communications outside of service mesh szstem are note encrypted.
 
-In one window do port forwarding to our service.
-
-```bash
-kubectl port-forward service/myweb-service 12345:80
-```
-
-In different window run linkerd tap and watch traffic
+Run linkerd tap and watch traffic
 ```bash
 export clientPod=$(kubectl get pods -l app=client -o jsonpath="{.items[0].metadata.name}")
 

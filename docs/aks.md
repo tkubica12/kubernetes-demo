@@ -94,7 +94,7 @@ az group create -n $aksRg -l $location
 
 az aks create -n aks -g $aksRg \
         --no-ssh-key \
-        --kubernetes-version 1.15.5 \
+        --kubernetes-version 1.15.7 \
         --zones 1 2 3 \
         --node-vm-size Standard_B2s \
         --network-plugin azure \

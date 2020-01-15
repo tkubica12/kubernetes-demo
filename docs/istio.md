@@ -12,7 +12,7 @@
 # Install Istio
 First download istioctl.
 
-```
+```bash
 cd ./istio
 wget https://github.com/istio/istio/releases/download/1.4.0/istioctl-1.4.0-linux.tar.gz
 tar -xvf istioctl-1.4.0-linux.tar.gz
