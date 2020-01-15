@@ -13,13 +13,14 @@ spec:
     retries:
       attempts: 30
       perTryTimeout: 1s
+      retryOn: gateway-error,reset,5xx
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
-  name: httpbin
+  name: retry-service
 spec:
-  host: httpbin
+  host: retry-service
   trafficPolicy:
     connectionPool:
       tcp:
@@ -28,7 +29,7 @@ spec:
         http1MaxPendingRequests: 1
         maxRequestsPerConnection: 1
     outlierDetection:
-      consecutiveErrors: 1
-      interval: 1s
-      baseEjectionTime: 3m
+      consecutiveErrors: 2
+      interval: 10s
+      baseEjectionTime: 1m
       maxEjectionPercent: 100

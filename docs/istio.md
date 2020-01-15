@@ -2,6 +2,7 @@
 - [Accessing GUI](#accessing-gui)
 - [Deploy with istio](#deploy-with-istio)
   - [Retry functionality](#retry-functionality)
+- [Circuit Breaker](#circuit-breaker)
   - [Copy traffic](#copy-traffic)
   - [Canary deployments (traffic split)](#canary-deployments-traffic-split)
   - [Managing access to services outside Istio with ServiceEntry](#managing-access-to-services-outside-istio-with-serviceentry)
@@ -63,9 +64,45 @@ Now apply Istio policy to retry.
 ```bash
 kubectl apply -f retryVirtualService.yaml
 export clientPod=$(kubectl get pods -l app=client -o jsonpath="{.items[0].metadata.name}")
-kubectl exec $clientPod -c client -- curl -vs -m 30 retry-service?failRate=50
+kubectl exec $clientPod -c client -- curl -vs -m 30 "retry-service?failRate=50&mode=crash"
 ```
+
 As you can see you now get response even if your first request causes container to crash. This demonstrates retry functionality in Istio.
+
+Suppose our service is in bad condition and fails with 90%, but rather than crashing it returns 503 rightaway. Retry policy we have configured will retry 503 errors. You can be checking logs continuously:
+
+```bash
+kubectl logs -l app=retry -c retry-backend -f
+```
+
+And you should see couple of attempts with 503 until finaly we have one 200.
+
+```bash
+kubectl exec $clientPod -c client -- curl -vs -m 30 "retry-service?failRate=90&mode=busy"
+```
+
+# Circuit Breaker
+In our last example perhaps 90% failure rate is so bad that we might rather consider this service down than wasting resources and users time on retries. What about stop sending traffic to service in this condition for some period of time.
+
+We will setup circuit breaker in a way that after 2 errors within 10 seconds Pod will be removed from pool and also allow for all Pods to be removed (basically declaring whole service down) and keep Pods out of rotation for 1 minute. Note you can also declare limits on number of connections going to Pod (eg. when there would be more than 100 connections you would remove Pod out of rotation to let it cool down).
+
+Let's configure appropriete Istio rules.
+
+```bash
+kubectl apply -f circuitBreaker.yaml
+```
+
+In one Window watch logs from all retry-backend Pods.
+
+```bash
+kubectl logs -l app=retry -c retry-backend -f
+```
+
+Now run following request two or three times. Initialy you should see backend Pods responding to requests, but on 3rd or 4th try you will get 503 response from Istio without trying to reach Pods (Istio removed all failing Pods from service). Wait 1 minute and you should see traffic hitting Pods again.
+
+```bash
+kubectl exec $clientPod -c client -- curl -vs -m 30 "retry-service?failRate=90&mode=busy"
+```
 
 ## Copy traffic
 Sometimes it might be useful to get copy of traffic for troubleshooting for example to copy production API requests to beta service. We will deploy sniffer, which is simple image that runs tcpdump on port 80 and use Istio VirtualService to copy traffic between client and retry-service to sniffer.

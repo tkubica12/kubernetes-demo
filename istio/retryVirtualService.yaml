@@ -13,3 +13,4 @@ spec:
     retries:
       attempts: 30
       perTryTimeout: 1s
+      retryOn: gateway-error,reset,5xx
