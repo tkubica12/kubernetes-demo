@@ -11,7 +11,7 @@ class web(object):
                 time.sleep(2)
                 os._exit(os.EX_UNAVAILABLE)
             else:
-                raise cherrypy.HTTPError(429, message="Overloaded")
+                raise cherrypy.HTTPError(503, message="Overloaded")
         else:
             return "OK"
 
