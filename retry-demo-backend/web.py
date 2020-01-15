@@ -5,10 +5,13 @@ import time
 
 class web(object):
     @cherrypy.expose
-    def index(self, failRate=50):
+    def index(self, failRate=50, mode="crash"):
         if int(failRate) > randint(1, 100):   # Should fail?
-            time.sleep(5)
-            os._exit(os.EX_UNAVAILABLE)
+            if mode == "crash":
+                time.sleep(2)
+                os._exit(os.EX_UNAVAILABLE)
+            else:
+                raise cherrypy.HTTPError(429, message="Overloaded")
         else:
             return "OK"
 
