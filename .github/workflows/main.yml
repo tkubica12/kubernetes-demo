@@ -81,21 +81,14 @@ jobs:
         helm upgrade -i baseconfig ./helm/cluster \
           --set upn=admin@tomaskubicaoffice.onmicrosoft.com
 
-    - name: DEBUG
-      working-directory: ./demo
-      env:
-        KUBECONFIG: "./kube_config"
-      run: |
-        echo TEST:
-        terraform output appgw_name
-        terraform output resource_group
-        echo appgw je $(terraform output appgw_name)
-
     - name: Deploy Ingress controller for Azure App Gw
       working-directory: ./demo
       env:
         KUBECONFIG: "./kube_config"
         ARM_SUBSCRIPTION_ID: ${{ secrets.subscription_id }}
+        ARM_CLIENT_ID: ${{ secrets.client_id }}
+        ARM_CLIENT_SECRET: ${{ secrets.client_secret }}
+        ARM_TENANT_ID: ${{ secrets.tenant_id }}
       run: |
         helm repo add application-gateway-kubernetes-ingress https://appgwingress.blob.core.windows.net/ingress-azure-helm-package/
         helm repo update
