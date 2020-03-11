@@ -77,7 +77,7 @@ resource "azurerm_public_ip" "appgw" {
   location            = azurerm_resource_group.demo.location
   allocation_method   = "Static"
   sku                 = "Standard"
-  domain_name_label   = "tomasaksdemo${var.env}"
+  domain_name_label   = "tomascloudnativedemo${var.env}"
 }
 
 resource "azurerm_application_gateway" "appgw" {

@@ -33,3 +33,11 @@ output "resource_group" {
 output "appgw_name" {
   value = azurerm_application_gateway.appgw.name
 }
+
+output "registry_name" {
+  value = azurerm_container_registry.demo.name
+}
+
+output "psql_name" {
+  value = azurerm_postgresql_server.demo.name
+}
