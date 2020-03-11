@@ -268,20 +268,20 @@ resource "azurerm_cosmosdb_account" "demo" {
   }
 }
 
-resource "azurerm_cosmosdb_sql_database" "demo" {
-  name                = "daprdb "
-  resource_group_name = azurerm_cosmosdb_account.demo.resource_group_name
-  account_name        = azurerm_cosmosdb_account.demo.name
-  throughput          = 400
-}
+# resource "azurerm_cosmosdb_sql_database" "demo" {
+#   name                = "daprdb "
+#   resource_group_name = azurerm_cosmosdb_account.demo.resource_group_name
+#   account_name        = azurerm_cosmosdb_account.demo.name
+#   throughput          = 400
+# }
 
-resource "azurerm_cosmosdb_sql_container" "demo" {
-  name                = "statecont"
-  resource_group_name = azurerm_resource_group.demo.name
-  account_name        = azurerm_cosmosdb_account.demo.name
-  database_name       = azurerm_cosmosdb_sql_database.demo.name
-  partition_key_path  = "/id"
-}
+# resource "azurerm_cosmosdb_sql_container" "demo" {
+#   name                = "statecont"
+#   resource_group_name = azurerm_resource_group.demo.name
+#   account_name        = azurerm_cosmosdb_account.demo.name
+#   database_name       = azurerm_cosmosdb_sql_database.demo.name
+#   partition_key_path  = "/id"
+# }
 
 # Service bus (DAPR demo)
 resource "azurerm_servicebus_namespace" "demo" {
@@ -332,20 +332,20 @@ resource "azurerm_eventhub_namespace" "demo" {
   sku                 = "Basic"
 }
 
-# resource "azurerm_eventhub" "demo" {
-#   name                = "dapreventhub"
-#   namespace_name      = azurerm_eventhub_namespace.demo.name
-#   resource_group_name = azurerm_resource_group.demo.name
-#   partition_count     = 2
-#   message_retention   = 1
-# }
+resource "azurerm_eventhub" "demo" {
+  name                = "dapreventhub"
+  namespace_name      = azurerm_eventhub_namespace.demo.name
+  resource_group_name = azurerm_resource_group.demo.name
+  partition_count     = 2
+  message_retention   = 1
+}
 
-# resource "azurerm_eventhub_authorization_rule" "demo" {
-#   name                = "daprauth"
-#   namespace_name      = azurerm_eventhub_namespace.demo.name
-#   eventhub_name       = azurerm_eventhub.demo.name
-#   resource_group_name = azurerm_resource_group.demo.name
-#   listen              = true
-#   send                = true
-#   manage              = false
-# }
+resource "azurerm_eventhub_authorization_rule" "demo" {
+  name                = "daprauth"
+  namespace_name      = azurerm_eventhub_namespace.demo.name
+  eventhub_name       = azurerm_eventhub.demo.name
+  resource_group_name = azurerm_resource_group.demo.name
+  listen              = true
+  send                = true
+  manage              = false
+}
