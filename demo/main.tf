@@ -24,7 +24,7 @@ terraform {
   backend "azurerm" {
     resource_group_name  = "shared-services"
     storage_account_name = "tomuvstore"
-    container_name       = "tstate-aks"
+    container_name       = "tstate-cloudnative"
     key                  = "terraform.tfstate"
   }
 }
