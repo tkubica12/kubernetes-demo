@@ -80,3 +80,20 @@ jobs:
       run: |
         helm upgrade -i baseconfig ./helm/cluster \
           --set upn=admin@tomaskubicaoffice.onmicrosoft.com
+
+    - name: Deploy Ingress controller for Azure App Gw
+      env:
+        KUBECONFIG: "./kube_config"
+        ARM_SUBSCRIPTION_ID: ${{ secrets.subscription_id }}
+      run: |
+        helm repo add application-gateway-kubernetes-ingress https://appgwingress.blob.core.windows.net/ingress-azure-helm-package/
+        helm repo update
+        helm upgrade -i ingress application-gateway-kubernetes-ingress/ingress-azure \
+          --set appgw.name=$(terraform output appgw_name) \
+          --set appgw.resourceGroup=$(terraform output resource_group) \
+          --set appgw.subscriptionId=$ARM_SUBSCRIPTION_ID \
+          --set appgw.usePrivateIP=False \
+          --set kubernetes.watchNamespace="" \
+          --set armAuth.type=servicePrincipal \
+          --set armAuth.secretJSON=$(cat sdk-auth.json | base64 -w0) \
+          --set rbac.enabled=true

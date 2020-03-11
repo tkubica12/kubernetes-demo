@@ -25,3 +25,11 @@ output "cosmosdb_key" {
 output "cosmosdb_url" {
   value = azurerm_cosmosdb_account.demo.endpoint
 }
+
+output "resource_group" {
+  value = azurerm_resource_group.demo.name
+}
+
+output "appgw_name" {
+  value = azurerm_application_gateway.appgw.name
+}
