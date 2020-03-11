@@ -17,3 +17,60 @@ jobs:
       uses: little-core-labs/install-terraform@v1.0.0
       with:
         version: 0.12.21
+
+    - name: Init Terraform
+      env:
+        ARM_SUBSCRIPTION_ID: ${{ secrets.subscription_id }}
+        ARM_CLIENT_ID: ${{ secrets.client_id }}
+        ARM_CLIENT_SECRET: ${{ secrets.client_secret }}
+        ARM_TENANT_ID: ${{ secrets.tenant_id }}
+      run: terraform init
+    
+    - name: Deploy Azure infrastructure
+      env:
+        ARM_SUBSCRIPTION_ID: ${{ secrets.subscription_id }}
+        ARM_CLIENT_ID: ${{ secrets.client_id }}
+        ARM_CLIENT_SECRET: ${{ secrets.client_secret }}
+        ARM_TENANT_ID: ${{ secrets.tenant_id }}  
+        TF_VAR_subscription_id: ${{ secrets.subscription_id }}
+        TF_VAR_client_id: ${{ secrets.client_id }}
+        TF_VAR_client_secret: ${{ secrets.client_secret }}
+        TF_VAR_tenant_id: ${{ secrets.tenant_id }}
+        TF_VAR_psql_password: ${{ secrets.psql_password }} 
+        TF_VAR_vm_password: ${{ secrets.vm_password }} 
+        TF_VAR_client_app_id: ${{ secrets.client_app_id }}
+        TF_VAR_server_app_id: ${{ secrets.server_app_id }}
+        TF_VAR_server_app_secret: ${{ secrets.server_app_secret }}
+        TF_VAR_tenant_app_id: ${{ secrets.tenant_app_id }}
+      run: terraform apply -auto-approve
+
+    - name: Store Kubernetes config
+      env:
+        ARM_SUBSCRIPTION_ID: ${{ secrets.subscription_id }}
+        ARM_CLIENT_ID: ${{ secrets.client_id }}
+        ARM_CLIENT_SECRET: ${{ secrets.client_secret }}
+        ARM_TENANT_ID: ${{ secrets.tenant_id }}
+      run: echo "$(terraform output kube_admin_config)" > ./kube_config
+
+    - name: Install Helm 3
+      uses: Azure/setup-helm@v1
+      with:
+        version: v3.1.1
+
+    - name: Prepare SDK auth file
+      env:
+        ARM_SUBSCRIPTION_ID: ${{ secrets.subscription_id }}
+        ARM_CLIENT_ID: ${{ secrets.client_id }}
+        ARM_CLIENT_SECRET: ${{ secrets.client_secret }}
+        ARM_TENANT_ID: ${{ secrets.tenant_id }}
+      run: |
+        sed -i "s/<azure_aubscription_id>/$ARM_SUBSCRIPTION_ID/g" sdk-auth.json
+        sed -i "s/<application_id>/$ARM_CLIENT_ID/g" sdk-auth.json
+        sed -i "s/<application_secret>/$ARM_CLIENT_SECRET/g" sdk-auth.json
+        sed -i "s/<tenant_id>/$ARM_TENANT_ID/g" sdk-auth.json
+    - name: Deploy cluster base configuration
+      env:
+        KUBECONFIG: "./kube_config"
+      run: |
+        helm upgrade -i baseconfig ./helm/cluster \
+          --set upn=admin@tomaskubicaoffice.onmicrosoft.com

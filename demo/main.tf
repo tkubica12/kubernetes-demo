@@ -7,6 +7,7 @@ variable "client_id" {}
 variable "client_secret" {}
 variable "tenant_id" {}
 variable "psql_password" {}
+variable "vm_password" {}
 variable "client_app_id" {}
 variable "server_app_id" {}
 variable "server_app_secret" {}
@@ -185,7 +186,7 @@ resource "azurerm_kubernetes_cluster" "demo" {
 
   windows_profile {
     admin_username = "tomas"
-    admin_password = "Azure12345678"
+    admin_password = var.vm_password
   }
 }
 
