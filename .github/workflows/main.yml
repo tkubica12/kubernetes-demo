@@ -19,6 +19,7 @@ jobs:
         version: 0.12.21
 
     - name: Init Terraform
+      working-directory: ./demo
       env:
         ARM_SUBSCRIPTION_ID: ${{ secrets.subscription_id }}
         ARM_CLIENT_ID: ${{ secrets.client_id }}
@@ -27,6 +28,7 @@ jobs:
       run: terraform init
     
     - name: Deploy Azure infrastructure
+      working-directory: ./demo
       env:
         ARM_SUBSCRIPTION_ID: ${{ secrets.subscription_id }}
         ARM_CLIENT_ID: ${{ secrets.client_id }}
@@ -45,6 +47,7 @@ jobs:
       run: terraform apply -auto-approve
 
     - name: Store Kubernetes config
+      working-directory: ./demo
       env:
         ARM_SUBSCRIPTION_ID: ${{ secrets.subscription_id }}
         ARM_CLIENT_ID: ${{ secrets.client_id }}
@@ -58,6 +61,7 @@ jobs:
         version: v3.1.1
 
     - name: Prepare SDK auth file
+      working-directory: ./demo
       env:
         ARM_SUBSCRIPTION_ID: ${{ secrets.subscription_id }}
         ARM_CLIENT_ID: ${{ secrets.client_id }}
@@ -68,7 +72,9 @@ jobs:
         sed -i "s/<application_id>/$ARM_CLIENT_ID/g" sdk-auth.json
         sed -i "s/<application_secret>/$ARM_CLIENT_SECRET/g" sdk-auth.json
         sed -i "s/<tenant_id>/$ARM_TENANT_ID/g" sdk-auth.json
+
     - name: Deploy cluster base configuration
+      working-directory: ./demo
       env:
         KUBECONFIG: "./kube_config"
       run: |
