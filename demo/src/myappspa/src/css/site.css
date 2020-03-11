@@ -1,0 +1,47 @@
+#sldMMspeedSlider .slider-selection {
+    background: #BABABA;
+}
+#sldMMpauseSlider .slider-selection {
+    background: #BABABA;
+}
+.verticalTextCCW {
+    -webkit-transform: rotate(270deg);
+    -moz-transform: rotate(270deg);
+    -ms-transform: rotate(270deg);
+    -o-transform: rotate(270deg);
+    transform: rotate(270deg);
+    white-space:nowrap;
+    display:block;
+    bottom:0;
+    width:20px;
+    height:20px;
+}
+.verticalTextCW {
+    -webkit-transform: rotate(90deg);
+    -moz-transform: rotate(90deg);
+    -ms-transform: rotate(90deg);
+    -o-transform: rotate(90deg);
+    transform: rotate(90deg);
+    white-space:nowrap;
+    display:block;
+    bottom:0;
+    width:20px;
+    height:20px;
+}
+
+.mystyle-hand {
+    cursor: pointer; cursor: hand;
+}
+
+.panel-clickable:hover{
+    text-decoration: none;
+    background-color: #eee;
+}
+
+.panel-clickable a:hover{
+    text-decoration: none;
+}
+
+.panel-clickable a{
+    color: #333;
+}

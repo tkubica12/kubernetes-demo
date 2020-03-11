@@ -1,0 +1,93 @@
+<div class="row">
+    <div ng-show="!data.isedit" id="pnlAddToDo" class="col-lg-6">
+        <div class="bs-callout bs-callout-danger">
+            <form id="frmToDoAdd" class="form-horizontal">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Comment</label>
+                    <div class="col-sm-8">
+                        <input class="form-control" ng-model="data.item.comment" id="txtNote" name="txtNote" type="text" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Category</label>
+                    <div class="col-sm-8">
+                        <input class="form-control" ng-model="data.item.category" id="txtSecretNote" name="txtNote" type="text" />
+                    </div>
+                </div>
+            </form>
+            <p>
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="btn-group">
+                            <button type="button" id="btnAdd" ng-click="addItem(data.item)" class="btn btn-primary">Add ToDo</button>
+                        </div>
+                    </div>
+                </div>
+            </p>
+        </div>
+    </div>
+
+    <div ng-show="data.isedit" id="pnlEditToDo" class="col-lg-6">
+        <div class="bs-callout bs-callout-danger">
+            <form id="frmToDoEdit" class="form-horizontal">
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Id</label>
+                    <label class="col-sm-8 control-label">{{data.item.itemId}}</label>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Comment</label>
+                    <div class="col-sm-8">
+                        <input class="form-control" ng-model="data.item.comment" id="txtNote" name="txtNote" type="text" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-4 control-label">Category</label>
+                    <div class="col-sm-8">
+                        <input class="form-control" ng-model="data.item.category" id="txtSecretNote" name="txtNote" type="text" />
+                    </div>
+                </div>
+            </form>
+            <p>
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="btn-group">
+                            <button type="button" id="btnEditOk" ng-click="editItemSave(data.item)" class="btn btn-primary">Save ToDo</button>
+                            <button type="button" id="btnEditCancel" ng-click="editItemCancel(data.item)" class="btn btn-default">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </p>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div id="pnlToDo" class="col-lg-6">
+        <div class="bs-callout bs-callout-info">
+            <h4>List of ToDos</h4>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Created</th>
+                        <th>Updated</th>
+                        <th>Category</th>
+                        <th>Comment</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="x in data.items">
+                        <td>{{x.itemId}}</td>
+                        <td>{{x.created}}</td>
+                        <td>{{x.updated}}</td>
+                        <td>{{x.category}}</td>
+                        <td>{{x.comment}}</td>
+                        <td><button type="button" ng-click="editItem(x)" class="btn btn-default">Edit</button></td>
+                    </tr>
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+</div>

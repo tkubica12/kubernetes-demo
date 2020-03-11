@@ -41,3 +41,5 @@ rudr/rudr/
 keda/packages-microsoft-prod.deb
 keda/keda-webapi
 keda/keda-worker
+demo/.secrets
+demo/.terraform
