@@ -82,6 +82,7 @@ jobs:
           --set upn=admin@tomaskubicaoffice.onmicrosoft.com
 
     - name: Deploy Ingress controller for Azure App Gw
+      working-directory: ./demo
       env:
         KUBECONFIG: "./kube_config"
         ARM_SUBSCRIPTION_ID: ${{ secrets.subscription_id }}
@@ -97,3 +98,13 @@ jobs:
           --set armAuth.type=servicePrincipal \
           --set armAuth.secretJSON=$(cat sdk-auth.json | base64 -w0) \
           --set rbac.enabled=true
+
+    - name: Export SDK-AUTH as output
+      working-directory: ./demo
+      id: sdkfile
+      run: echo "##[set-output name=sdkauth;]$(tr -d '\n' < sdk-auth.json)"
+
+    - name: Azure CLI login
+      uses: azure/login@v1
+      with:
+        creds: ${{ steps.sdkfile.outputs.sdkauth }}
