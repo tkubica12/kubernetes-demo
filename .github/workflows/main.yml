@@ -2,9 +2,9 @@ name: Deploy
 
 on:
   push:
-    paths: 
-      - "/demo/**"
-      - "/.github/workflows/**"
+    # paths: 
+    #   - "/demo/**"
+    #   - "/.github/workflows/**"
 
 jobs:
   deploy:
