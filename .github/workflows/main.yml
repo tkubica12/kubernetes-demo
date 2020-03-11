@@ -1,0 +1,19 @@
+name: Deploy
+
+on:
+  push:
+    paths: 
+      - "/demo/"
+      - "/.github/workflows/"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Get repo files
+      uses: actions/checkout@v1
+     
+    - name: Install Terraform
+      uses: little-core-labs/install-terraform@v1.0.0
+      with:
+        version: 0.12.21
