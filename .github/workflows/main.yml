@@ -3,8 +3,8 @@ name: Deploy
 on:
   push:
     paths: 
-      - "/demo/"
-      - "/.github/workflows/"
+      - "/demo/**"
+      - "/.github/workflows/**"
 
 jobs:
   deploy:
