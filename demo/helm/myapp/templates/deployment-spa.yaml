@@ -1,0 +1,41 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "fullname" . }}-spa
+  labels:
+    app: {{ template "name" . }}-spa
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.appspa.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "name" . }}-spa
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}-spa
+          image: "{{ .Values.appspa.image.repository }}:{{ .Values.appspa.image.tag | toString }}"
+          imagePullPolicy: {{ .Values.appspa.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.appspa.service.internalPort }}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.appspa.service.internalPort }}
+          readinessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.appspa.service.internalPort }}
+          resources:
+{{ toYaml .Values.appspa.resources | indent 12 }}
+    {{- if .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+    {{- end }}
+      {{- if .Values.appspa.imagePullSecrets }}
+      imagePullSecrets:
+        - name: {{ .Values.appspa.imagePullSecrets }}
+      {{- end }}

@@ -1,0 +1,47 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "fullname" . }}-todo
+  labels:
+    app: {{ template "name" . }}-todo
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.apptodo.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "name" . }}-todo
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}-todo
+          image: "{{ .Values.apptodo.image.repository }}:{{ .Values.apptodo.image.tag | toString }}"
+          imagePullPolicy: {{ .Values.apptodo.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.apptodo.service.internalPort }}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.apptodo.service.internalPort }}
+          readinessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.apptodo.service.internalPort }}
+          env:
+            - name: POSTGRESQL_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "fullname" . }}
+                  key: postgresqlurl
+          resources:
+{{ toYaml .Values.apptodo.resources | indent 12 }}
+    {{- if .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+    {{- end }}
+      {{- if .Values.apptodo.imagePullSecrets }}
+      imagePullSecrets:
+        - name: {{ .Values.apptodo.imagePullSecrets }}
+      {{- end }}

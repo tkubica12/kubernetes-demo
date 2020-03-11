@@ -1,0 +1,30 @@
+{{- if .Values.apptodo.ingress.enabled -}}
+{{- $serviceName := include "fullname" . -}}
+{{- $servicePort := .Values.apptodo.service.externalPort -}}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ template "fullname" . }}-todo
+  labels:
+    app: {{ template "name" . }}-todo
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+  annotations:
+    {{- range $key, $value := .Values.apptodo.ingress.annotations }}
+      {{ $key }}: {{ $value | quote }}
+    {{- end }}
+spec:
+  rules:
+    - host: {{ .Values.apphost }}
+      http:
+        paths:
+          - path: {{ .Values.apptodo.ingress.myservicepath }}
+            backend:
+              serviceName: {{ $serviceName }}-todo
+              servicePort: {{ $servicePort }}
+  {{- if .Values.apptodo.ingress.tls }}
+  tls:
+{{ toYaml .Values.apptodo.ingress.tls | indent 4 }}
+  {{- end -}}
+{{- end -}}

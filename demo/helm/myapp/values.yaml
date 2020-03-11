@@ -1,0 +1,52 @@
+# SPA app
+appspa:
+  replicaCount: 2
+  image:
+    repository: acr/myimg
+    tag: v1
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    name: myappspa
+    internalPort: 8080
+    externalPort: 8080
+  ingress:
+    enabled: true
+    myservicepath: /
+    annotations:
+      kubernetes.io/ingress.class: azure/application-gateway
+    tls:
+  resources: 
+    limits:
+      cpu: 250m
+      memory: 128Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+# TODO app
+apptodo:
+  replicaCount: 1
+  image:
+    repository: acr/myimg
+    tag: v1
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    name: myapptodo
+    internalPort: 8080
+    externalPort: 8080
+  ingress:
+    enabled: true
+    myservicepath: /api/todo
+    annotations:
+      kubernetes.io/ingress.class: azure/application-gateway
+      nginx.ingress.kubernetes.io/rewrite-target: "/api/todo"
+    tls:
+  resources: 
+    limits:
+      cpu: 1000m
+      memory: 512Mi
+    requests:
+      cpu: 500m
+      memory: 256Mi
