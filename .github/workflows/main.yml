@@ -87,12 +87,15 @@ jobs:
         KUBECONFIG: "./kube_config"
         ARM_SUBSCRIPTION_ID: ${{ secrets.subscription_id }}
       run: |
-        echo "appgw je $(terraform output appgw_name)"
+        echo TEST:
+        terraform output appgw_name
+        terraform output resource_group
+        echo appgw je $(terraform output appgw_name)
         helm repo add application-gateway-kubernetes-ingress https://appgwingress.blob.core.windows.net/ingress-azure-helm-package/
         helm repo update
         helm upgrade -i ingress application-gateway-kubernetes-ingress/ingress-azure \
-          --set appgw.name="$(terraform output appgw_name)" \
-          --set appgw.resourceGroup="$(terraform output resource_group)" \
+          --set appgw.name=$(terraform output appgw_name) \
+          --set appgw.resourceGroup=$(terraform output resource_group) \
           --set appgw.subscriptionId=$ARM_SUBSCRIPTION_ID \
           --set appgw.usePrivateIP=False \
           --set kubernetes.watchNamespace="" \
