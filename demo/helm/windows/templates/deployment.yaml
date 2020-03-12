@@ -1,0 +1,23 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: myiis-deployment
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: myiis
+    spec:
+      containers:
+      - name: myiis
+        image: mcr.microsoft.com/windows/servercore/iis:windowsservercore-ltsc2019
+        ports:
+        - containerPort: 80
+      tolerations:
+      - key: os
+        operator: Equal
+        value: windows
+        effect: NoSchedule
+      nodeSelector:
+        beta.kubernetes.io/os: windows
