@@ -15,7 +15,7 @@ variable "tenant_app_id" {}
 
 # Configure the Microsoft Azure Provider
 provider "azurerm" {
-  version = "=2.0.0"
+  version = "=2.1.0"
   features {}
 }
 
@@ -268,20 +268,20 @@ resource "azurerm_cosmosdb_account" "demo" {
   }
 }
 
-# resource "azurerm_cosmosdb_sql_database" "demo" {
-#   name                = "daprdb "
-#   resource_group_name = azurerm_cosmosdb_account.demo.resource_group_name
-#   account_name        = azurerm_cosmosdb_account.demo.name
-#   throughput          = 400
-# }
+resource "azurerm_cosmosdb_sql_database" "demo" {
+  name                = "daprdb "
+  resource_group_name = azurerm_cosmosdb_account.demo.resource_group_name
+  account_name        = azurerm_cosmosdb_account.demo.name
+  throughput          = 400
+}
 
-# resource "azurerm_cosmosdb_sql_container" "demo" {
-#   name                = "statecont"
-#   resource_group_name = azurerm_resource_group.demo.name
-#   account_name        = azurerm_cosmosdb_account.demo.name
-#   database_name       = azurerm_cosmosdb_sql_database.demo.name
-#   partition_key_path  = "/id"
-# }
+resource "azurerm_cosmosdb_sql_container" "demo" {
+  name                = "statecont"
+  resource_group_name = azurerm_resource_group.demo.name
+  account_name        = azurerm_cosmosdb_account.demo.name
+  database_name       = azurerm_cosmosdb_sql_database.demo.name
+  partition_key_path  = "/id"
+}
 
 # Service bus (DAPR demo)
 resource "azurerm_servicebus_namespace" "demo" {
