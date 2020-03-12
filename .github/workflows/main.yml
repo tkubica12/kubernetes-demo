@@ -81,6 +81,15 @@ jobs:
         helm upgrade -i baseconfig ./helm/cluster \
           --set upn=admin@tomaskubicaoffice.onmicrosoft.com
 
+    - name: Deploy KEDA
+      working-directory: ./demo
+      env:
+        KUBECONFIG: "./kube_config"
+      run: |
+        helm repo add kedacore https://kedacore.github.io/charts
+        helm repo update
+        helm upgrade -i keda kedacore/keda -n keda
+
     - name: Deploy Ingress controller for Azure App Gw
       working-directory: ./demo
       env:
@@ -92,7 +101,7 @@ jobs:
       run: |
         helm repo add application-gateway-kubernetes-ingress https://appgwingress.blob.core.windows.net/ingress-azure-helm-package/
         helm repo update
-        helm upgrade -i ingress application-gateway-kubernetes-ingress/ingress-azure \
+        helm upgrade -i -n ingress ingress application-gateway-kubernetes-ingress/ingress-azure \
           --set appgw.name=$(terraform output appgw_name) \
           --set appgw.resourceGroup=$(terraform output resource_group) \
           --set appgw.subscriptionId=$ARM_SUBSCRIPTION_ID \
