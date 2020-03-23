@@ -249,39 +249,39 @@ resource "azurerm_postgresql_firewall_rule" "demo" {
 }
 
 # Cosmos DB (DAPR demo)
-resource "azurerm_cosmosdb_account" "demo" {
-  name                = "cosmos-${var.env}-${lower(random_id.prefix.b64_url)}"
-  location            = azurerm_resource_group.demo.location
-  resource_group_name = azurerm_resource_group.demo.name
-  offer_type          = "Standard"
-  kind                = "GlobalDocumentDB"
+# resource "azurerm_cosmosdb_account" "demo" {
+#   name                = "cosmos-${var.env}-${lower(random_id.prefix.b64_url)}"
+#   location            = azurerm_resource_group.demo.location
+#   resource_group_name = azurerm_resource_group.demo.name
+#   offer_type          = "Standard"
+#   kind                = "GlobalDocumentDB"
 
-  enable_automatic_failover = false
+#   enable_automatic_failover = false
 
-  consistency_policy {
-    consistency_level       = "Session"
-  }
+#   consistency_policy {
+#     consistency_level       = "Session"
+#   }
 
-  geo_location {
-    location          = azurerm_resource_group.demo.location
-    failover_priority = 0
-  }
-}
+#   geo_location {
+#     location          = azurerm_resource_group.demo.location
+#     failover_priority = 0
+#   }
+# }
 
-resource "azurerm_cosmosdb_sql_database" "demo" {
-  name                = "daprdb "
-  resource_group_name = azurerm_cosmosdb_account.demo.resource_group_name
-  account_name        = azurerm_cosmosdb_account.demo.name
-  throughput          = 400
-}
+# resource "azurerm_cosmosdb_sql_database" "demo" {
+#   name                = "daprdb "
+#   resource_group_name = azurerm_cosmosdb_account.demo.resource_group_name
+#   account_name        = azurerm_cosmosdb_account.demo.name
+#   throughput          = 400
+# }
 
-resource "azurerm_cosmosdb_sql_container" "demo" {
-  name                = "statecont"
-  resource_group_name = azurerm_resource_group.demo.name
-  account_name        = azurerm_cosmosdb_account.demo.name
-  database_name       = azurerm_cosmosdb_sql_database.demo.name
-  partition_key_path  = "/id"
-}
+# resource "azurerm_cosmosdb_sql_container" "demo" {
+#   name                = "statecont"
+#   resource_group_name = azurerm_resource_group.demo.name
+#   account_name        = azurerm_cosmosdb_account.demo.name
+#   database_name       = azurerm_cosmosdb_sql_database.demo.name
+#   partition_key_path  = "/id"
+# }
 
 # Service bus (DAPR demo)
 resource "azurerm_servicebus_namespace" "demo" {
