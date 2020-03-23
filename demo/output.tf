@@ -18,13 +18,13 @@ output "eventhub_connection" {
   value = azurerm_eventhub_authorization_rule.demo.primary_connection_string
 }
 
-output "cosmosdb_key" {
-  value = azurerm_cosmosdb_account.demo.primary_master_key
-}
+# output "cosmosdb_key" {
+#   value = azurerm_cosmosdb_account.demo.primary_master_key
+# }
 
-output "cosmosdb_url" {
-  value = azurerm_cosmosdb_account.demo.endpoint
-}
+# output "cosmosdb_url" {
+#   value = azurerm_cosmosdb_account.demo.endpoint
+# }
 
 output "resource_group" {
   value = azurerm_resource_group.demo.name
