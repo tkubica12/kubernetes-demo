@@ -37,7 +37,7 @@ resource "random_id" "prefix" {
 # Resource Group
 resource "azurerm_resource_group" "demo" {
   name     = "cloudnative-${var.env}"
-  location = "France Central"
+  location = "centralus"
 }
 
 # Azure Monitor
@@ -142,7 +142,7 @@ resource "azurerm_kubernetes_cluster" "demo" {
 
   default_node_pool {
     name                = "default"
-    vm_size             = "Standard_D2s_v3"
+    vm_size             = "Standard_B2s"
     enable_auto_scaling = true
     max_count           = 5
     min_count           = 2
