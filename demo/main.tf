@@ -46,7 +46,7 @@ resource "azurerm_resource_group" "demo" {
 
 # Azure Monitor
 resource "azurerm_log_analytics_workspace" "demo" {
-  name                = "logs-${var.env}-${random_string.prefix)}"
+  name                = "logs-${var.env}-${random_string.prefix}"
   location            = azurerm_resource_group.demo.location
   resource_group_name = azurerm_resource_group.demo.name
   sku                 = "PerGB2018"
