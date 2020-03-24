@@ -116,6 +116,7 @@ jobs:
       env:
         KUBECONFIG: "./kube_config"
       run: |
+        helm repo add stable https://kubernetes-charts.storage.googleapis.com
         helm repo update
         helm upgrade -i grafana stable/grafana -n grafana -f helm/cluster/grafana-values.yaml
     
