@@ -46,7 +46,7 @@ resource "azurerm_resource_group" "demo" {
 
 # Azure Monitor
 resource "azurerm_log_analytics_workspace" "demo" {
-  name                = "logs-${var.env}-${random_string.prefix}"
+  name                = "logs-${var.env}-${random_string.prefix.result}"
   location            = azurerm_resource_group.demo.location
   resource_group_name = azurerm_resource_group.demo.name
   sku                 = "PerGB2018"
@@ -139,10 +139,10 @@ resource "azurerm_application_gateway" "appgw" {
 
 # Kubernetes
 resource "azurerm_kubernetes_cluster" "demo" {
-  name                = "aks-${var.env}-${random_string.prefix}"
+  name                = "aks-${var.env}-${random_string.prefix.result}"
   location            = azurerm_resource_group.demo.location
   resource_group_name = azurerm_resource_group.demo.name
-  dns_prefix          = "aks-${var.env}-${random_string.prefix}"
+  dns_prefix          = "aks-${var.env}-${random_string.prefix.result}"
 
   default_node_pool {
     name                = "default"
@@ -207,7 +207,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "demo" {
 
 # Container registry
 resource "azurerm_container_registry" "demo" {
-  name                     = "registry${var.env}${random_string.prefix}"
+  name                     = "registry${var.env}${random_string.prefix.result}"
   resource_group_name      = azurerm_resource_group.demo.name
   location                 = azurerm_resource_group.demo.location
   sku                      = "Premium"
@@ -217,7 +217,7 @@ resource "azurerm_container_registry" "demo" {
 
 # PostgreSQL
 resource "azurerm_postgresql_server" "demo" {
-  name                = "psql-${var.env}-${random_string.prefix}"
+  name                = "psql-${var.env}-${random_string.prefix.result}"
   location            = azurerm_resource_group.demo.location
   resource_group_name = azurerm_resource_group.demo.name
 
@@ -254,7 +254,7 @@ resource "azurerm_postgresql_firewall_rule" "demo" {
 
 # Cosmos DB (DAPR demo)
 # resource "azurerm_cosmosdb_account" "demo" {
-#   name                = "cosmos-${var.env}-${random_string.prefix}"
+#   name                = "cosmos-${var.env}-${random_string.prefix.result}"
 #   location            = azurerm_resource_group.demo.location
 #   resource_group_name = azurerm_resource_group.demo.name
 #   offer_type          = "Standard"
@@ -289,7 +289,7 @@ resource "azurerm_postgresql_firewall_rule" "demo" {
 
 # Service bus (DAPR demo)
 resource "azurerm_servicebus_namespace" "demo" {
-  name                = "servicebus-${var.env}-${random_string.prefix}"
+  name                = "servicebus-${var.env}-${random_string.prefix.result}"
   location            = azurerm_resource_group.demo.location
   resource_group_name = azurerm_resource_group.demo.name
   sku                 = "Standard"
@@ -315,7 +315,7 @@ resource "azurerm_servicebus_namespace_authorization_rule" "demo" {
 
 # Storage account (DAPR demo)
 resource "azurerm_storage_account" "demo" {
-  name                     = "store${var.env}${random_string.prefix}"
+  name                     = "store${var.env}${random_string.prefix.result}"
   resource_group_name      = azurerm_resource_group.demo.name
   location                 = azurerm_resource_group.demo.location
   account_tier             = "Standard"
@@ -330,7 +330,7 @@ resource "azurerm_storage_container" "demo" {
 
 # Event Hub (DAPR demo)
 resource "azurerm_eventhub_namespace" "demo" {
-  name                = "eventhub-${var.env}-${random_string.prefix}"
+  name                = "eventhub-${var.env}-${random_string.prefix.result}"
   location            = azurerm_resource_group.demo.location
   resource_group_name = azurerm_resource_group.demo.name
   sku                 = "Basic"
