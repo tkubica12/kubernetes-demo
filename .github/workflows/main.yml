@@ -78,6 +78,7 @@ jobs:
       env:
         KUBECONFIG: "./kube_config"
       run: |
+        helm repo update
         helm upgrade -i baseconfig ./helm/cluster \
           --set upn=admin@tomaskubicaoffice.onmicrosoft.com
 
