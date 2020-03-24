@@ -39,3 +39,6 @@ terraform plan
 terraform apply -auto-approve
 ```
 
+helm upgrade -i grafana stable/grafana -n grafana -f helm/cluster/grafana-values.yaml
+
+

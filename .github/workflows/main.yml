@@ -111,6 +111,13 @@ jobs:
           --set armAuth.secretJSON=$(cat sdk-auth.json | base64 -w0) \
           --set rbac.enabled=true
 
+    - name: Deploy Grafana
+      working-directory: ./demo
+      env:
+        KUBECONFIG: "./kube_config"
+      run: |
+        helm upgrade -i grafana stable/grafana -n grafana -f helm/cluster/grafana-values.yaml
+    
     - name: Export SDK-AUTH as output
       working-directory: ./demo
       id: sdkfile

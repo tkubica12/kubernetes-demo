@@ -1,5 +1,5 @@
 variable "env" {
-  default = "test"
+  default = "demo"
 }
 
 variable "subscription_id" {}
@@ -37,7 +37,7 @@ resource "random_id" "prefix" {
 # Resource Group
 resource "azurerm_resource_group" "demo" {
   name     = "cloudnative-${var.env}"
-  location = "West Europe"
+  location = "France Central"
 }
 
 # Azure Monitor

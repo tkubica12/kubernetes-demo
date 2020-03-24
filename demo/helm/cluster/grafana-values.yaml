@@ -1,0 +1,9 @@
+ingress:
+  annotations:
+    kubernetes.io/ingress.class: azure/application-gateway
+  hosts:
+    - grafana.cloud.tomaskubica.in
+  enabled: true
+
+admin:
+  existingSecret: grafana-secrets
