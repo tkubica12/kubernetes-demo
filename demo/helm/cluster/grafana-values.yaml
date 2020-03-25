@@ -7,3 +7,21 @@ ingress:
 
 admin:
   existingSecret: grafana-login
+
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+    - name: Azure Monitor
+      type: grafana-azure-monitor-datasource
+      access: proxy
+      isDefault: false
+      jsonData:
+        cloudName: azuremonitor
+        subscriptionId: "{{ .Values.subscriptionId }}"
+        tenantId: "{{ .Values.tenantId }}"
+        clientId: "{{ .Values.clientId }}"
+        logAnalyticsDefaultWorkspace: "{{ .Values.workspaceId }}"
+        azureLogAnalyticsSameAs: true
+      secureJsonData:
+        clientSecret: "{{ .Values.clientSecret }}"

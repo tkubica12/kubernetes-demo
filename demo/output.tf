@@ -41,3 +41,7 @@ output "registry_name" {
 output "psql_name" {
   value = azurerm_postgresql_server.demo.name
 }
+
+output "workspace_id" {
+  value = azurerm_log_analytics_workspace.demo.workspace_id
+}
