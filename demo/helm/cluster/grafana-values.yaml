@@ -6,4 +6,4 @@ ingress:
   enabled: true
 
 admin:
-  existingSecret: grafana-secrets
+  existingSecret: grafana-login

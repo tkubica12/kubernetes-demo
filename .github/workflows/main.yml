@@ -39,7 +39,7 @@ jobs:
         TF_VAR_client_secret: ${{ secrets.client_secret }}
         TF_VAR_tenant_id: ${{ secrets.tenant_id }}
         TF_VAR_psql_password: ${{ secrets.psql_password }} 
-        TF_VAR_vm_password: ${{ secrets.vm_password }} 
+        TF_VAR_vm_password: ${{ secrets.password }} 
         TF_VAR_client_app_id: ${{ secrets.client_app_id }}
         TF_VAR_server_app_id: ${{ secrets.server_app_id }}
         TF_VAR_server_app_secret: ${{ secrets.server_app_secret }}
@@ -77,9 +77,12 @@ jobs:
       working-directory: ./demo
       env:
         KUBECONFIG: "./kube_config"
+        password: ${{ secrets.password }} 
       run: |
         helm upgrade -i baseconfig ./helm/cluster \
-          --set upn=admin@tomaskubicaoffice.onmicrosoft.com
+          --set upn=admin@tomaskubicaoffice.onmicrosoft.com \
+          --set username=tomas \
+          --set password=${password}
 
     - name: Deploy KEDA
       working-directory: ./demo
