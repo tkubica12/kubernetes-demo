@@ -11,6 +11,10 @@ spec:
   replicas: {{ .Values.appspa.replicaCount }}
   template:
     metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /metrics
+        prometheus.io/port: "9113"
       labels:
         app: {{ template "name" . }}-spa
         release: {{ .Release.Name }}
@@ -31,6 +35,11 @@ spec:
               port: {{ .Values.appspa.service.internalPort }}
           resources:
 {{ toYaml .Values.appspa.resources | indent 12 }}
+        - name: adapter
+          image: nginx/nginx-prometheus-exporter:0.6.0
+          args: ["-nginx.scrape-uri","http://localhost:8080/status"]
+          ports:
+          - containerPort: 9113
     {{- if .Values.nodeSelector }}
       nodeSelector:
 {{ toYaml .Values.nodeSelector | indent 8 }}

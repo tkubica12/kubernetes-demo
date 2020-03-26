@@ -135,7 +135,7 @@ jobs:
           --set clientSecret=$GRAFANA_CLIENT_SECRET \
           --set tenantId=$GRAFANA_TENANT_ID \
           --set workspaceId=$(terraform output workspace_id)
-        helm upgrade -i prometheus stable/prometheus -n prometheus
+        helm upgrade -i prometheus stable/prometheus -n prometheus -f helm/cluster/prometheus-values.yaml
     
     - name: Export SDK-AUTH as output
       working-directory: ./demo
