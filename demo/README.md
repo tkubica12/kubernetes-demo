@@ -38,10 +38,3 @@ terraform init
 terraform plan
 terraform apply -auto-approve
 ```
-
-helm delete grafana -n grafana
-helm upgrade -i grafana stable/grafana -n grafana -f helm/cluster/grafana-values.yaml \
-    --set subscriptionId=a0f4a733-4fce-4d49-b8a8-d30541fc1b45 \
-    --set clientId=d21c218a-9572-40cc-8176-ac4ea639c74c \
-    --set clientSecret=dedca3bf-4fd5-45ed-b407-30e4f8031e66 \
-    --set tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47

@@ -114,7 +114,7 @@ jobs:
           --set armAuth.secretJSON=$(cat sdk-auth.json | base64 -w0) \
           --set rbac.enabled=true
 
-    - name: Deploy Grafana
+    - name: Deploy Grafana+Prometheus
       working-directory: ./demo
       env:
         KUBECONFIG: "./kube_config"
@@ -135,6 +135,7 @@ jobs:
           --set clientSecret=$GRAFANA_CLIENT_SECRET \
           --set tenantId=$GRAFANA_TENANT_ID \
           --set workspaceId=$(terraform output workspace_id)
+        helm upgrade -i prometheus stable/prometheus -n prometheus
     
     - name: Export SDK-AUTH as output
       working-directory: ./demo

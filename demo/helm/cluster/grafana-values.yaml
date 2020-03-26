@@ -25,3 +25,8 @@ datasources:
         azureLogAnalyticsSameAs: true
       secureJsonData:
         clientSecret: "{{ .Values.clientSecret }}"
+    - name: Prometheus
+      type: prometheus
+      url: http://prometheus-server.prometheus.svc.cluster.local
+      access: proxy
+      editable: true
