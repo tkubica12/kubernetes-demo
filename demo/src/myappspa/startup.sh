@@ -12,7 +12,8 @@ sed -i -e "s/#TODOAPIURL#/${TODOAPIURL/'//'/'\/\/'}/" /opt/bitnami/nginx/html/js
 sed -i -e "s/#INSTANCENAME#/$(cat /etc/hostname)/" /opt/bitnami/nginx/html/js/app.js 
 sed -i -e "s/#INSTANCEVERSION#/$(cat /version)/" /opt/bitnami/nginx/html/js/app.js 
 
-echo "$(cat /etc/hostname) - $(cat /version)" > /opt/bitnami/nginx/html/info
+mkdir /opt/bitnami/nginx/html/info
+echo "$(cat /etc/hostname) - $(cat /version)" > /opt/bitnami/nginx/html/info/index.html
 
 /bin/bash /setup.sh
 exec /bin/bash /run.sh
