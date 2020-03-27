@@ -11,6 +11,7 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
   annotations:
+      rollme: {{ randAlphaNum 5 | quote}}
     {{- range $key, $value := .Values.appspa.ingress.annotations }}
       {{ $key }}: {{ $value | quote }}
     {{- end }}
