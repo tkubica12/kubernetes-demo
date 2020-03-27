@@ -353,3 +353,16 @@ resource "azurerm_eventhub_authorization_rule" "demo" {
   send                = true
   manage              = false
 }
+
+# Key Vault
+resource "azurerm_key_vault" "demo" {
+  name                        = "vault-${var.env}-${random_string.prefix.result}"
+  location                    = azurerm_resource_group.demo.location
+  resource_group_name         = azurerm_resource_group.demo.name
+  enabled_for_disk_encryption = true
+  tenant_id                   = var.tenant_id
+  soft_delete_enabled         = false
+  purge_protection_enabled    = false
+
+  sku_name = "standard"
+}

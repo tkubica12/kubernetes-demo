@@ -20,13 +20,3798 @@ datasources:
         cloudName: azuremonitor
         subscriptionId: "{{ .Values.subscriptionId }}"
         tenantId: "{{ .Values.tenantId }}"
+        logAnalyticsTenantId: "{{ .Values.tenantId }}"
         clientId: "{{ .Values.clientId }}"
+        logAnalyticsClientId: "{{ .Values.clientId }}"
         logAnalyticsDefaultWorkspace: "{{ .Values.workspaceId }}"
         azureLogAnalyticsSameAs: true
       secureJsonData:
         clientSecret: "{{ .Values.clientSecret }}"
+        logAnalyticsClientSecret: "{{ .Values.clientSecret }}"
     - name: Prometheus
       type: prometheus
       url: http://prometheus-server.prometheus.svc.cluster.local
       access: proxy
       editable: true
+
+dashboardProviders:
+  dashboardproviders.yaml:
+    apiVersion: 1
+    providers:
+    - name: 'default'
+      orgId: 1
+      folder: ''
+      type: file
+      disableDeletion: false
+      editable: true
+      options:
+        path: /var/lib/grafana/dashboards/default
+
+dashboards:
+  default:
+    AzureMonitorViaPrometheus:
+      json: |
+        {
+          "annotations": {
+            "list": [
+              {
+                "builtIn": 1,
+                "datasource": "-- Grafana --",
+                "enable": true,
+                "hide": true,
+                "iconColor": "rgba(0, 211, 255, 1)",
+                "name": "Annotations & Alerts",
+                "type": "dashboard"
+              }
+            ]
+          },
+          "editable": true,
+          "gnetId": null,
+          "graphTooltip": 0,
+          "id": 2,
+          "iteration": 1585320169649,
+          "links": [],
+          "panels": [
+            {
+              "aliasColors": {},
+              "bars": false,
+              "dashLength": 10,
+              "dashes": false,
+              "datasource": "Azure Monitor",
+              "fill": 1,
+              "fillGradient": 0,
+              "gridPos": {
+                "h": 9,
+                "w": 12,
+                "x": 0,
+                "y": 0
+              },
+              "hiddenSeries": false,
+              "id": 2,
+              "legend": {
+                "avg": false,
+                "current": false,
+                "max": false,
+                "min": false,
+                "show": true,
+                "total": false,
+                "values": false
+              },
+              "lines": true,
+              "linewidth": 1,
+              "nullPointMode": "null",
+              "options": {
+                "dataLinks": []
+              },
+              "percentage": false,
+              "pointradius": 2,
+              "points": false,
+              "renderer": "flot",
+              "seriesOverrides": [],
+              "spaceLength": 10,
+              "stack": false,
+              "steppedLine": false,
+              "targets": [
+                {
+                  "appInsights": {
+                    "dimension": "none",
+                    "metricName": "select",
+                    "rawQuery": false,
+                    "rawQueryString": "",
+                    "timeColumn": "timestamp",
+                    "timeGrain": "auto",
+                    "valueColumn": ""
+                  },
+                  "azureLogAnalytics": {
+                    "query": "InsightsMetrics\r\n| where Namespace == \"prometheus\"\r\n| where Name == \"$metric\"\n| extend podName = tostring(parse_json(Tags).pod_name\r)\n| summarize metrics = percentile(Val,$percentile) by bin(TimeGenerated, $__interval), podName\r\n| order by TimeGenerated asc",
+                    "resultFormat": "time_series",
+                    "workspace": "0d163583-b901-4764-998a-065b52e55799"
+                  },
+                  "azureMonitor": {
+                    "aggOptions": [],
+                    "aggregation": "",
+                    "dimension": "",
+                    "dimensionFilter": "*",
+                    "dimensions": [],
+                    "metricDefinition": "Microsoft.OperationalInsights/workspaces",
+                    "metricName": "select",
+                    "metricNamespace": "Microsoft.OperationalInsights/workspaces",
+                    "resourceGroup": "cloudnative-demo",
+                    "resourceName": "logs-demo-e25wbosx",
+                    "timeGrain": "",
+                    "timeGrains": [],
+                    "top": "10"
+                  },
+                  "queryType": "Azure Log Analytics",
+                  "refId": "A",
+                  "subscription": "a0f4a733-4fce-4d49-b8a8-d30541fc1b45"
+                }
+              ],
+              "thresholds": [],
+              "timeFrom": null,
+              "timeRegions": [],
+              "timeShift": null,
+              "title": "Pod metrics via Prometheus",
+              "tooltip": {
+                "shared": true,
+                "sort": 0,
+                "value_type": "individual"
+              },
+              "type": "graph",
+              "xaxis": {
+                "buckets": null,
+                "mode": "time",
+                "name": null,
+                "show": true,
+                "values": []
+              },
+              "yaxes": [
+                {
+                  "format": "short",
+                  "label": null,
+                  "logBase": 1,
+                  "max": null,
+                  "min": null,
+                  "show": true
+                },
+                {
+                  "format": "short",
+                  "label": null,
+                  "logBase": 1,
+                  "max": null,
+                  "min": null,
+                  "show": true
+                }
+              ],
+              "yaxis": {
+                "align": false,
+                "alignLevel": null
+              }
+            }
+          ],
+          "schemaVersion": 22,
+          "style": "dark",
+          "tags": [],
+          "templating": {
+            "list": [
+              {
+                "allValue": null,
+                "current": {
+                  "selected": true,
+                  "text": "50",
+                  "value": "50"
+                },
+                "hide": 0,
+                "includeAll": false,
+                "label": "Percentile",
+                "multi": false,
+                "name": "percentile",
+                "options": [
+                  {
+                    "selected": false,
+                    "text": "50",
+                    "value": "50"
+                  },
+                  {
+                    "selected": false,
+                    "text": "75",
+                    "value": "75"
+                  },
+                  {
+                    "selected": false,
+                    "text": "80",
+                    "value": "80"
+                  },
+                  {
+                    "selected": false,
+                    "text": "85",
+                    "value": "85"
+                  },
+                  {
+                    "selected": false,
+                    "text": "90",
+                    "value": "90"
+                  },
+                  {
+                    "selected": false,
+                    "text": "95",
+                    "value": "95"
+                  },
+                  {
+                    "selected": false,
+                    "text": "96",
+                    "value": "96"
+                  },
+                  {
+                    "selected": false,
+                    "text": "97",
+                    "value": "97"
+                  },
+                  {
+                    "selected": false,
+                    "text": "98",
+                    "value": "98"
+                  },
+                  {
+                    "selected": false,
+                    "text": "99",
+                    "value": "99"
+                  },
+                  {
+                    "selected": true,
+                    "text": "99.9",
+                    "value": "99.9"
+                  }
+                ],
+                "query": "50,75,80,85,90,95,96,97,98,99,99.9",
+                "skipUrlSync": false,
+                "type": "custom"
+              },
+              {
+                "allValue": null,
+                "current": {
+                  "selected": true,
+                  "text": "myapp-spa",
+                  "value": "myapp-spa"
+                },
+                "datasource": "Azure Monitor",
+                "definition": "InsightsMetrics\n| where Namespace == \"prometheus\"\n| distinct tostring(parse_json(Tags).app)",
+                "hide": 0,
+                "includeAll": false,
+                "index": -1,
+                "label": "App",
+                "multi": false,
+                "name": "app",
+                "options": [
+                  {
+                    "selected": true,
+                    "text": "myapp-spa",
+                    "value": "myapp-spa"
+                  },
+                  {
+                    "selected": false,
+                    "text": "ingress-azure",
+                    "value": "ingress-azure"
+                  }
+                ],
+                "query": "InsightsMetrics\n| where Namespace == \"prometheus\"\n| distinct tostring(parse_json(Tags).app)",
+                "refresh": 0,
+                "regex": "",
+                "skipUrlSync": false,
+                "sort": 0,
+                "tagValuesQuery": "",
+                "tags": [],
+                "tagsQuery": "",
+                "type": "query",
+                "useTags": false
+              },
+              {
+                "allValue": null,
+                "current": {
+                  "selected": true,
+                  "text": "appgw_ingress_controller_update_latency_seconds",
+                  "value": "appgw_ingress_controller_update_latency_seconds"
+                },
+                "datasource": "Azure Monitor",
+                "definition": "InsightsMetrics\n| where Namespace == \"prometheus\"\n| distinct Name",
+                "hide": 0,
+                "includeAll": false,
+                "index": -1,
+                "label": "Metric",
+                "multi": false,
+                "name": "metric",
+                "options": [
+                  {
+                    "selected": false,
+                    "text": "nginx_connections_waiting",
+                    "value": "nginx_connections_waiting"
+                  },
+                  {
+                    "selected": false,
+                    "text": "nginx_http_requests_total",
+                    "value": "nginx_http_requests_total"
+                  },
+                  {
+                    "selected": false,
+                    "text": "nginx_connections_reading",
+                    "value": "nginx_connections_reading"
+                  },
+                  {
+                    "selected": false,
+                    "text": "nginx_connections_accepted",
+                    "value": "nginx_connections_accepted"
+                  },
+                  {
+                    "selected": false,
+                    "text": "nginxexporter_build_info",
+                    "value": "nginxexporter_build_info"
+                  },
+                  {
+                    "selected": true,
+                    "text": "nginx_connections_active",
+                    "value": "nginx_connections_active"
+                  },
+                  {
+                    "selected": false,
+                    "text": "nginx_up",
+                    "value": "nginx_up"
+                  },
+                  {
+                    "selected": false,
+                    "text": "nginx_connections_handled",
+                    "value": "nginx_connections_handled"
+                  },
+                  {
+                    "selected": false,
+                    "text": "nginx_connections_writing",
+                    "value": "nginx_connections_writing"
+                  },
+                  {
+                    "selected": false,
+                    "text": "promhttp_metric_handler_requests_total",
+                    "value": "promhttp_metric_handler_requests_total"
+                  },
+                  {
+                    "selected": false,
+                    "text": "promhttp_metric_handler_requests_in_flight",
+                    "value": "promhttp_metric_handler_requests_in_flight"
+                  },
+                  {
+                    "selected": false,
+                    "text": "appgw_ingress_controller_update_latency_seconds",
+                    "value": "appgw_ingress_controller_update_latency_seconds"
+                  },
+                  {
+                    "selected": false,
+                    "text": "appgw_ingress_controller_k8s_api_event_counter",
+                    "value": "appgw_ingress_controller_k8s_api_event_counter"
+                  },
+                  {
+                    "selected": false,
+                    "text": "appgw_ingress_controller_arm_api_update_call_success_counter",
+                    "value": "appgw_ingress_controller_arm_api_update_call_success_counter"
+                  },
+                  {
+                    "selected": false,
+                    "text": "appgw_ingress_controller_arm_api_call_counter",
+                    "value": "appgw_ingress_controller_arm_api_call_counter"
+                  },
+                  {
+                    "selected": false,
+                    "text": "appgw_ingress_controller_arm_api_update_call_failure_counter",
+                    "value": "appgw_ingress_controller_arm_api_update_call_failure_counter"
+                  }
+                ],
+                "query": "InsightsMetrics\n| where Namespace == \"prometheus\"\n| distinct Name",
+                "refresh": 0,
+                "regex": "",
+                "skipUrlSync": false,
+                "sort": 0,
+                "tagValuesQuery": "",
+                "tags": [],
+                "tagsQuery": "",
+                "type": "query",
+                "useTags": false
+              }
+            ]
+          },
+          "time": {
+            "from": "now-6h",
+            "to": "now"
+          },
+          "timepicker": {
+            "refresh_intervals": [
+              "5s",
+              "10s",
+              "30s",
+              "1m",
+              "5m",
+              "15m",
+              "30m",
+              "1h",
+              "2h",
+              "1d"
+            ]
+          },
+          "timezone": "",
+          "title": "Azure Monitor - Prometheus exports",
+          "uid": "UARp309Wz",
+          "variables": {
+            "list": []
+          },
+          "version": 3
+        }
+    AKS:
+      json: |
+        {
+          "annotations": {
+            "list": [
+              {
+                "builtIn": 1,
+                "datasource": "-- Grafana --",
+                "enable": true,
+                "hide": true,
+                "iconColor": "rgba(0, 211, 255, 1)",
+                "name": "Annotations & Alerts",
+                "type": "dashboard"
+              }
+            ]
+          },
+          "description": "Azure Monitor - Container Insights metrics for Kubernetes clusters. Cluster utilization, namespace utilization, Node cpu & memory, Node disk usage & disk io, node network & kubelet docker operation metrics. Many more metrics that are queriable from the log analytics workspace used by Azure monitor for containers!",
+          "editable": true,
+          "gnetId": 10956,
+          "graphTooltip": 0,
+          "id": 1,
+          "iteration": 1585316879225,
+          "links": [
+            {
+              "asDropdown": true,
+              "icon": "external link",
+              "includeVars": false,
+              "keepTime": false,
+              "tags": [],
+              "targetBlank": true,
+              "title": "Azure Monitor - Container Insights",
+              "tooltip": "Click here to open Azure Monitor Ux for this cluster",
+              "type": "link",
+              "url": "https://portal.azure.com/#@microsoft.onmicrosoft.com/resource$clusterid/infrainsights"
+            }
+          ],
+          "panels": [
+            {
+              "collapsed": true,
+              "datasource": null,
+              "gridPos": {
+                "h": 1,
+                "w": 24,
+                "x": 0,
+                "y": 0
+              },
+              "id": 44,
+              "panels": [
+                {
+                  "datasource": "Azure Monitor",
+                  "description": "% Allocatable CPU used across all nodes in the cluster",
+                  "gridPos": {
+                    "h": 8,
+                    "w": 12,
+                    "x": 0,
+                    "y": 1
+                  },
+                  "id": 4,
+                  "options": {
+                    "fieldOptions": {
+                      "calcs": [
+                        "mean"
+                      ],
+                      "defaults": {
+                        "color": {
+                          "mode": "thresholds"
+                        },
+                        "mappings": [],
+                        "max": 100,
+                        "min": 0,
+                        "thresholds": {
+                          "mode": "absolute",
+                          "steps": [
+                            {
+                              "color": "green",
+                              "value": null
+                            },
+                            {
+                              "color": "red",
+                              "value": 80
+                            }
+                          ]
+                        },
+                        "unit": "percent"
+                      },
+                      "overrides": [],
+                      "values": false
+                    },
+                    "orientation": "auto",
+                    "showThresholdLabels": false,
+                    "showThresholdMarkers": true
+                  },
+                  "pluginVersion": "6.7.1",
+                  "scopedVars": {
+                    "clusterid": {
+                      "selected": true,
+                      "text": "/subscriptions/a0f4a733-4fce-4d49-b8a8-d30541fc1b45/resourceGroups/cloudnative-demo/providers/Microsoft.ContainerService/managedClusters/aks-demo-e25wbosx",
+                      "value": "/subscriptions/a0f4a733-4fce-4d49-b8a8-d30541fc1b45/resourceGroups/cloudnative-demo/providers/Microsoft.ContainerService/managedClusters/aks-demo-e25wbosx"
+                    }
+                  },
+                  "targets": [
+                    {
+                      "appInsights": {
+                        "groupBy": "none",
+                        "metricName": "select",
+                        "rawQuery": false,
+                        "rawQueryString": "",
+                        "spliton": "",
+                        "timeGrainType": "auto",
+                        "xaxis": "timestamp",
+                        "yaxis": ""
+                      },
+                      "azureLogAnalytics": {
+                        "query": "\rlet allocatable = Perf | where ObjectName == \"K8SNode\" | where CounterName == \"cpuCapacityNanoCores\" \r\n| where $__timeFilter(TimeGenerated) \r\n| where InstanceName startswith '$clusterid'\n| summarize arg_max(TimeGenerated, * ) by Computer\r\n| summarize a=toreal(sum(CounterValue) /1000000)\r\n| project a, b=\"abc\";\r\n\r\nallocatable \r\n| join kind=inner (\r\n    Perf | where ObjectName == \"K8SNode\" | where CounterName == \"cpuUsageNanoCores\" \r\n    | where $__timeFilter(TimeGenerated) \r\n    | where InstanceName startswith '$clusterid'\n    | summarize arg_max(TimeGenerated, * ) by Computer\r\n    | summarize x=toreal(sum(CounterValue) /1000000)\r\n    | project x,y=\"abc\"\r\n) on $left.b == $right.y\r\n|project now(), (x/a) * 100",
+                        "resultFormat": "time_series",
+                        "workspace": ""
+                      },
+                      "azureMonitor": {
+                        "dimensionFilter": "*",
+                        "metricDefinition": "select",
+                        "metricName": "select",
+                        "metricNamespace": "select",
+                        "resourceGroup": "select",
+                        "resourceName": "select",
+                        "timeGrain": "auto"
+                      },
+                      "queryType": "Azure Log Analytics",
+                      "refId": "A",
+                      "subscription": ""
+                    }
+                  ],
+                  "timeFrom": null,
+                  "timeShift": null,
+                  "title": "Cluster CPU Utilization",
+                  "type": "gauge"
+                },
+                {
+                  "datasource": "Azure Monitor",
+                  "description": "% Allocatable memory (workingset) used across all nodes in the cluster",
+                  "gridPos": {
+                    "h": 8,
+                    "w": 12,
+                    "x": 12,
+                    "y": 1
+                  },
+                  "id": 5,
+                  "options": {
+                    "fieldOptions": {
+                      "calcs": [
+                        "mean"
+                      ],
+                      "defaults": {
+                        "color": {
+                          "mode": "thresholds"
+                        },
+                        "mappings": [],
+                        "max": 100,
+                        "min": 0,
+                        "thresholds": {
+                          "mode": "absolute",
+                          "steps": [
+                            {
+                              "color": "green",
+                              "value": null
+                            },
+                            {
+                              "color": "red",
+                              "value": 80
+                            }
+                          ]
+                        },
+                        "unit": "percent"
+                      },
+                      "overrides": [],
+                      "values": false
+                    },
+                    "orientation": "auto",
+                    "showThresholdLabels": false,
+                    "showThresholdMarkers": true
+                  },
+                  "pluginVersion": "6.7.1",
+                  "scopedVars": {
+                    "clusterid": {
+                      "selected": true,
+                      "text": "/subscriptions/a0f4a733-4fce-4d49-b8a8-d30541fc1b45/resourceGroups/cloudnative-demo/providers/Microsoft.ContainerService/managedClusters/aks-demo-e25wbosx",
+                      "value": "/subscriptions/a0f4a733-4fce-4d49-b8a8-d30541fc1b45/resourceGroups/cloudnative-demo/providers/Microsoft.ContainerService/managedClusters/aks-demo-e25wbosx"
+                    }
+                  },
+                  "targets": [
+                    {
+                      "appInsights": {
+                        "groupBy": "none",
+                        "metricName": "select",
+                        "rawQuery": false,
+                        "rawQueryString": "",
+                        "spliton": "",
+                        "timeGrainType": "auto",
+                        "xaxis": "timestamp",
+                        "yaxis": ""
+                      },
+                      "azureLogAnalytics": {
+                        "query": "\r\nlet allocatable = Perf | where ObjectName == \"K8SNode\" | where CounterName == \"memoryCapacityBytes\" \r\n| where $__timeFilter(TimeGenerated) \r\n| where InstanceName startswith '$clusterid'\n| summarize arg_max(TimeGenerated, * ) by Computer\r\n| summarize a=toreal(sum(CounterValue))\r\n| project a, b=\"abc\";\r\n\r\nallocatable \r\n| join kind=inner (\r\n    Perf | where ObjectName == \"K8SNode\" | where CounterName == \"memoryWorkingSetBytes\" \r\n    | where $__timeFilter(TimeGenerated) \r\n    | where InstanceName startswith '$clusterid'\n    | summarize arg_max(TimeGenerated, * ) by Computer\r\n    | summarize x=toreal(sum(CounterValue))\r\n    | project x,y=\"abc\"\r\n) on $left.b == $right.y\r\n|project now(), (x/a) * 100",
+                        "resultFormat": "time_series",
+                        "workspace": ""
+                      },
+                      "azureMonitor": {
+                        "dimensionFilter": "*",
+                        "metricDefinition": "select",
+                        "metricName": "select",
+                        "metricNamespace": "select",
+                        "resourceGroup": "select",
+                        "resourceName": "select",
+                        "timeGrain": "auto"
+                      },
+                      "queryType": "Azure Log Analytics",
+                      "refId": "A",
+                      "subscription": ""
+                    }
+                  ],
+                  "timeFrom": null,
+                  "timeShift": null,
+                  "title": "Cluster Memory Utilization",
+                  "type": "gauge"
+                },
+                {
+                  "aliasColors": {},
+                  "bars": true,
+                  "cacheTimeout": null,
+                  "dashLength": 10,
+                  "dashes": false,
+                  "datasource": "Azure Monitor",
+                  "description": "Number of nodes in the cluster grouped by status",
+                  "fill": 1,
+                  "fillGradient": 0,
+                  "gridPos": {
+                    "h": 9,
+                    "w": 8,
+                    "x": 0,
+                    "y": 9
+                  },
+                  "hiddenSeries": false,
+                  "id": 11,
+                  "legend": {
+                    "alignAsTable": true,
+                    "avg": false,
+                    "current": false,
+                    "max": false,
+                    "min": false,
+                    "rightSide": true,
+                    "show": true,
+                    "total": false,
+                    "values": false
+                  },
+                  "lines": false,
+                  "linewidth": 1,
+                  "links": [],
+                  "nullPointMode": "null",
+                  "options": {
+                    "dataLinks": []
+                  },
+                  "percentage": false,
+                  "pluginVersion": "6.3.3",
+                  "pointradius": 2,
+                  "points": false,
+                  "renderer": "flot",
+                  "scopedVars": {
+                    "clusterid": {
+                      "selected": true,
+                      "text": "/subscriptions/a0f4a733-4fce-4d49-b8a8-d30541fc1b45/resourceGroups/cloudnative-demo/providers/Microsoft.ContainerService/managedClusters/aks-demo-e25wbosx",
+                      "value": "/subscriptions/a0f4a733-4fce-4d49-b8a8-d30541fc1b45/resourceGroups/cloudnative-demo/providers/Microsoft.ContainerService/managedClusters/aks-demo-e25wbosx"
+                    }
+                  },
+                  "seriesOverrides": [],
+                  "spaceLength": 10,
+                  "stack": false,
+                  "steppedLine": false,
+                  "targets": [
+                    {
+                      "appInsights": {
+                        "groupBy": "none",
+                        "metricName": "select",
+                        "rawQuery": false,
+                        "rawQueryString": "",
+                        "spliton": "",
+                        "timeGrainType": "auto",
+                        "xaxis": "timestamp",
+                        "yaxis": ""
+                      },
+                      "azureLogAnalytics": {
+                        "query": "\r\nKubeNodeInventory\r\n| where ClusterId == '$clusterid'\n| where $__timeFilter(TimeGenerated)\n| summarize count() by bin(TimeGenerated, $__interval), Computer, Status\r\n| summarize arg_max(TimeGenerated, *) by Computer, Status\r\n| summarize nodecount=count() by Status\r\n| project nodecount, Status , now()",
+                        "resultFormat": "time_series",
+                        "workspace": ""
+                      },
+                      "azureMonitor": {
+                        "dimensionFilter": "*",
+                        "metricDefinition": "select",
+                        "metricName": "select",
+                        "metricNamespace": "select",
+                        "resourceGroup": "select",
+                        "resourceName": "select",
+                        "timeGrain": "auto"
+                      },
+                      "queryType": "Azure Log Analytics",
+                      "refId": "A",
+                      "subscription": ""
+                    }
+                  ],
+                  "thresholds": [
+                    {
+                      "colorMode": "critical",
+                      "fill": true,
+                      "line": true,
+                      "op": "gt",
+                      "yaxis": "left"
+                    }
+                  ],
+                  "timeFrom": null,
+                  "timeRegions": [],
+                  "timeShift": null,
+                  "title": "Node count by Status",
+                  "tooltip": {
+                    "shared": false,
+                    "sort": 0,
+                    "value_type": "individual"
+                  },
+                  "type": "graph",
+                  "xaxis": {
+                    "buckets": null,
+                    "mode": "series",
+                    "name": null,
+                    "show": false,
+                    "values": [
+                      "total"
+                    ]
+                  },
+                  "yaxes": [
+                    {
+                      "decimals": 0,
+                      "format": "short",
+                      "label": null,
+                      "logBase": 1,
+                      "max": null,
+                      "min": null,
+                      "show": true
+                    },
+                    {
+                      "decimals": 0,
+                      "format": "short",
+                      "label": null,
+                      "logBase": 1,
+                      "max": null,
+                      "min": null,
+                      "show": true
+                    }
+                  ],
+                  "yaxis": {
+                    "align": false,
+                    "alignLevel": null
+                  }
+                },
+                {
+                  "aliasColors": {},
+                  "bars": true,
+                  "cacheTimeout": null,
+                  "dashLength": 10,
+                  "dashes": false,
+                  "datasource": "Azure Monitor",
+                  "description": "Pod count grouped by Pod Status",
+                  "fill": 1,
+                  "fillGradient": 0,
+                  "gridPos": {
+                    "h": 9,
+                    "w": 8,
+                    "x": 8,
+                    "y": 9
+                  },
+                  "hiddenSeries": false,
+                  "id": 12,
+                  "legend": {
+                    "alignAsTable": true,
+                    "avg": false,
+                    "current": false,
+                    "max": false,
+                    "min": false,
+                    "rightSide": true,
+                    "show": true,
+                    "total": false,
+                    "values": false
+                  },
+                  "lines": false,
+                  "linewidth": 1,
+                  "links": [],
+                  "nullPointMode": "null",
+                  "options": {
+                    "dataLinks": [
+                      {
+                        "title": "",
+                        "url": ""
+                      }
+                    ]
+                  },
+                  "percentage": false,
+                  "pluginVersion": "6.3.3",
+                  "pointradius": 2,
+                  "points": false,
+                  "renderer": "flot",
+                  "scopedVars": {
+                    "clusterid": {
+                      "selected": true,
+                      "text": "/subscriptions/a0f4a733-4fce-4d49-b8a8-d30541fc1b45/resourceGroups/cloudnative-demo/providers/Microsoft.ContainerService/managedClusters/aks-demo-e25wbosx",
+                      "value": "/subscriptions/a0f4a733-4fce-4d49-b8a8-d30541fc1b45/resourceGroups/cloudnative-demo/providers/Microsoft.ContainerService/managedClusters/aks-demo-e25wbosx"
+                    }
+                  },
+                  "seriesOverrides": [],
+                  "spaceLength": 10,
+                  "stack": false,
+                  "steppedLine": false,
+                  "targets": [
+                    {
+                      "appInsights": {
+                        "groupBy": "none",
+                        "metricName": "select",
+                        "rawQuery": false,
+                        "rawQueryString": "",
+                        "spliton": "",
+                        "timeGrainType": "auto",
+                        "xaxis": "timestamp",
+                        "yaxis": ""
+                      },
+                      "azureLogAnalytics": {
+                        "query": "KubePodInventory | where ClusterId == '$clusterid'\n| where $__timeFilter(TimeGenerated)\r\n| summarize count() by bin(TimeGenerated, $__interval), PodUid, PodStatus\r\n| summarize arg_max(TimeGenerated, *) by PodUid, PodStatus\r\n| summarize podCount = count() by PodStatus\r\n| project podCount, PodStatus , now() \r\n",
+                        "resultFormat": "time_series",
+                        "workspace": ""
+                      },
+                      "azureMonitor": {
+                        "dimensionFilter": "*",
+                        "metricDefinition": "select",
+                        "metricName": "select",
+                        "metricNamespace": "select",
+                        "resourceGroup": "select",
+                        "resourceName": "select",
+                        "timeGrain": "auto"
+                      },
+                      "queryType": "Azure Log Analytics",
+                      "refId": "A",
+                      "subscription": ""
+                    }
+                  ],
+                  "thresholds": [
+                    {
+                      "colorMode": "critical",
+                      "fill": true,
+                      "line": true,
+                      "op": "gt",
+                      "yaxis": "left"
+                    }
+                  ],
+                  "timeFrom": null,
+                  "timeRegions": [],
+                  "timeShift": null,
+                  "title": "Pod count by status",
+                  "tooltip": {
+                    "shared": true,
+                    "sort": 0,
+                    "value_type": "individual"
+                  },
+                  "type": "graph",
+                  "xaxis": {
+                    "buckets": null,
+                    "mode": "series",
+                    "name": null,
+                    "show": false,
+                    "values": [
+                      "total"
+                    ]
+                  },
+                  "yaxes": [
+                    {
+                      "decimals": 0,
+                      "format": "short",
+                      "label": null,
+                      "logBase": 1,
+                      "max": null,
+                      "min": null,
+                      "show": true
+                    },
+                    {
+                      "format": "short",
+                      "label": null,
+                      "logBase": 1,
+                      "max": null,
+                      "min": null,
+                      "show": true
+                    }
+                  ],
+                  "yaxis": {
+                    "align": false,
+                    "alignLevel": null
+                  }
+                },
+                {
+                  "aliasColors": {},
+                  "bars": true,
+                  "cacheTimeout": null,
+                  "dashLength": 10,
+                  "dashes": false,
+                  "datasource": "Azure Monitor",
+                  "description": "Number of controllers in the cluster by Controller Kind",
+                  "fill": 1,
+                  "fillGradient": 0,
+                  "gridPos": {
+                    "h": 9,
+                    "w": 8,
+                    "x": 16,
+                    "y": 9
+                  },
+                  "hiddenSeries": false,
+                  "id": 16,
+                  "legend": {
+                    "alignAsTable": true,
+                    "avg": false,
+                    "current": false,
+                    "max": false,
+                    "min": false,
+                    "rightSide": true,
+                    "show": true,
+                    "total": false,
+                    "values": false
+                  },
+                  "lines": false,
+                  "linewidth": 1,
+                  "links": [],
+                  "nullPointMode": "null",
+                  "options": {
+                    "dataLinks": []
+                  },
+                  "percentage": false,
+                  "pluginVersion": "6.3.3",
+                  "pointradius": 2,
+                  "points": false,
+                  "renderer": "flot",
+                  "scopedVars": {
+                    "clusterid": {
+                      "selected": true,
+                      "text": "/subscriptions/a0f4a733-4fce-4d49-b8a8-d30541fc1b45/resourceGroups/cloudnative-demo/providers/Microsoft.ContainerService/managedClusters/aks-demo-e25wbosx",
+                      "value": "/subscriptions/a0f4a733-4fce-4d49-b8a8-d30541fc1b45/resourceGroups/cloudnative-demo/providers/Microsoft.ContainerService/managedClusters/aks-demo-e25wbosx"
+                    }
+                  },
+                  "seriesOverrides": [],
+                  "spaceLength": 10,
+                  "stack": false,
+                  "steppedLine": false,
+                  "targets": [
+                    {
+                      "appInsights": {
+                        "groupBy": "none",
+                        "metricName": "select",
+                        "rawQuery": false,
+                        "rawQueryString": "",
+                        "spliton": "",
+                        "timeGrainType": "auto",
+                        "xaxis": "timestamp",
+                        "yaxis": ""
+                      },
+                      "azureLogAnalytics": {
+                        "query": "\r\nKubePodInventory | where ClusterId == '$clusterid' | where $__timeFilter(TimeGenerated) \n| summarize count() by bin(TimeGenerated, $__interval), PodUid, ControllerKind\r\n| summarize arg_max(TimeGenerated, *) by PodUid, ControllerKind\r\n| summarize controllerCount = count() by ControllerKind\r\n| extend ControllerKind=iif(isempty(ControllerKind), \"None\", ControllerKind)\n| project ControllerKind, controllerCount , now() ",
+                        "resultFormat": "time_series",
+                        "workspace": ""
+                      },
+                      "azureMonitor": {
+                        "dimensionFilter": "*",
+                        "metricDefinition": "select",
+                        "metricName": "select",
+                        "metricNamespace": "select",
+                        "resourceGroup": "select",
+                        "resourceName": "select",
+                        "timeGrain": "auto"
+                      },
+                      "queryType": "Azure Log Analytics",
+                      "refId": "A",
+                      "subscription": ""
+                    }
+                  ],
+                  "thresholds": [
+                    {
+                      "colorMode": "critical",
+                      "fill": true,
+                      "line": true,
+                      "op": "gt",
+                      "yaxis": "left"
+                    }
+                  ],
+                  "timeFrom": null,
+                  "timeRegions": [],
+                  "timeShift": null,
+                  "title": "Controller count by Controller Kind",
+                  "tooltip": {
+                    "shared": true,
+                    "sort": 0,
+                    "value_type": "individual"
+                  },
+                  "type": "graph",
+                  "xaxis": {
+                    "buckets": null,
+                    "mode": "series",
+                    "name": null,
+                    "show": false,
+                    "values": [
+                      "total"
+                    ]
+                  },
+                  "yaxes": [
+                    {
+                      "decimals": 0,
+                      "format": "short",
+                      "label": null,
+                      "logBase": 1,
+                      "max": null,
+                      "min": null,
+                      "show": true
+                    },
+                    {
+                      "format": "short",
+                      "label": null,
+                      "logBase": 1,
+                      "max": null,
+                      "min": null,
+                      "show": true
+                    }
+                  ],
+                  "yaxis": {
+                    "align": false,
+                    "alignLevel": null
+                  }
+                },
+                {
+                  "aliasColors": {},
+                  "bars": true,
+                  "cacheTimeout": null,
+                  "dashLength": 10,
+                  "dashes": false,
+                  "datasource": "Azure Monitor",
+                  "description": "% Used Disk grouped by Disk in each node where usage > 80%",
+                  "fill": 1,
+                  "fillGradient": 0,
+                  "gridPos": {
+                    "h": 8,
+                    "w": 8,
+                    "x": 0,
+                    "y": 18
+                  },
+                  "hiddenSeries": false,
+                  "id": 6,
+                  "legend": {
+                    "alignAsTable": true,
+                    "avg": false,
+                    "current": false,
+                    "max": false,
+                    "min": false,
+                    "rightSide": true,
+                    "show": true,
+                    "total": false,
+                    "values": false
+                  },
+                  "lines": false,
+                  "linewidth": 1,
+                  "links": [],
+                  "nullPointMode": "null",
+                  "options": {
+                    "dataLinks": []
+                  },
+                  "percentage": false,
+                  "pluginVersion": "6.3.3",
+                  "pointradius": 2,
+                  "points": false,
+                  "renderer": "flot",
+                  "scopedVars": {
+                    "clusterid": {
+                      "selected": true,
+                      "text": "/subscriptions/a0f4a733-4fce-4d49-b8a8-d30541fc1b45/resourceGroups/cloudnative-demo/providers/Microsoft.ContainerService/managedClusters/aks-demo-e25wbosx",
+                      "value": "/subscriptions/a0f4a733-4fce-4d49-b8a8-d30541fc1b45/resourceGroups/cloudnative-demo/providers/Microsoft.ContainerService/managedClusters/aks-demo-e25wbosx"
+                    }
+                  },
+                  "seriesOverrides": [],
+                  "spaceLength": 10,
+                  "stack": false,
+                  "steppedLine": false,
+                  "targets": [
+                    {
+                      "appInsights": {
+                        "groupBy": "none",
+                        "metricName": "select",
+                        "rawQuery": false,
+                        "rawQueryString": "",
+                        "spliton": "",
+                        "timeGrainType": "auto",
+                        "xaxis": "timestamp",
+                        "yaxis": ""
+                      },
+                      "azureLogAnalytics": {
+                        "query": "\r\nInsightsMetrics\r\n| extend tags=todynamic(Tags) \r\n| where Name ==\"used_percent\"\r\n| where tags[\"container.azm.ms/clusterId\"] == '$clusterid'\n| where $__timeFilter(TimeGenerated) \n| extend hostName=tags.hostName\r\n| extend device=tags.device\r\n| extend disk=strcat(device, \"/\" , hostName) \r\n| summarize arg_max(TimeGenerated, *) by disk\r\n| where Val > 80.0\n| sort by Val desc\n| project Val, disk, now()",
+                        "resultFormat": "time_series",
+                        "workspace": ""
+                      },
+                      "azureMonitor": {
+                        "dimensionFilter": "*",
+                        "metricDefinition": "select",
+                        "metricName": "select",
+                        "metricNamespace": "select",
+                        "resourceGroup": "select",
+                        "resourceName": "select",
+                        "timeGrain": "auto"
+                      },
+                      "queryType": "Azure Log Analytics",
+                      "refId": "A",
+                      "subscription": ""
+                    }
+                  ],
+                  "thresholds": [
+                    {
+                      "colorMode": "critical",
+                      "fill": true,
+                      "line": true,
+                      "op": "gt",
+                      "yaxis": "left"
+                    }
+                  ],
+                  "timeFrom": null,
+                  "timeRegions": [],
+                  "timeShift": null,
+                  "title": "Node disks with > 80% used space",
+                  "tooltip": {
+                    "shared": false,
+                    "sort": 2,
+                    "value_type": "individual"
+                  },
+                  "type": "graph",
+                  "xaxis": {
+                    "buckets": null,
+                    "mode": "series",
+                    "name": null,
+                    "show": false,
+                    "values": [
+                      "total"
+                    ]
+                  },
+                  "yaxes": [
+                    {
+                      "decimals": 0,
+                      "format": "short",
+                      "label": null,
+                      "logBase": 1,
+                      "max": null,
+                      "min": null,
+                      "show": true
+                    },
+                    {
+                      "format": "percent",
+                      "label": null,
+                      "logBase": 1,
+                      "max": null,
+                      "min": null,
+                      "show": true
+                    }
+                  ],
+                  "yaxis": {
+                    "align": false,
+                    "alignLevel": null
+                  }
+                }
+              ],
+              "repeat": "clusterid",
+              "scopedVars": {
+                "clusterid": {
+                  "selected": true,
+                  "text": "/subscriptions/a0f4a733-4fce-4d49-b8a8-d30541fc1b45/resourceGroups/cloudnative-demo/providers/Microsoft.ContainerService/managedClusters/aks-demo-e25wbosx",
+                  "value": "/subscriptions/a0f4a733-4fce-4d49-b8a8-d30541fc1b45/resourceGroups/cloudnative-demo/providers/Microsoft.ContainerService/managedClusters/aks-demo-e25wbosx"
+                }
+              },
+              "title": "Cluster - Overview & utilization",
+              "type": "row"
+            },
+            {
+              "collapsed": true,
+              "datasource": null,
+              "gridPos": {
+                "h": 1,
+                "w": 24,
+                "x": 0,
+                "y": 1
+              },
+              "id": 42,
+              "panels": [
+                {
+                  "cacheTimeout": null,
+                  "colorBackground": false,
+                  "colorPostfix": false,
+                  "colorPrefix": false,
+                  "colorValue": true,
+                  "colors": [
+                    "#37872D",
+                    "rgba(237, 129, 40, 0.89)",
+                    "#d44a3a"
+                  ],
+                  "datasource": "Azure Monitor",
+                  "decimals": 0,
+                  "description": "Number of namespaces in the cluster",
+                  "format": "none",
+                  "gauge": {
+                    "maxValue": 100,
+                    "minValue": 0,
+                    "show": false,
+                    "thresholdLabels": false,
+                    "thresholdMarkers": true
+                  },
+                  "gridPos": {
+                    "h": 8,
+                    "w": 3,
+                    "x": 0,
+                    "y": 2
+                  },
+                  "id": 7,
+                  "interval": null,
+                  "links": [],
+                  "mappingType": 1,
+                  "mappingTypes": [
+                    {
+                      "name": "value to text",
+                      "value": 1
+                    },
+                    {
+                      "name": "range to text",
+                      "value": 2
+                    }
+                  ],
+                  "maxDataPoints": 100,
+                  "nullPointMode": "connected",
+                  "nullText": null,
+                  "options": {},
+                  "pluginVersion": "6.3.3",
+                  "postfix": "",
+                  "postfixFontSize": "50%",
+                  "prefix": "",
+                  "prefixFontSize": "50%",
+                  "rangeMaps": [
+                    {
+                      "from": "null",
+                      "text": "N/A",
+                      "to": "null"
+                    }
+                  ],
+                  "scopedVars": {
+                    "clusterid": {
+                      "selected": true,
+                      "text": "/subscriptions/a0f4a733-4fce-4d49-b8a8-d30541fc1b45/resourceGroups/cloudnative-demo/providers/Microsoft.ContainerService/managedClusters/aks-demo-e25wbosx",
+                      "value": "/subscriptions/a0f4a733-4fce-4d49-b8a8-d30541fc1b45/resourceGroups/cloudnative-demo/providers/Microsoft.ContainerService/managedClusters/aks-demo-e25wbosx"
+                    }
+                  },
+                  "sparkline": {
+                    "fillColor": "rgba(31, 118, 189, 0.18)",
+                    "full": false,
+                    "lineColor": "rgb(31, 120, 193)",
+                    "show": false,
+                    "ymax": null,
+                    "ymin": null
+                  },
+                  "tableColumn": "",
+                  "targets": [
+                    {
+                      "appInsights": {
+                        "groupBy": "none",
+                        "metricName": "select",
+                        "rawQuery": false,
+                        "rawQueryString": "",
+                        "spliton": "",
+                        "timeGrainType": "auto",
+                        "xaxis": "timestamp",
+                        "yaxis": ""
+                      },
+                      "azureLogAnalytics": {
+                        "query": "KubePodInventory | where ClusterId == '$clusterid' \r| where $__timeFilter(TimeGenerated)\n| summarize count() by bin(TimeGenerated, $__interval), Namespace\r\n| summarize arg_max(TimeGenerated, *) by Namespace\r\n| summarize namespaceCount = count()\r\n| project namespaceCount,now() ",
+                        "resultFormat": "time_series",
+                        "workspace": ""
+                      },
+                      "azureMonitor": {
+                        "dimensionFilter": "*",
+                        "metricDefinition": "select",
+                        "metricName": "select",
+                        "metricNamespace": "select",
+                        "resourceGroup": "select",
+                        "resourceName": "select",
+                        "timeGrain": "auto"
+                      },
+                      "queryType": "Azure Log Analytics",
+                      "refId": "A",
+                      "subscription": ""
+                    }
+                  ],
+                  "thresholds": "",
+                  "timeFrom": null,
+                  "timeShift": null,
+                  "title": "Kubernetes Namespace count",
+                  "type": "singlestat",
+                  "valueFontSize": "80%",
+                  "valueMaps": [
+                    {
+                      "op": "=",
+                      "text": "N/A",
+                      "value": "null"
+                    }
+                  ],
+                  "valueName": "current"
+                },
+                {
+                  "aliasColors": {},
+                  "bars": true,
+                  "cacheTimeout": null,
+                  "dashLength": 10,
+                  "dashes": false,
+                  "datasource": "Azure Monitor",
+                  "description": "Number of pods per namespace",
+                  "fill": 1,
+                  "fillGradient": 0,
+                  "gridPos": {
+                    "h": 8,
+                    "w": 6,
+                    "x": 3,
+                    "y": 2
+                  },
+                  "id": 10,
+                  "legend": {
+                    "alignAsTable": true,
+                    "avg": false,
+                    "current": false,
+                    "max": false,
+                    "min": false,
+                    "rightSide": true,
+                    "show": true,
+                    "total": false,
+                    "values": false
+                  },
+                  "lines": false,
+                  "linewidth": 1,
+                  "links": [],
+                  "nullPointMode": "null",
+                  "options": {
+                    "dataLinks": []
+                  },
+                  "percentage": false,
+                  "pluginVersion": "6.3.3",
+                  "pointradius": 2,
+                  "points": false,
+                  "renderer": "flot",
+                  "scopedVars": {
+                    "clusterid": {
+                      "selected": true,
+                      "text": "/subscriptions/a0f4a733-4fce-4d49-b8a8-d30541fc1b45/resourceGroups/cloudnative-demo/providers/Microsoft.ContainerService/managedClusters/aks-demo-e25wbosx",
+                      "value": "/subscriptions/a0f4a733-4fce-4d49-b8a8-d30541fc1b45/resourceGroups/cloudnative-demo/providers/Microsoft.ContainerService/managedClusters/aks-demo-e25wbosx"
+                    }
+                  },
+                  "seriesOverrides": [],
+                  "spaceLength": 10,
+                  "stack": false,
+                  "steppedLine": false,
+                  "targets": [
+                    {
+                      "appInsights": {
+                        "groupBy": "none",
+                        "metricName": "select",
+                        "rawQuery": false,
+                        "rawQueryString": "",
+                        "spliton": "",
+                        "timeGrainType": "auto",
+                        "xaxis": "timestamp",
+                        "yaxis": ""
+                      },
+                      "azureLogAnalytics": {
+                        "query": "\rKubePodInventory \n\r| where ClusterId == '$clusterid'\n| where $__timeFilter(TimeGenerated)\n| summarize count() by bin(TimeGenerated, $__interval), PodUid, Namespace\r\n| summarize arg_max(TimeGenerated, *) by PodUid, Namespace\r\n| summarize namespaceCount = count() by Namespace\r\n| sort by namespaceCount desc\n| project namespaceCount, Namespace, now() ",
+                        "resultFormat": "time_series",
+                        "workspace": ""
+                      },
+                      "azureMonitor": {
+                        "dimensionFilter": "*",
+                        "metricDefinition": "select",
+                        "metricName": "select",
+                        "metricNamespace": "select",
+                        "resourceGroup": "select",
+                        "resourceName": "select",
+                        "timeGrain": "auto"
+                      },
+                      "queryType": "Azure Log Analytics",
+                      "refId": "A",
+                      "subscription": ""
+                    }
+                  ],
+                  "thresholds": [
+                    {
+                      "colorMode": "critical",
+                      "fill": true,
+                      "line": true,
+                      "op": "gt",
+                      "yaxis": "left"
+                    }
+                  ],
+                  "timeFrom": null,
+                  "timeRegions": [],
+                  "timeShift": null,
+                  "title": "Pod count by Kubernetes Namespace",
+                  "tooltip": {
+                    "shared": true,
+                    "sort": 0,
+                    "value_type": "individual"
+                  },
+                  "type": "graph",
+                  "xaxis": {
+                    "buckets": null,
+                    "mode": "series",
+                    "name": null,
+                    "show": false,
+                    "values": [
+                      "total"
+                    ]
+                  },
+                  "yaxes": [
+                    {
+                      "decimals": 0,
+                      "format": "short",
+                      "label": null,
+                      "logBase": 1,
+                      "max": null,
+                      "min": null,
+                      "show": true
+                    },
+                    {
+                      "format": "short",
+                      "label": null,
+                      "logBase": 1,
+                      "max": null,
+                      "min": null,
+                      "show": true
+                    }
+                  ],
+                  "yaxis": {
+                    "align": false,
+                    "alignLevel": null
+                  }
+                },
+                {
+                  "aliasColors": {},
+                  "bars": true,
+                  "cacheTimeout": null,
+                  "dashLength": 10,
+                  "dashes": false,
+                  "datasource": "Azure Monitor",
+                  "description": "Number of controllers per namespace",
+                  "fill": 1,
+                  "fillGradient": 0,
+                  "gridPos": {
+                    "h": 8,
+                    "w": 7,
+                    "x": 9,
+                    "y": 2
+                  },
+                  "id": 53,
+                  "legend": {
+                    "alignAsTable": true,
+                    "avg": false,
+                    "current": false,
+                    "max": false,
+                    "min": false,
+                    "rightSide": true,
+                    "show": true,
+                    "total": false,
+                    "values": false
+                  },
+                  "lines": false,
+                  "linewidth": 1,
+                  "links": [],
+                  "nullPointMode": "null",
+                  "options": {
+                    "dataLinks": []
+                  },
+                  "percentage": false,
+                  "pluginVersion": "6.3.3",
+                  "pointradius": 2,
+                  "points": false,
+                  "renderer": "flot",
+                  "scopedVars": {
+                    "clusterid": {
+                      "selected": true,
+                      "text": "/subscriptions/a0f4a733-4fce-4d49-b8a8-d30541fc1b45/resourceGroups/cloudnative-demo/providers/Microsoft.ContainerService/managedClusters/aks-demo-e25wbosx",
+                      "value": "/subscriptions/a0f4a733-4fce-4d49-b8a8-d30541fc1b45/resourceGroups/cloudnative-demo/providers/Microsoft.ContainerService/managedClusters/aks-demo-e25wbosx"
+                    }
+                  },
+                  "seriesOverrides": [],
+                  "spaceLength": 10,
+                  "stack": false,
+                  "steppedLine": false,
+                  "targets": [
+                    {
+                      "appInsights": {
+                        "groupBy": "none",
+                        "metricName": "select",
+                        "rawQuery": false,
+                        "rawQueryString": "",
+                        "spliton": "",
+                        "timeGrainType": "auto",
+                        "xaxis": "timestamp",
+                        "yaxis": ""
+                      },
+                      "azureLogAnalytics": {
+                        "query": "\rKubePodInventory \n\r| where ClusterId == '$clusterid'\n| where $__timeFilter(TimeGenerated)\n| summarize count() by bin(TimeGenerated, $__interval), PodUid, Namespace\r, ControllerKind\n| summarize arg_max(TimeGenerated, *) by PodUid, Namespace\r, ControllerKind\n| summarize controllerCountByNamespace = count() by Namespace\r, ControllerKind\n| sort by controllerCountByNamespace desc\n| project controllerCountByNamespace, Namespace, now() \n\n",
+                        "resultFormat": "time_series",
+                        "workspace": ""
+                      },
+                      "azureMonitor": {
+                        "dimensionFilter": "*",
+                        "metricDefinition": "select",
+                        "metricName": "select",
+                        "metricNamespace": "select",
+                        "resourceGroup": "select",
+                        "resourceName": "select",
+                        "timeGrain": "auto"
+                      },
+                      "queryType": "Azure Log Analytics",
+                      "refId": "A",
+                      "subscription": ""
+                    }
+                  ],
+                  "thresholds": [
+                    {
+                      "colorMode": "critical",
+                      "fill": true,
+                      "line": true,
+                      "op": "gt",
+                      "yaxis": "left"
+                    }
+                  ],
+                  "timeFrom": null,
+                  "timeRegions": [],
+                  "timeShift": null,
+                  "title": "Controller count by Kubernetes Namespace",
+                  "tooltip": {
+                    "shared": true,
+                    "sort": 0,
+                    "value_type": "individual"
+                  },
+                  "type": "graph",
+                  "xaxis": {
+                    "buckets": null,
+                    "mode": "series",
+                    "name": null,
+                    "show": false,
+                    "values": [
+                      "total"
+                    ]
+                  },
+                  "yaxes": [
+                    {
+                      "decimals": 0,
+                      "format": "short",
+                      "label": null,
+                      "logBase": 1,
+                      "max": null,
+                      "min": null,
+                      "show": true
+                    },
+                    {
+                      "format": "short",
+                      "label": null,
+                      "logBase": 1,
+                      "max": null,
+                      "min": null,
+                      "show": true
+                    }
+                  ],
+                  "yaxis": {
+                    "align": false,
+                    "alignLevel": null
+                  }
+                },
+                {
+                  "aliasColors": {},
+                  "bars": true,
+                  "cacheTimeout": null,
+                  "dashLength": 10,
+                  "dashes": false,
+                  "datasource": "Azure Monitor",
+                  "description": "Number of controllers per namespace per kind",
+                  "fill": 1,
+                  "fillGradient": 0,
+                  "gridPos": {
+                    "h": 8,
+                    "w": 8,
+                    "x": 16,
+                    "y": 2
+                  },
+                  "id": 54,
+                  "legend": {
+                    "alignAsTable": true,
+                    "avg": false,
+                    "current": false,
+                    "max": false,
+                    "min": false,
+                    "rightSide": true,
+                    "show": true,
+                    "total": false,
+                    "values": false
+                  },
+                  "lines": false,
+                  "linewidth": 1,
+                  "links": [],
+                  "nullPointMode": "null",
+                  "options": {
+                    "dataLinks": []
+                  },
+                  "percentage": false,
+                  "pluginVersion": "6.3.3",
+                  "pointradius": 2,
+                  "points": false,
+                  "renderer": "flot",
+                  "scopedVars": {
+                    "clusterid": {
+                      "selected": true,
+                      "text": "/subscriptions/a0f4a733-4fce-4d49-b8a8-d30541fc1b45/resourceGroups/cloudnative-demo/providers/Microsoft.ContainerService/managedClusters/aks-demo-e25wbosx",
+                      "value": "/subscriptions/a0f4a733-4fce-4d49-b8a8-d30541fc1b45/resourceGroups/cloudnative-demo/providers/Microsoft.ContainerService/managedClusters/aks-demo-e25wbosx"
+                    }
+                  },
+                  "seriesOverrides": [],
+                  "spaceLength": 10,
+                  "stack": false,
+                  "steppedLine": false,
+                  "targets": [
+                    {
+                      "appInsights": {
+                        "groupBy": "none",
+                        "metricName": "select",
+                        "rawQuery": false,
+                        "rawQueryString": "",
+                        "spliton": "",
+                        "timeGrainType": "auto",
+                        "xaxis": "timestamp",
+                        "yaxis": ""
+                      },
+                      "azureLogAnalytics": {
+                        "query": "\rKubePodInventory \n\r| where ClusterId == '$clusterid'\n| where $__timeFilter(TimeGenerated)\n| summarize count() by bin(TimeGenerated, $__interval), PodUid, Namespace\r, ControllerKind\n| summarize arg_max(TimeGenerated, *) by PodUid, nsc = strcat(Namespace\r,\"/\", ControllerKind)\n| summarize controllerCountByNamespace = count() by nsc\n| sort by controllerCountByNamespace desc\n| project controllerCountByNamespace, nsc, now() \n\n",
+                        "resultFormat": "time_series",
+                        "workspace": ""
+                      },
+                      "azureMonitor": {
+                        "dimensionFilter": "*",
+                        "metricDefinition": "select",
+                        "metricName": "select",
+                        "metricNamespace": "select",
+                        "resourceGroup": "select",
+                        "resourceName": "select",
+                        "timeGrain": "auto"
+                      },
+                      "queryType": "Azure Log Analytics",
+                      "refId": "A",
+                      "subscription": ""
+                    }
+                  ],
+                  "thresholds": [
+                    {
+                      "colorMode": "critical",
+                      "fill": true,
+                      "line": true,
+                      "op": "gt",
+                      "yaxis": "left"
+                    }
+                  ],
+                  "timeFrom": null,
+                  "timeRegions": [],
+                  "timeShift": null,
+                  "title": "Controller Kind by Kubernetes Namespace (namespace/controllerkind)",
+                  "tooltip": {
+                    "shared": true,
+                    "sort": 0,
+                    "value_type": "individual"
+                  },
+                  "type": "graph",
+                  "xaxis": {
+                    "buckets": null,
+                    "mode": "series",
+                    "name": null,
+                    "show": false,
+                    "values": [
+                      "total"
+                    ]
+                  },
+                  "yaxes": [
+                    {
+                      "decimals": 0,
+                      "format": "short",
+                      "label": null,
+                      "logBase": 1,
+                      "max": null,
+                      "min": null,
+                      "show": true
+                    },
+                    {
+                      "format": "short",
+                      "label": null,
+                      "logBase": 1,
+                      "max": null,
+                      "min": null,
+                      "show": true
+                    }
+                  ],
+                  "yaxis": {
+                    "align": false,
+                    "alignLevel": null
+                  }
+                },
+                {
+                  "aliasColors": {},
+                  "bars": true,
+                  "cacheTimeout": null,
+                  "dashLength": 10,
+                  "dashes": false,
+                  "datasource": "Azure Monitor",
+                  "description": "CPU % utilized by each namespace",
+                  "fill": 1,
+                  "fillGradient": 0,
+                  "gridPos": {
+                    "h": 8,
+                    "w": 12,
+                    "x": 0,
+                    "y": 10
+                  },
+                  "id": 17,
+                  "legend": {
+                    "alignAsTable": true,
+                    "avg": false,
+                    "current": false,
+                    "max": false,
+                    "min": false,
+                    "rightSide": true,
+                    "show": true,
+                    "total": false,
+                    "values": false
+                  },
+                  "lines": false,
+                  "linewidth": 1,
+                  "links": [],
+                  "nullPointMode": "null",
+                  "options": {
+                    "dataLinks": []
+                  },
+                  "percentage": false,
+                  "pluginVersion": "6.3.3",
+                  "pointradius": 2,
+                  "points": false,
+                  "renderer": "flot",
+                  "scopedVars": {
+                    "clusterid": {
+                      "selected": true,
+                      "text": "/subscriptions/a0f4a733-4fce-4d49-b8a8-d30541fc1b45/resourceGroups/cloudnative-demo/providers/Microsoft.ContainerService/managedClusters/aks-demo-e25wbosx",
+                      "value": "/subscriptions/a0f4a733-4fce-4d49-b8a8-d30541fc1b45/resourceGroups/cloudnative-demo/providers/Microsoft.ContainerService/managedClusters/aks-demo-e25wbosx"
+                    }
+                  },
+                  "seriesOverrides": [],
+                  "spaceLength": 10,
+                  "stack": false,
+                  "steppedLine": false,
+                  "targets": [
+                    {
+                      "appInsights": {
+                        "groupBy": "none",
+                        "metricName": "select",
+                        "rawQuery": false,
+                        "rawQueryString": "",
+                        "spliton": "",
+                        "timeGrainType": "auto",
+                        "xaxis": "timestamp",
+                        "yaxis": ""
+                      },
+                      "azureLogAnalytics": {
+                        "query": "let allocatable = Perf | where ObjectName == \"K8SNode\" | where CounterName == \"cpuCapacityNanoCores\" \r\n| where $__timeFilter(TimeGenerated) \r\n| where InstanceName startswith '$clusterid'\n| summarize arg_max(TimeGenerated, * ) by Computer\r\n| summarize a=toreal(sum(CounterValue))\r\n| project a, b=\"abc\";\r\n\r\nallocatable \r\n| join kind=inner (\r\n    Perf | where ObjectName == \"K8SContainer\" | where CounterName == \"cpuUsageNanoCores\" \r\n    | where $__timeFilter(TimeGenerated) \r\n    | where InstanceName startswith '$clusterid'\n    | extend cnameArr = split(InstanceName, \"/\")\r\n    | extend h=array_length(cnameArr)-1\r\n    | extend l=array_length(cnameArr)-2\r\n    | extend cname = strcat(cnameArr[l], \"/\", cnameArr[h])\r\n    | extend x= CounterValue \r\n    | summarize arg_max(TimeGenerated, * ) by cname // | summarize sum(x)\r\n    \r\n    //| summarize x=toreal(sum(CounterValue))\r\n    | project x,y=\"abc\", cname, TimeGenerated\r\n      | join kind=inner ( KubePodInventory\r\n      | where $__timeFilter(TimeGenerated) \r\n      | where ClusterId == '$clusterid'\n      | summarize arg_max(TimeGenerated, *) by ContainerName\r\n      | project ContainerName, Namespace\r\n      ) on $left.cname == $right.ContainerName//)\r\n) on $left.b == $right.y \r\n//| summarize v=arg_max(TimeGenerated,*) by cname,a, Namespace\r\n| summarize xyz= toreal(sum(x)) by a, Namespace\r\n| order by xyz desc\r\n|project now(), (xyz/a) * 100, Namespace \r\n",
+                        "resultFormat": "time_series",
+                        "workspace": ""
+                      },
+                      "azureMonitor": {
+                        "dimensionFilter": "*",
+                        "metricDefinition": "select",
+                        "metricName": "select",
+                        "metricNamespace": "select",
+                        "resourceGroup": "select",
+                        "resourceName": "select",
+                        "timeGrain": "auto"
+                      },
+                      "queryType": "Azure Log Analytics",
+                      "refId": "A",
+                      "subscription": ""
+                    }
+                  ],
+                  "thresholds": [
+                    {
+                      "colorMode": "critical",
+                      "fill": true,
+                      "line": true,
+                      "op": "gt",
+                      "yaxis": "left"
+                    }
+                  ],
+                  "timeFrom": null,
+                  "timeRegions": [],
+                  "timeShift": null,
+                  "title": "Cluster CPU Utilization % by Kubernetes Namespace",
+                  "tooltip": {
+                    "shared": true,
+                    "sort": 0,
+                    "value_type": "individual"
+                  },
+                  "type": "graph",
+                  "xaxis": {
+                    "buckets": null,
+                    "mode": "series",
+                    "name": null,
+                    "show": false,
+                    "values": [
+                      "total"
+                    ]
+                  },
+                  "yaxes": [
+                    {
+                      "decimals": null,
+                      "format": "percent",
+                      "label": null,
+                      "logBase": 1,
+                      "max": null,
+                      "min": null,
+                      "show": true
+                    },
+                    {
+                      "decimals": -3,
+                      "format": "percent",
+                      "label": null,
+                      "logBase": 1,
+                      "max": null,
+                      "min": null,
+                      "show": true
+                    }
+                  ],
+                  "yaxis": {
+                    "align": false,
+                    "alignLevel": null
+                  }
+                },
+                {
+                  "aliasColors": {},
+                  "bars": true,
+                  "cacheTimeout": null,
+                  "dashLength": 10,
+                  "dashes": false,
+                  "datasource": "Azure Monitor",
+                  "description": "Memory usage (working set) by namespace",
+                  "fill": 1,
+                  "fillGradient": 0,
+                  "gridPos": {
+                    "h": 8,
+                    "w": 12,
+                    "x": 12,
+                    "y": 10
+                  },
+                  "id": 18,
+                  "legend": {
+                    "alignAsTable": true,
+                    "avg": false,
+                    "current": false,
+                    "max": false,
+                    "min": false,
+                    "rightSide": true,
+                    "show": true,
+                    "total": false,
+                    "values": false
+                  },
+                  "lines": false,
+                  "linewidth": 1,
+                  "links": [],
+                  "nullPointMode": "null",
+                  "options": {
+                    "dataLinks": [
+                      {
+                        "title": "",
+                        "url": ""
+                      }
+                    ]
+                  },
+                  "percentage": false,
+                  "pluginVersion": "6.3.3",
+                  "pointradius": 2,
+                  "points": false,
+                  "renderer": "flot",
+                  "scopedVars": {
+                    "clusterid": {
+                      "selected": true,
+                      "text": "/subscriptions/a0f4a733-4fce-4d49-b8a8-d30541fc1b45/resourceGroups/cloudnative-demo/providers/Microsoft.ContainerService/managedClusters/aks-demo-e25wbosx",
+                      "value": "/subscriptions/a0f4a733-4fce-4d49-b8a8-d30541fc1b45/resourceGroups/cloudnative-demo/providers/Microsoft.ContainerService/managedClusters/aks-demo-e25wbosx"
+                    }
+                  },
+                  "seriesOverrides": [],
+                  "spaceLength": 10,
+                  "stack": false,
+                  "steppedLine": false,
+                  "targets": [
+                    {
+                      "appInsights": {
+                        "groupBy": "none",
+                        "metricName": "select",
+                        "rawQuery": false,
+                        "rawQueryString": "",
+                        "spliton": "",
+                        "timeGrainType": "auto",
+                        "xaxis": "timestamp",
+                        "yaxis": ""
+                      },
+                      "azureLogAnalytics": {
+                        "query": "let allocatable = Perf | where ObjectName == \"K8SNode\" | where CounterName == \"memoryCapacityBytes\" \r\n| where $__timeFilter(TimeGenerated) \r\n| where InstanceName startswith '$clusterid'\n| summarize arg_max(TimeGenerated, * ) by Computer\r\n| summarize a=toreal(sum(CounterValue))\r\n| project a, b=\"abc\";\r\n\r\nallocatable \r\n| join kind=inner (\r\n    Perf | where ObjectName == \"K8SContainer\" | where CounterName == \"memoryWorkingSetBytes\" \r\n    | where $__timeFilter(TimeGenerated) \r\n    | where InstanceName startswith '$clusterid'\n    | extend cnameArr = split(InstanceName, \"/\")\r\n    | extend h=array_length(cnameArr)-1\r\n    | extend l=array_length(cnameArr)-2\r\n    | extend cname = strcat(cnameArr[l], \"/\", cnameArr[h])\r\n    | extend x= CounterValue \r\n    | summarize arg_max(TimeGenerated, * ) by cname // | summarize sum(x)\r\n    \r\n    //| summarize x=toreal(sum(CounterValue))\r\n    | project x,y=\"abc\", cname, TimeGenerated\r\n      | join kind=inner ( KubePodInventory\r\n      | where $__timeFilter(TimeGenerated) \r\n      | where ClusterId == '$clusterid'\n      | summarize arg_max(TimeGenerated, *) by ContainerName\r\n      | project ContainerName, Namespace\r\n      ) on $left.cname == $right.ContainerName//)\r\n) on $left.b == $right.y \r\n//| summarize v=arg_max(TimeGenerated,*) by cname,a, Namespace\r\n| summarize xyz= toreal(sum(x)) by a, Namespace\r\n| order by xyz desc\r\n|project now(), (xyz/a) * 100, Namespace  ",
+                        "resultFormat": "time_series",
+                        "workspace": ""
+                      },
+                      "azureMonitor": {
+                        "dimensionFilter": "*",
+                        "metricDefinition": "select",
+                        "metricName": "select",
+                        "metricNamespace": "select",
+                        "resourceGroup": "select",
+                        "resourceName": "select",
+                        "timeGrain": "auto"
+                      },
+                      "queryType": "Azure Log Analytics",
+                      "refId": "A",
+                      "subscription": ""
+                    }
+                  ],
+                  "thresholds": [
+                    {
+                      "colorMode": "critical",
+                      "fill": true,
+                      "line": true,
+                      "op": "gt",
+                      "yaxis": "left"
+                    }
+                  ],
+                  "timeFrom": null,
+                  "timeRegions": [],
+                  "timeShift": null,
+                  "title": "Cluster Memory Utilization % by Kubernetes Namespace",
+                  "tooltip": {
+                    "shared": true,
+                    "sort": 0,
+                    "value_type": "individual"
+                  },
+                  "type": "graph",
+                  "xaxis": {
+                    "buckets": null,
+                    "mode": "series",
+                    "name": null,
+                    "show": false,
+                    "values": [
+                      "total"
+                    ]
+                  },
+                  "yaxes": [
+                    {
+                      "decimals": null,
+                      "format": "percent",
+                      "label": null,
+                      "logBase": 1,
+                      "max": null,
+                      "min": null,
+                      "show": true
+                    },
+                    {
+                      "format": "short",
+                      "label": null,
+                      "logBase": 1,
+                      "max": null,
+                      "min": null,
+                      "show": true
+                    }
+                  ],
+                  "yaxis": {
+                    "align": false,
+                    "alignLevel": null
+                  }
+                }
+              ],
+              "repeat": "clusterid",
+              "scopedVars": {
+                "clusterid": {
+                  "selected": true,
+                  "text": "/subscriptions/a0f4a733-4fce-4d49-b8a8-d30541fc1b45/resourceGroups/cloudnative-demo/providers/Microsoft.ContainerService/managedClusters/aks-demo-e25wbosx",
+                  "value": "/subscriptions/a0f4a733-4fce-4d49-b8a8-d30541fc1b45/resourceGroups/cloudnative-demo/providers/Microsoft.ContainerService/managedClusters/aks-demo-e25wbosx"
+                }
+              },
+              "title": "Cluster - Namespaces",
+              "type": "row"
+            },
+            {
+              "collapsed": true,
+              "datasource": null,
+              "gridPos": {
+                "h": 1,
+                "w": 24,
+                "x": 0,
+                "y": 2
+              },
+              "id": 40,
+              "panels": [
+                {
+                  "aliasColors": {},
+                  "bars": false,
+                  "dashLength": 10,
+                  "dashes": false,
+                  "datasource": "Azure Monitor",
+                  "description": "",
+                  "fill": 1,
+                  "fillGradient": 10,
+                  "gridPos": {
+                    "h": 8,
+                    "w": 12,
+                    "x": 0,
+                    "y": 3
+                  },
+                  "id": 20,
+                  "legend": {
+                    "alignAsTable": true,
+                    "avg": false,
+                    "current": false,
+                    "max": false,
+                    "min": false,
+                    "rightSide": true,
+                    "show": true,
+                    "total": false,
+                    "values": false
+                  },
+                  "lines": true,
+                  "linewidth": 2,
+                  "nullPointMode": "null",
+                  "options": {
+                    "dataLinks": []
+                  },
+                  "percentage": false,
+                  "pluginVersion": "6.3.3",
+                  "pointradius": 2,
+                  "points": false,
+                  "renderer": "flot",
+                  "scopedVars": {
+                    "clusterid": {
+                      "selected": true,
+                      "text": "/subscriptions/a0f4a733-4fce-4d49-b8a8-d30541fc1b45/resourceGroups/cloudnative-demo/providers/Microsoft.ContainerService/managedClusters/aks-demo-e25wbosx",
+                      "value": "/subscriptions/a0f4a733-4fce-4d49-b8a8-d30541fc1b45/resourceGroups/cloudnative-demo/providers/Microsoft.ContainerService/managedClusters/aks-demo-e25wbosx"
+                    }
+                  },
+                  "seriesOverrides": [],
+                  "spaceLength": 10,
+                  "stack": false,
+                  "steppedLine": false,
+                  "targets": [
+                    {
+                      "appInsights": {
+                        "groupBy": "none",
+                        "metricName": "select",
+                        "rawQuery": false,
+                        "rawQueryString": "",
+                        "spliton": "",
+                        "timeGrainType": "auto",
+                        "xaxis": "timestamp",
+                        "yaxis": ""
+                      },
+                      "azureLogAnalytics": {
+                        "query": "let nodeCpuCapacity=Perf | where CounterName == \"cpuCapacityNanoCores\" | where ObjectName == \"K8SNode\" | where InstanceName startswith '$clusterid' | where $__timeFilter(TimeGenerated)| summarize arg_max(TimeGenerated, *) by Computer| project Computer , cpuCapacity=CounterValue; \n\nlet nodeCpuUsage=Perf | where CounterName == \"cpuUsageNanoCores\"| where ObjectName  == \"K8SNode\"| where InstanceName startswith '$clusterid'| where $__timeFilter(TimeGenerated) | summarize ptileCpuUsage=percentile(CounterValue, $ptile) by Computer, bin(TimeGenerated, $__interval);\n\nnodeCpuUsage|join kind=inner (nodeCpuCapacity) on $left.Computer == $right.Computer| extend ptileCpuUsagepercent=(ptileCpuUsage/cpuCapacity) * 100| order by TimeGenerated asc| project TimeGenerated, Computer, ptileCpuUsagepercent",
+                        "resultFormat": "time_series",
+                        "workspace": ""
+                      },
+                      "azureMonitor": {
+                        "dimensionFilter": "*",
+                        "metricDefinition": "select",
+                        "metricName": "select",
+                        "metricNamespace": "select",
+                        "resourceGroup": "select",
+                        "resourceName": "select",
+                        "timeGrain": "auto"
+                      },
+                      "queryType": "Azure Log Analytics",
+                      "refId": "A",
+                      "subscription": ""
+                    }
+                  ],
+                  "thresholds": [
+                    {
+                      "colorMode": "critical",
+                      "fill": true,
+                      "line": true,
+                      "op": "gt",
+                      "value": 80,
+                      "yaxis": "left"
+                    }
+                  ],
+                  "timeFrom": null,
+                  "timeRegions": [],
+                  "timeShift": null,
+                  "title": "$ptile-th Percentile % CPU usage by node",
+                  "tooltip": {
+                    "shared": true,
+                    "sort": 1,
+                    "value_type": "individual"
+                  },
+                  "transparent": true,
+                  "type": "graph",
+                  "xaxis": {
+                    "buckets": null,
+                    "mode": "time",
+                    "name": null,
+                    "show": true,
+                    "values": []
+                  },
+                  "yaxes": [
+                    {
+                      "format": "percent",
+                      "label": null,
+                      "logBase": 1,
+                      "max": null,
+                      "min": null,
+                      "show": true
+                    },
+                    {
+                      "format": "short",
+                      "label": null,
+                      "logBase": 1,
+                      "max": null,
+                      "min": null,
+                      "show": false
+                    }
+                  ],
+                  "yaxis": {
+                    "align": false,
+                    "alignLevel": null
+                  }
+                },
+                {
+                  "aliasColors": {},
+                  "bars": false,
+                  "dashLength": 10,
+                  "dashes": false,
+                  "datasource": "Azure Monitor",
+                  "fill": 1,
+                  "fillGradient": 10,
+                  "gridPos": {
+                    "h": 8,
+                    "w": 12,
+                    "x": 12,
+                    "y": 3
+                  },
+                  "id": 26,
+                  "legend": {
+                    "alignAsTable": true,
+                    "avg": false,
+                    "current": false,
+                    "max": false,
+                    "min": false,
+                    "rightSide": true,
+                    "show": true,
+                    "total": false,
+                    "values": false
+                  },
+                  "lines": true,
+                  "linewidth": 2,
+                  "nullPointMode": "null",
+                  "options": {
+                    "dataLinks": []
+                  },
+                  "percentage": false,
+                  "pluginVersion": "6.3.3",
+                  "pointradius": 2,
+                  "points": false,
+                  "renderer": "flot",
+                  "scopedVars": {
+                    "clusterid": {
+                      "selected": true,
+                      "text": "/subscriptions/a0f4a733-4fce-4d49-b8a8-d30541fc1b45/resourceGroups/cloudnative-demo/providers/Microsoft.ContainerService/managedClusters/aks-demo-e25wbosx",
+                      "value": "/subscriptions/a0f4a733-4fce-4d49-b8a8-d30541fc1b45/resourceGroups/cloudnative-demo/providers/Microsoft.ContainerService/managedClusters/aks-demo-e25wbosx"
+                    }
+                  },
+                  "seriesOverrides": [],
+                  "spaceLength": 10,
+                  "stack": false,
+                  "steppedLine": false,
+                  "targets": [
+                    {
+                      "appInsights": {
+                        "groupBy": "none",
+                        "metricName": "select",
+                        "rawQuery": false,
+                        "rawQueryString": "",
+                        "spliton": "",
+                        "timeGrainType": "auto",
+                        "xaxis": "timestamp",
+                        "yaxis": ""
+                      },
+                      "azureLogAnalytics": {
+                        "query": "let nodeMemoryCapacity=Perf| where CounterName == \"memoryCapacityBytes\"| where ObjectName == \"K8SNode\" | where InstanceName startswith '$clusterid'| where $__timeFilter(TimeGenerated)| summarize arg_max(TimeGenerated, *) by Computer| project Computer , memoryCapacity=CounterValue;\n\nlet nodeMemoryUsage= Perf | where CounterName == \"memoryRssBytes\"| where ObjectName  == \"K8SNode\"| where InstanceName startswith '$clusterid'| where $__timeFilter(TimeGenerated) | summarize ptileMemoryUsage=percentile(CounterValue, $ptile) by Computer, bin(TimeGenerated, $__interval);\n\nnodeMemoryUsage|join kind=inner (nodeMemoryCapacity) on $left.Computer == $right.Computer| extend ptileMemoryUsagepercent=(ptileMemoryUsage/memoryCapacity) * 100| order by TimeGenerated asc| project TimeGenerated, Computer, ptileMemoryUsagepercent",
+                        "resultFormat": "time_series",
+                        "workspace": ""
+                      },
+                      "azureMonitor": {
+                        "dimensionFilter": "*",
+                        "metricDefinition": "select",
+                        "metricName": "select",
+                        "metricNamespace": "select",
+                        "resourceGroup": "select",
+                        "resourceName": "select",
+                        "timeGrain": "auto"
+                      },
+                      "queryType": "Azure Log Analytics",
+                      "refId": "A",
+                      "subscription": ""
+                    }
+                  ],
+                  "thresholds": [
+                    {
+                      "colorMode": "critical",
+                      "fill": true,
+                      "line": true,
+                      "op": "gt",
+                      "value": 80,
+                      "yaxis": "left"
+                    }
+                  ],
+                  "timeFrom": null,
+                  "timeRegions": [],
+                  "timeShift": null,
+                  "title": "$ptile-th Percentile Memory (rss) usage by node",
+                  "tooltip": {
+                    "shared": true,
+                    "sort": 1,
+                    "value_type": "individual"
+                  },
+                  "transparent": true,
+                  "type": "graph",
+                  "xaxis": {
+                    "buckets": null,
+                    "mode": "time",
+                    "name": null,
+                    "show": true,
+                    "values": []
+                  },
+                  "yaxes": [
+                    {
+                      "decimals": 0,
+                      "format": "percent",
+                      "label": null,
+                      "logBase": 1,
+                      "max": null,
+                      "min": null,
+                      "show": true
+                    },
+                    {
+                      "format": "short",
+                      "label": null,
+                      "logBase": 1,
+                      "max": null,
+                      "min": null,
+                      "show": false
+                    }
+                  ],
+                  "yaxis": {
+                    "align": false,
+                    "alignLevel": null
+                  }
+                }
+              ],
+              "repeat": "clusterid",
+              "scopedVars": {
+                "clusterid": {
+                  "selected": true,
+                  "text": "/subscriptions/a0f4a733-4fce-4d49-b8a8-d30541fc1b45/resourceGroups/cloudnative-demo/providers/Microsoft.ContainerService/managedClusters/aks-demo-e25wbosx",
+                  "value": "/subscriptions/a0f4a733-4fce-4d49-b8a8-d30541fc1b45/resourceGroups/cloudnative-demo/providers/Microsoft.ContainerService/managedClusters/aks-demo-e25wbosx"
+                }
+              },
+              "title": "Node - CPU & Memory",
+              "type": "row"
+            },
+            {
+              "collapsed": true,
+              "datasource": null,
+              "gridPos": {
+                "h": 1,
+                "w": 24,
+                "x": 0,
+                "y": 3
+              },
+              "id": 38,
+              "panels": [
+                {
+                  "aliasColors": {},
+                  "bars": false,
+                  "cacheTimeout": null,
+                  "dashLength": 10,
+                  "dashes": false,
+                  "datasource": "Azure Monitor",
+                  "description": "$ptile-th percentile, % Used Disk grouped by Disk in each node",
+                  "fill": 0,
+                  "fillGradient": 0,
+                  "gridPos": {
+                    "h": 7,
+                    "w": 12,
+                    "x": 0,
+                    "y": 12
+                  },
+                  "id": 28,
+                  "legend": {
+                    "alignAsTable": true,
+                    "avg": false,
+                    "current": false,
+                    "max": false,
+                    "min": false,
+                    "rightSide": true,
+                    "show": true,
+                    "total": false,
+                    "values": false
+                  },
+                  "lines": true,
+                  "linewidth": 2,
+                  "links": [],
+                  "nullPointMode": "null",
+                  "options": {
+                    "dataLinks": []
+                  },
+                  "percentage": false,
+                  "pluginVersion": "6.3.3",
+                  "pointradius": 2,
+                  "points": false,
+                  "renderer": "flot",
+                  "seriesOverrides": [],
+                  "spaceLength": 10,
+                  "stack": false,
+                  "steppedLine": false,
+                  "targets": [
+                    {
+                      "appInsights": {
+                        "groupBy": "none",
+                        "metricName": "select",
+                        "rawQuery": false,
+                        "rawQueryString": "",
+                        "spliton": "",
+                        "timeGrainType": "auto",
+                        "xaxis": "timestamp",
+                        "yaxis": ""
+                      },
+                      "azureLogAnalytics": {
+                        "query": "\rInsightsMetrics\r\n| extend tags=todynamic(Tags) \r\n| where Name ==\"used_percent\"\r\n| where tags[\"container.azm.ms/clusterId\"] == '$clusterid'\n| where $__timeFilter(TimeGenerated) \n| extend hostName=tags.hostName\r\n| extend device=tags.device\r\n| extend disk=strcat(device, \"/\" , hostName) \r\n| summarize ptileDiskUsagePercentagebyNodeDisk = percentile(Val,$ptile) by bin(TimeGenerated, $__interval), disk\r\n| order by TimeGenerated asc\n| project TimeGenerated, disk, ptileDiskUsagePercentagebyNodeDisk",
+                        "resultFormat": "time_series",
+                        "workspace": ""
+                      },
+                      "azureMonitor": {
+                        "dimensionFilter": "*",
+                        "metricDefinition": "select",
+                        "metricName": "select",
+                        "metricNamespace": "select",
+                        "resourceGroup": "select",
+                        "resourceName": "select",
+                        "timeGrain": "auto"
+                      },
+                      "queryType": "Azure Log Analytics",
+                      "refId": "A",
+                      "subscription": ""
+                    }
+                  ],
+                  "thresholds": [
+                    {
+                      "colorMode": "critical",
+                      "fill": true,
+                      "line": true,
+                      "op": "gt",
+                      "value": 80,
+                      "yaxis": "left"
+                    }
+                  ],
+                  "timeFrom": null,
+                  "timeRegions": [],
+                  "timeShift": null,
+                  "title": "% Used Disk ($ptile-th percentile) by Disk/Node",
+                  "tooltip": {
+                    "shared": true,
+                    "sort": 0,
+                    "value_type": "individual"
+                  },
+                  "transparent": true,
+                  "type": "graph",
+                  "xaxis": {
+                    "buckets": null,
+                    "mode": "time",
+                    "name": null,
+                    "show": true,
+                    "values": []
+                  },
+                  "yaxes": [
+                    {
+                      "decimals": null,
+                      "format": "percent",
+                      "label": null,
+                      "logBase": 1,
+                      "max": null,
+                      "min": null,
+                      "show": true
+                    },
+                    {
+                      "format": "percent",
+                      "label": null,
+                      "logBase": 1,
+                      "max": null,
+                      "min": null,
+                      "show": true
+                    }
+                  ],
+                  "yaxis": {
+                    "align": false,
+                    "alignLevel": null
+                  }
+                },
+                {
+                  "aliasColors": {},
+                  "bars": false,
+                  "cacheTimeout": null,
+                  "dashLength": 10,
+                  "dashes": false,
+                  "datasource": "Azure Monitor",
+                  "description": "$ptile-th percentile iops in progress grouped by Disk in each node",
+                  "fill": 0,
+                  "fillGradient": 0,
+                  "gridPos": {
+                    "h": 7,
+                    "w": 12,
+                    "x": 12,
+                    "y": 12
+                  },
+                  "id": 30,
+                  "legend": {
+                    "alignAsTable": true,
+                    "avg": false,
+                    "current": false,
+                    "max": false,
+                    "min": false,
+                    "rightSide": true,
+                    "show": true,
+                    "total": false,
+                    "values": false
+                  },
+                  "lines": true,
+                  "linewidth": 2,
+                  "links": [],
+                  "nullPointMode": "null",
+                  "options": {
+                    "dataLinks": []
+                  },
+                  "percentage": false,
+                  "pluginVersion": "6.3.3",
+                  "pointradius": 2,
+                  "points": false,
+                  "renderer": "flot",
+                  "seriesOverrides": [],
+                  "spaceLength": 10,
+                  "stack": false,
+                  "steppedLine": false,
+                  "targets": [
+                    {
+                      "appInsights": {
+                        "groupBy": "none",
+                        "metricName": "select",
+                        "rawQuery": false,
+                        "rawQueryString": "",
+                        "spliton": "",
+                        "timeGrainType": "auto",
+                        "xaxis": "timestamp",
+                        "yaxis": ""
+                      },
+                      "azureLogAnalytics": {
+                        "query": "\rInsightsMetrics\r\n| extend tags=todynamic(Tags) \r\n| where Name ==\"iops_in_progress\"\r\n| where tags[\"container.azm.ms/clusterId\"] == '$clusterid'\r\n| where $__timeFilter(TimeGenerated) \n| extend hostName=tags.hostName\r\n| extend device=tags.name\n| extend disk=strcat(device, \"/\" , hostName) \r\n| summarize ptileDiskIopsInProgressbyNodeDisk = percentile(Val,$ptile) by bin(TimeGenerated, $__interval), disk\r\n| order by TimeGenerated asc\n| project TimeGenerated, disk, ptileDiskIopsInProgressbyNodeDisk",
+                        "resultFormat": "time_series",
+                        "workspace": ""
+                      },
+                      "azureMonitor": {
+                        "dimensionFilter": "*",
+                        "metricDefinition": "select",
+                        "metricName": "select",
+                        "metricNamespace": "select",
+                        "resourceGroup": "select",
+                        "resourceName": "select",
+                        "timeGrain": "auto"
+                      },
+                      "queryType": "Azure Log Analytics",
+                      "refId": "A",
+                      "subscription": ""
+                    }
+                  ],
+                  "thresholds": [
+                    {
+                      "colorMode": "critical",
+                      "fill": true,
+                      "line": true,
+                      "op": "gt",
+                      "value": null,
+                      "yaxis": "left"
+                    }
+                  ],
+                  "timeFrom": null,
+                  "timeRegions": [],
+                  "timeShift": null,
+                  "title": "iops in progress ($ptile-th percentile) by Disk/Node",
+                  "tooltip": {
+                    "shared": true,
+                    "sort": 0,
+                    "value_type": "individual"
+                  },
+                  "transparent": true,
+                  "type": "graph",
+                  "xaxis": {
+                    "buckets": null,
+                    "mode": "time",
+                    "name": null,
+                    "show": true,
+                    "values": []
+                  },
+                  "yaxes": [
+                    {
+                      "decimals": null,
+                      "format": "short",
+                      "label": null,
+                      "logBase": 1,
+                      "max": null,
+                      "min": null,
+                      "show": true
+                    },
+                    {
+                      "format": "short",
+                      "label": null,
+                      "logBase": 1,
+                      "max": null,
+                      "min": null,
+                      "show": true
+                    }
+                  ],
+                  "yaxis": {
+                    "align": false,
+                    "alignLevel": null
+                  }
+                },
+                {
+                  "aliasColors": {},
+                  "bars": false,
+                  "cacheTimeout": null,
+                  "dashLength": 10,
+                  "dashes": false,
+                  "datasource": "Azure Monitor",
+                  "description": "Reads/sec ($ptile-th percentile) grouped by Disk in each node",
+                  "fill": 0,
+                  "fillGradient": 0,
+                  "gridPos": {
+                    "h": 7,
+                    "w": 12,
+                    "x": 0,
+                    "y": 19
+                  },
+                  "id": 32,
+                  "legend": {
+                    "alignAsTable": true,
+                    "avg": false,
+                    "current": false,
+                    "max": false,
+                    "min": false,
+                    "rightSide": true,
+                    "show": true,
+                    "total": false,
+                    "values": false
+                  },
+                  "lines": true,
+                  "linewidth": 2,
+                  "links": [],
+                  "nullPointMode": "null",
+                  "options": {
+                    "dataLinks": []
+                  },
+                  "percentage": false,
+                  "pluginVersion": "6.3.3",
+                  "pointradius": 2,
+                  "points": false,
+                  "renderer": "flot",
+                  "seriesOverrides": [],
+                  "spaceLength": 10,
+                  "stack": false,
+                  "steppedLine": false,
+                  "targets": [
+                    {
+                      "appInsights": {
+                        "groupBy": "none",
+                        "metricName": "select",
+                        "rawQuery": false,
+                        "rawQueryString": "",
+                        "spliton": "",
+                        "timeGrainType": "auto",
+                        "xaxis": "timestamp",
+                        "yaxis": ""
+                      },
+                      "azureLogAnalytics": {
+                        "query": "\rInsightsMetrics\r\n| where Origin == 'container.azm.ms/telegraf'\r\n| where Namespace == 'container.azm.ms/diskio'\r\n| where Name == 'reads'\r\n| where $__timeFilter(TimeGenerated) \n| extend Tags = todynamic(Tags)\r\n| extend HostName = tostring(Tags.hostName), Device = tostring(Tags.name)\r, clusterId = tostring(Tags[\"container.azm.ms/clusterId\"])\n| where clusterId == '$clusterid'\n| extend NodeDisk = strcat(Device, \"/\", HostName)\r\n| summarize Val=percentile(Val,$ptile) by NodeDisk, TimeGenerated=bin(TimeGenerated,$__interval)\r\n| order by NodeDisk asc, TimeGenerated asc\r\n| serialize\r\n| extend PrevVal = iif(prev(NodeDisk) != NodeDisk, 0.0, prev(Val)), PrevTimeGenerated = iif(prev(NodeDisk) != NodeDisk, datetime(null), prev(TimeGenerated))\r\n| where isnotnull(PrevTimeGenerated) and PrevTimeGenerated != TimeGenerated\r\n| extend Rate = iif(PrevVal > Val, Val / (datetime_diff('Second', TimeGenerated, PrevTimeGenerated) * 1), iif(PrevVal == Val, 0.0, (Val - PrevVal) / (datetime_diff('Second', TimeGenerated, PrevTimeGenerated) * 1)))\r\n| where isnotnull(Rate)\r\n| project TimeGenerated, NodeDisk, Rate\r\n|render timechart",
+                        "resultFormat": "time_series",
+                        "workspace": ""
+                      },
+                      "azureMonitor": {
+                        "dimensionFilter": "*",
+                        "metricDefinition": "select",
+                        "metricName": "select",
+                        "metricNamespace": "select",
+                        "resourceGroup": "select",
+                        "resourceName": "select",
+                        "timeGrain": "auto"
+                      },
+                      "queryType": "Azure Log Analytics",
+                      "refId": "A",
+                      "subscription": ""
+                    }
+                  ],
+                  "thresholds": [
+                    {
+                      "colorMode": "critical",
+                      "fill": true,
+                      "line": true,
+                      "op": "gt",
+                      "value": 80,
+                      "yaxis": "left"
+                    }
+                  ],
+                  "timeFrom": null,
+                  "timeRegions": [],
+                  "timeShift": null,
+                  "title": "Disk reads/sec ($ptile-th percentile) by disk/node",
+                  "tooltip": {
+                    "shared": true,
+                    "sort": 0,
+                    "value_type": "individual"
+                  },
+                  "transparent": true,
+                  "type": "graph",
+                  "xaxis": {
+                    "buckets": null,
+                    "mode": "time",
+                    "name": null,
+                    "show": true,
+                    "values": []
+                  },
+                  "yaxes": [
+                    {
+                      "decimals": null,
+                      "format": "short",
+                      "label": null,
+                      "logBase": 1,
+                      "max": null,
+                      "min": null,
+                      "show": true
+                    },
+                    {
+                      "format": "short",
+                      "label": null,
+                      "logBase": 1,
+                      "max": null,
+                      "min": null,
+                      "show": true
+                    }
+                  ],
+                  "yaxis": {
+                    "align": false,
+                    "alignLevel": null
+                  }
+                },
+                {
+                  "aliasColors": {},
+                  "bars": false,
+                  "cacheTimeout": null,
+                  "dashLength": 10,
+                  "dashes": false,
+                  "datasource": "Azure Monitor",
+                  "description": "Write bytes/sec ($ptile-th percentile) grouped by Disk in each node",
+                  "fill": 0,
+                  "fillGradient": 0,
+                  "gridPos": {
+                    "h": 7,
+                    "w": 12,
+                    "x": 12,
+                    "y": 19
+                  },
+                  "id": 34,
+                  "legend": {
+                    "alignAsTable": true,
+                    "avg": false,
+                    "current": false,
+                    "max": false,
+                    "min": false,
+                    "rightSide": true,
+                    "show": true,
+                    "total": false,
+                    "values": false
+                  },
+                  "lines": true,
+                  "linewidth": 2,
+                  "links": [],
+                  "nullPointMode": "null",
+                  "options": {
+                    "dataLinks": []
+                  },
+                  "percentage": false,
+                  "pluginVersion": "6.3.3",
+                  "pointradius": 2,
+                  "points": false,
+                  "renderer": "flot",
+                  "seriesOverrides": [],
+                  "spaceLength": 10,
+                  "stack": false,
+                  "steppedLine": false,
+                  "targets": [
+                    {
+                      "appInsights": {
+                        "groupBy": "none",
+                        "metricName": "select",
+                        "rawQuery": false,
+                        "rawQueryString": "",
+                        "spliton": "",
+                        "timeGrainType": "auto",
+                        "xaxis": "timestamp",
+                        "yaxis": ""
+                      },
+                      "azureLogAnalytics": {
+                        "query": "\rInsightsMetrics\r\n| where Origin == 'container.azm.ms/telegraf'\r\n| where Namespace == 'container.azm.ms/diskio'\r\n| where Name == 'write_bytes'\r\n| where $__timeFilter(TimeGenerated) \n| extend Tags = todynamic(Tags)\r\n| extend HostName = tostring(Tags.hostName), Device = tostring(Tags.name)\r, clusterId = tostring(Tags[\"container.azm.ms/clusterId\"])\n| where clusterId == '$clusterid'\n| extend NodeDisk = strcat(Device, \"/\", HostName)\r\n| summarize Val=percentile(Val,$ptile) by NodeDisk, TimeGenerated=bin(TimeGenerated,$__interval)\r\n| order by NodeDisk asc, TimeGenerated asc\r\n| serialize\r\n| extend PrevVal = iif(prev(NodeDisk) != NodeDisk, 0.0, prev(Val)), PrevTimeGenerated = iif(prev(NodeDisk) != NodeDisk, datetime(null), prev(TimeGenerated))\r\n| where isnotnull(PrevTimeGenerated) and PrevTimeGenerated != TimeGenerated\r\n| extend Rate = iif(PrevVal > Val, Val / (datetime_diff('Second', TimeGenerated, PrevTimeGenerated) * 1), iif(PrevVal == Val, 0.0, (Val - PrevVal) / (datetime_diff('Second', TimeGenerated, PrevTimeGenerated) * 1)))\r\n| where isnotnull(Rate)\r\n| project TimeGenerated, NodeDisk, Rate\r\n|render timechart",
+                        "resultFormat": "time_series",
+                        "workspace": ""
+                      },
+                      "azureMonitor": {
+                        "dimensionFilter": "*",
+                        "metricDefinition": "select",
+                        "metricName": "select",
+                        "metricNamespace": "select",
+                        "resourceGroup": "select",
+                        "resourceName": "select",
+                        "timeGrain": "auto"
+                      },
+                      "queryType": "Azure Log Analytics",
+                      "refId": "A",
+                      "subscription": ""
+                    }
+                  ],
+                  "thresholds": [
+                    {
+                      "colorMode": "critical",
+                      "fill": true,
+                      "line": true,
+                      "op": "gt",
+                      "value": 80,
+                      "yaxis": "left"
+                    }
+                  ],
+                  "timeFrom": null,
+                  "timeRegions": [],
+                  "timeShift": null,
+                  "title": "Disk write bytes/sec ($ptile-th percentile) by disk/node",
+                  "tooltip": {
+                    "shared": true,
+                    "sort": 0,
+                    "value_type": "individual"
+                  },
+                  "transparent": true,
+                  "type": "graph",
+                  "xaxis": {
+                    "buckets": null,
+                    "mode": "time",
+                    "name": null,
+                    "show": true,
+                    "values": []
+                  },
+                  "yaxes": [
+                    {
+                      "decimals": null,
+                      "format": "Bps",
+                      "label": null,
+                      "logBase": 1,
+                      "max": null,
+                      "min": null,
+                      "show": true
+                    },
+                    {
+                      "format": "short",
+                      "label": null,
+                      "logBase": 1,
+                      "max": null,
+                      "min": null,
+                      "show": true
+                    }
+                  ],
+                  "yaxis": {
+                    "align": false,
+                    "alignLevel": null
+                  }
+                }
+              ],
+              "title": "Node - Disk Usage & IO",
+              "type": "row"
+            },
+            {
+              "collapsed": true,
+              "datasource": null,
+              "gridPos": {
+                "h": 1,
+                "w": 24,
+                "x": 0,
+                "y": 4
+              },
+              "id": 36,
+              "panels": [
+                {
+                  "aliasColors": {},
+                  "bars": false,
+                  "cacheTimeout": null,
+                  "dashLength": 10,
+                  "dashes": false,
+                  "datasource": "Azure Monitor",
+                  "description": "Sent bytes/sec ($ptile-th percentile) grouped by network interface in each node",
+                  "fill": 0,
+                  "fillGradient": 0,
+                  "gridPos": {
+                    "h": 7,
+                    "w": 11,
+                    "x": 0,
+                    "y": 13
+                  },
+                  "id": 46,
+                  "legend": {
+                    "alignAsTable": true,
+                    "avg": false,
+                    "current": false,
+                    "max": false,
+                    "min": false,
+                    "rightSide": true,
+                    "show": true,
+                    "total": false,
+                    "values": false
+                  },
+                  "lines": true,
+                  "linewidth": 2,
+                  "links": [],
+                  "nullPointMode": "null",
+                  "options": {
+                    "dataLinks": []
+                  },
+                  "percentage": false,
+                  "pluginVersion": "6.3.3",
+                  "pointradius": 2,
+                  "points": false,
+                  "renderer": "flot",
+                  "scopedVars": {
+                    "clusterid": {
+                      "selected": true,
+                      "text": "/subscriptions/a0f4a733-4fce-4d49-b8a8-d30541fc1b45/resourceGroups/cloudnative-demo/providers/Microsoft.ContainerService/managedClusters/aks-demo-e25wbosx",
+                      "value": "/subscriptions/a0f4a733-4fce-4d49-b8a8-d30541fc1b45/resourceGroups/cloudnative-demo/providers/Microsoft.ContainerService/managedClusters/aks-demo-e25wbosx"
+                    }
+                  },
+                  "seriesOverrides": [],
+                  "spaceLength": 10,
+                  "stack": false,
+                  "steppedLine": false,
+                  "targets": [
+                    {
+                      "appInsights": {
+                        "groupBy": "none",
+                        "metricName": "select",
+                        "rawQuery": false,
+                        "rawQueryString": "",
+                        "spliton": "",
+                        "timeGrainType": "auto",
+                        "xaxis": "timestamp",
+                        "yaxis": ""
+                      },
+                      "azureLogAnalytics": {
+                        "query": "\rInsightsMetrics\r\n| where Origin == 'container.azm.ms/telegraf'\r\n| where Namespace == 'container.azm.ms/net'\r\n| where Name == 'bytes_sent'\r\n| where $__timeFilter(TimeGenerated) \n| extend Tags = todynamic(Tags)\r\n| extend HostName = tostring(Tags.hostName), Interface = tostring(Tags.interface)\r, clusterId = tostring(Tags[\"container.azm.ms/clusterId\"])\n| where clusterId == '$clusterid'\n| extend NodeInterface = strcat(Interface, \"/\", HostName)\r\n| summarize Val=percentile(Val,$ptile) by NodeInterface, TimeGenerated=bin(TimeGenerated,$__interval)\r\n| order by NodeInterface asc, TimeGenerated asc\r\n| serialize\r\n| extend PrevVal = iif(prev(NodeInterface) != NodeInterface, 0.0, prev(Val)), PrevTimeGenerated = iif(prev(NodeInterface) != NodeInterface, datetime(null), prev(TimeGenerated))\r\n| where isnotnull(PrevTimeGenerated) and PrevTimeGenerated != TimeGenerated\r\n| extend Rate = iif(PrevVal > Val, Val / (datetime_diff('Second', TimeGenerated, PrevTimeGenerated) * 1), iif(PrevVal == Val, 0.0, (Val - PrevVal) / (datetime_diff('Second', TimeGenerated, PrevTimeGenerated) * 1)))\r\n| where isnotnull(Rate)\r\n| project TimeGenerated, NodeInterface, Rate\r\n|render timechart",
+                        "resultFormat": "time_series",
+                        "workspace": ""
+                      },
+                      "azureMonitor": {
+                        "dimensionFilter": "*",
+                        "metricDefinition": "select",
+                        "metricName": "select",
+                        "metricNamespace": "select",
+                        "resourceGroup": "select",
+                        "resourceName": "select",
+                        "timeGrain": "auto"
+                      },
+                      "queryType": "Azure Log Analytics",
+                      "refId": "A",
+                      "subscription": ""
+                    }
+                  ],
+                  "thresholds": [
+                    {
+                      "colorMode": "critical",
+                      "fill": true,
+                      "line": true,
+                      "op": "gt",
+                      "value": 80,
+                      "yaxis": "left"
+                    }
+                  ],
+                  "timeFrom": null,
+                  "timeRegions": [],
+                  "timeShift": null,
+                  "title": "Network sent bytes/sec ($ptile-th percentile) by interface/node",
+                  "tooltip": {
+                    "shared": true,
+                    "sort": 0,
+                    "value_type": "individual"
+                  },
+                  "transparent": true,
+                  "type": "graph",
+                  "xaxis": {
+                    "buckets": null,
+                    "mode": "time",
+                    "name": null,
+                    "show": true,
+                    "values": []
+                  },
+                  "yaxes": [
+                    {
+                      "decimals": null,
+                      "format": "Bps",
+                      "label": null,
+                      "logBase": 1,
+                      "max": null,
+                      "min": null,
+                      "show": true
+                    },
+                    {
+                      "format": "short",
+                      "label": null,
+                      "logBase": 1,
+                      "max": null,
+                      "min": null,
+                      "show": true
+                    }
+                  ],
+                  "yaxis": {
+                    "align": false,
+                    "alignLevel": null
+                  }
+                },
+                {
+                  "aliasColors": {},
+                  "bars": false,
+                  "cacheTimeout": null,
+                  "dashLength": 10,
+                  "dashes": false,
+                  "datasource": "Azure Monitor",
+                  "description": "Received bytes/sec ($ptile-th percentile) grouped by network interface in each node",
+                  "fill": 0,
+                  "fillGradient": 0,
+                  "gridPos": {
+                    "h": 7,
+                    "w": 13,
+                    "x": 11,
+                    "y": 13
+                  },
+                  "id": 48,
+                  "legend": {
+                    "alignAsTable": true,
+                    "avg": false,
+                    "current": false,
+                    "max": false,
+                    "min": false,
+                    "rightSide": true,
+                    "show": true,
+                    "total": false,
+                    "values": false
+                  },
+                  "lines": true,
+                  "linewidth": 2,
+                  "links": [],
+                  "nullPointMode": "null",
+                  "options": {
+                    "dataLinks": []
+                  },
+                  "percentage": false,
+                  "pluginVersion": "6.3.3",
+                  "pointradius": 2,
+                  "points": false,
+                  "renderer": "flot",
+                  "scopedVars": {
+                    "clusterid": {
+                      "selected": true,
+                      "text": "/subscriptions/a0f4a733-4fce-4d49-b8a8-d30541fc1b45/resourceGroups/cloudnative-demo/providers/Microsoft.ContainerService/managedClusters/aks-demo-e25wbosx",
+                      "value": "/subscriptions/a0f4a733-4fce-4d49-b8a8-d30541fc1b45/resourceGroups/cloudnative-demo/providers/Microsoft.ContainerService/managedClusters/aks-demo-e25wbosx"
+                    }
+                  },
+                  "seriesOverrides": [],
+                  "spaceLength": 10,
+                  "stack": false,
+                  "steppedLine": false,
+                  "targets": [
+                    {
+                      "appInsights": {
+                        "groupBy": "none",
+                        "metricName": "select",
+                        "rawQuery": false,
+                        "rawQueryString": "",
+                        "spliton": "",
+                        "timeGrainType": "auto",
+                        "xaxis": "timestamp",
+                        "yaxis": ""
+                      },
+                      "azureLogAnalytics": {
+                        "query": "\rInsightsMetrics\r\n| where Origin == 'container.azm.ms/telegraf'\r\n| where Namespace == 'container.azm.ms/net'\r\n| where Name == 'bytes_recv'\r\n| where $__timeFilter(TimeGenerated) \n| extend Tags = todynamic(Tags)\r\n| extend HostName = tostring(Tags.hostName), Interface = tostring(Tags.interface)\r, clusterId = tostring(Tags[\"container.azm.ms/clusterId\"])\n| where clusterId == '$clusterid'\n| extend NodeInterface = strcat(Interface, \"/\", HostName)\r\n| summarize Val=percentile(Val,$ptile) by NodeInterface, TimeGenerated=bin(TimeGenerated,$__interval)\r\n| order by NodeInterface asc, TimeGenerated asc\r\n| serialize\r\n| extend PrevVal = iif(prev(NodeInterface) != NodeInterface, 0.0, prev(Val)), PrevTimeGenerated = iif(prev(NodeInterface) != NodeInterface, datetime(null), prev(TimeGenerated))\r\n| where isnotnull(PrevTimeGenerated) and PrevTimeGenerated != TimeGenerated\r\n| extend Rate = iif(PrevVal > Val, Val / (datetime_diff('Second', TimeGenerated, PrevTimeGenerated) * 1), iif(PrevVal == Val, 0.0, (Val - PrevVal) / (datetime_diff('Second', TimeGenerated, PrevTimeGenerated) * 1)))\r\n| where isnotnull(Rate)\r\n| project TimeGenerated, NodeInterface, Rate\r\n|render timechart",
+                        "resultFormat": "time_series",
+                        "workspace": ""
+                      },
+                      "azureMonitor": {
+                        "dimensionFilter": "*",
+                        "metricDefinition": "select",
+                        "metricName": "select",
+                        "metricNamespace": "select",
+                        "resourceGroup": "select",
+                        "resourceName": "select",
+                        "timeGrain": "auto"
+                      },
+                      "queryType": "Azure Log Analytics",
+                      "refId": "A",
+                      "subscription": ""
+                    }
+                  ],
+                  "thresholds": [
+                    {
+                      "colorMode": "critical",
+                      "fill": true,
+                      "line": true,
+                      "op": "gt",
+                      "value": 80,
+                      "yaxis": "left"
+                    }
+                  ],
+                  "timeFrom": null,
+                  "timeRegions": [],
+                  "timeShift": null,
+                  "title": "Network received bytes/sec ($ptile-th percentile)  by interface/node",
+                  "tooltip": {
+                    "shared": true,
+                    "sort": 0,
+                    "value_type": "individual"
+                  },
+                  "transparent": true,
+                  "type": "graph",
+                  "xaxis": {
+                    "buckets": null,
+                    "mode": "time",
+                    "name": null,
+                    "show": true,
+                    "values": []
+                  },
+                  "yaxes": [
+                    {
+                      "decimals": null,
+                      "format": "Bps",
+                      "label": null,
+                      "logBase": 1,
+                      "max": null,
+                      "min": null,
+                      "show": true
+                    },
+                    {
+                      "format": "short",
+                      "label": null,
+                      "logBase": 1,
+                      "max": null,
+                      "min": null,
+                      "show": true
+                    }
+                  ],
+                  "yaxis": {
+                    "align": false,
+                    "alignLevel": null
+                  }
+                },
+                {
+                  "aliasColors": {},
+                  "bars": false,
+                  "cacheTimeout": null,
+                  "dashLength": 10,
+                  "dashes": false,
+                  "datasource": "Azure Monitor",
+                  "description": "Network send errors ($ptile-th percentile) grouped by interface in each node",
+                  "fill": 0,
+                  "fillGradient": 0,
+                  "gridPos": {
+                    "h": 6,
+                    "w": 11,
+                    "x": 0,
+                    "y": 20
+                  },
+                  "id": 50,
+                  "legend": {
+                    "alignAsTable": true,
+                    "avg": false,
+                    "current": false,
+                    "max": false,
+                    "min": false,
+                    "rightSide": true,
+                    "show": true,
+                    "total": false,
+                    "values": false
+                  },
+                  "lines": true,
+                  "linewidth": 2,
+                  "links": [],
+                  "nullPointMode": "null",
+                  "options": {
+                    "dataLinks": []
+                  },
+                  "percentage": false,
+                  "pluginVersion": "6.3.3",
+                  "pointradius": 2,
+                  "points": false,
+                  "renderer": "flot",
+                  "scopedVars": {
+                    "clusterid": {
+                      "selected": true,
+                      "text": "/subscriptions/a0f4a733-4fce-4d49-b8a8-d30541fc1b45/resourceGroups/cloudnative-demo/providers/Microsoft.ContainerService/managedClusters/aks-demo-e25wbosx",
+                      "value": "/subscriptions/a0f4a733-4fce-4d49-b8a8-d30541fc1b45/resourceGroups/cloudnative-demo/providers/Microsoft.ContainerService/managedClusters/aks-demo-e25wbosx"
+                    }
+                  },
+                  "seriesOverrides": [],
+                  "spaceLength": 10,
+                  "stack": false,
+                  "steppedLine": false,
+                  "targets": [
+                    {
+                      "appInsights": {
+                        "groupBy": "none",
+                        "metricName": "select",
+                        "rawQuery": false,
+                        "rawQueryString": "",
+                        "spliton": "",
+                        "timeGrainType": "auto",
+                        "xaxis": "timestamp",
+                        "yaxis": ""
+                      },
+                      "azureLogAnalytics": {
+                        "query": "\rInsightsMetrics\r\n| extend tags=todynamic(Tags) \r\n| where Name ==\"err_out\"\r\n| where tags[\"container.azm.ms/clusterId\"] == '$clusterid'\n| where $__timeFilter(TimeGenerated) \n| extend hostName=tags.hostName\n| extend interface=tags.interface\n| extend nodeInterface=strcat(interface, \"/\" , hostName) \r\n| summarize ptileErrorsOutByNodeInterface = percentile(Val,$ptile) by bin(TimeGenerated, $__interval), nodeInterface\n| order by TimeGenerated asc\n| project TimeGenerated, nodeInterface, ptileErrorsOutByNodeInterface",
+                        "resultFormat": "time_series",
+                        "workspace": ""
+                      },
+                      "azureMonitor": {
+                        "dimensionFilter": "*",
+                        "metricDefinition": "select",
+                        "metricName": "select",
+                        "metricNamespace": "select",
+                        "resourceGroup": "select",
+                        "resourceName": "select",
+                        "timeGrain": "auto"
+                      },
+                      "queryType": "Azure Log Analytics",
+                      "refId": "A",
+                      "subscription": ""
+                    }
+                  ],
+                  "thresholds": [
+                    {
+                      "colorMode": "critical",
+                      "fill": true,
+                      "line": true,
+                      "op": "gt",
+                      "value": 80,
+                      "yaxis": "left"
+                    }
+                  ],
+                  "timeFrom": null,
+                  "timeRegions": [],
+                  "timeShift": null,
+                  "title": "Network send errors ($ptile-th percentle) by Interface/Node",
+                  "tooltip": {
+                    "shared": true,
+                    "sort": 0,
+                    "value_type": "individual"
+                  },
+                  "transparent": true,
+                  "type": "graph",
+                  "xaxis": {
+                    "buckets": null,
+                    "mode": "time",
+                    "name": null,
+                    "show": true,
+                    "values": []
+                  },
+                  "yaxes": [
+                    {
+                      "decimals": null,
+                      "format": "short",
+                      "label": null,
+                      "logBase": 1,
+                      "max": null,
+                      "min": null,
+                      "show": true
+                    },
+                    {
+                      "format": "short",
+                      "label": null,
+                      "logBase": 1,
+                      "max": null,
+                      "min": null,
+                      "show": true
+                    }
+                  ],
+                  "yaxis": {
+                    "align": false,
+                    "alignLevel": null
+                  }
+                },
+                {
+                  "aliasColors": {},
+                  "bars": false,
+                  "cacheTimeout": null,
+                  "dashLength": 10,
+                  "dashes": false,
+                  "datasource": "Azure Monitor",
+                  "description": "Network receive errors ($ptile-th percentile) grouped by interface in each node",
+                  "fill": 0,
+                  "fillGradient": 0,
+                  "gridPos": {
+                    "h": 7,
+                    "w": 13,
+                    "x": 11,
+                    "y": 20
+                  },
+                  "id": 52,
+                  "legend": {
+                    "alignAsTable": true,
+                    "avg": false,
+                    "current": false,
+                    "max": false,
+                    "min": false,
+                    "rightSide": true,
+                    "show": true,
+                    "total": false,
+                    "values": false
+                  },
+                  "lines": true,
+                  "linewidth": 2,
+                  "links": [],
+                  "nullPointMode": "null",
+                  "options": {
+                    "dataLinks": []
+                  },
+                  "percentage": false,
+                  "pluginVersion": "6.3.3",
+                  "pointradius": 2,
+                  "points": false,
+                  "renderer": "flot",
+                  "scopedVars": {
+                    "clusterid": {
+                      "selected": true,
+                      "text": "/subscriptions/a0f4a733-4fce-4d49-b8a8-d30541fc1b45/resourceGroups/cloudnative-demo/providers/Microsoft.ContainerService/managedClusters/aks-demo-e25wbosx",
+                      "value": "/subscriptions/a0f4a733-4fce-4d49-b8a8-d30541fc1b45/resourceGroups/cloudnative-demo/providers/Microsoft.ContainerService/managedClusters/aks-demo-e25wbosx"
+                    }
+                  },
+                  "seriesOverrides": [],
+                  "spaceLength": 10,
+                  "stack": false,
+                  "steppedLine": false,
+                  "targets": [
+                    {
+                      "appInsights": {
+                        "groupBy": "none",
+                        "metricName": "select",
+                        "rawQuery": false,
+                        "rawQueryString": "",
+                        "spliton": "",
+                        "timeGrainType": "auto",
+                        "xaxis": "timestamp",
+                        "yaxis": ""
+                      },
+                      "azureLogAnalytics": {
+                        "query": "\rInsightsMetrics\r\n| extend tags=todynamic(Tags) \r\n| where Name ==\"err_in\"\r\n| where tags[\"container.azm.ms/clusterId\"] == '$clusterid'\n| where $__timeFilter(TimeGenerated) \n| extend hostName=tags.hostName\n| extend interface=tags.interface\n| extend nodeInterface=strcat(interface, \"/\" , hostName) \r\n| summarize ptileErrorsInByNodeInterface = percentile(Val,$ptile) by bin(TimeGenerated, $__interval), nodeInterface\n| order by TimeGenerated asc\n| project TimeGenerated, nodeInterface, ptileErrorsInByNodeInterface",
+                        "resultFormat": "time_series",
+                        "workspace": ""
+                      },
+                      "azureMonitor": {
+                        "dimensionFilter": "*",
+                        "metricDefinition": "select",
+                        "metricName": "select",
+                        "metricNamespace": "select",
+                        "resourceGroup": "select",
+                        "resourceName": "select",
+                        "timeGrain": "auto"
+                      },
+                      "queryType": "Azure Log Analytics",
+                      "refId": "A",
+                      "subscription": ""
+                    }
+                  ],
+                  "thresholds": [
+                    {
+                      "colorMode": "critical",
+                      "fill": true,
+                      "line": true,
+                      "op": "gt",
+                      "value": 80,
+                      "yaxis": "left"
+                    }
+                  ],
+                  "timeFrom": null,
+                  "timeRegions": [],
+                  "timeShift": null,
+                  "title": "Network receive errors ($ptile-th percentle) by Interface/Node",
+                  "tooltip": {
+                    "shared": true,
+                    "sort": 0,
+                    "value_type": "individual"
+                  },
+                  "transparent": true,
+                  "type": "graph",
+                  "xaxis": {
+                    "buckets": null,
+                    "mode": "time",
+                    "name": null,
+                    "show": true,
+                    "values": []
+                  },
+                  "yaxes": [
+                    {
+                      "decimals": null,
+                      "format": "short",
+                      "label": null,
+                      "logBase": 1,
+                      "max": null,
+                      "min": null,
+                      "show": true
+                    },
+                    {
+                      "format": "short",
+                      "label": null,
+                      "logBase": 1,
+                      "max": null,
+                      "min": null,
+                      "show": true
+                    }
+                  ],
+                  "yaxis": {
+                    "align": false,
+                    "alignLevel": null
+                  }
+                }
+              ],
+              "repeat": "clusterid",
+              "scopedVars": {
+                "clusterid": {
+                  "selected": true,
+                  "text": "/subscriptions/a0f4a733-4fce-4d49-b8a8-d30541fc1b45/resourceGroups/cloudnative-demo/providers/Microsoft.ContainerService/managedClusters/aks-demo-e25wbosx",
+                  "value": "/subscriptions/a0f4a733-4fce-4d49-b8a8-d30541fc1b45/resourceGroups/cloudnative-demo/providers/Microsoft.ContainerService/managedClusters/aks-demo-e25wbosx"
+                }
+              },
+              "title": "Node - Network",
+              "type": "row"
+            },
+            {
+              "collapsed": true,
+              "datasource": null,
+              "gridPos": {
+                "h": 1,
+                "w": 24,
+                "x": 0,
+                "y": 5
+              },
+              "id": 22,
+              "panels": [
+                {
+                  "aliasColors": {},
+                  "bars": false,
+                  "cacheTimeout": null,
+                  "dashLength": 10,
+                  "dashes": false,
+                  "datasource": "Azure Monitor",
+                  "description": "Docker Operations/sec ($ptile-th percentile) grouped by operation in each node",
+                  "fill": 0,
+                  "fillGradient": 0,
+                  "gridPos": {
+                    "h": 11,
+                    "w": 12,
+                    "x": 0,
+                    "y": 14
+                  },
+                  "id": 55,
+                  "legend": {
+                    "alignAsTable": true,
+                    "avg": false,
+                    "current": false,
+                    "max": false,
+                    "min": false,
+                    "rightSide": true,
+                    "show": true,
+                    "total": false,
+                    "values": false
+                  },
+                  "lines": true,
+                  "linewidth": 2,
+                  "links": [],
+                  "nullPointMode": "null",
+                  "options": {
+                    "dataLinks": []
+                  },
+                  "percentage": false,
+                  "pluginVersion": "6.3.3",
+                  "pointradius": 2,
+                  "points": false,
+                  "renderer": "flot",
+                  "scopedVars": {
+                    "clusterid": {
+                      "selected": true,
+                      "text": "/subscriptions/a0f4a733-4fce-4d49-b8a8-d30541fc1b45/resourceGroups/cloudnative-demo/providers/Microsoft.ContainerService/managedClusters/aks-demo-e25wbosx",
+                      "value": "/subscriptions/a0f4a733-4fce-4d49-b8a8-d30541fc1b45/resourceGroups/cloudnative-demo/providers/Microsoft.ContainerService/managedClusters/aks-demo-e25wbosx"
+                    }
+                  },
+                  "seriesOverrides": [],
+                  "spaceLength": 10,
+                  "stack": false,
+                  "steppedLine": false,
+                  "targets": [
+                    {
+                      "appInsights": {
+                        "groupBy": "none",
+                        "metricName": "select",
+                        "rawQuery": false,
+                        "rawQueryString": "",
+                        "spliton": "",
+                        "timeGrainType": "auto",
+                        "xaxis": "timestamp",
+                        "yaxis": ""
+                      },
+                      "azureLogAnalytics": {
+                        "query": "InsightsMetrics\r\n| where Origin == 'container.azm.ms/telegraf'\r\n| where Namespace == 'container.azm.ms/prometheus'\r\n| where Name == 'kubelet_docker_operations'\r\n| where $__timeFilter(TimeGenerated) | extend Tags = todynamic(Tags)\r\n| extend HostName = tostring(Tags.hostName), optype = tostring(Tags.operation_type)\r\n, clusterId = tostring(Tags[\"container.azm.ms/clusterId\"])| where clusterId == '$clusterid'| extend NodeOp = strcat(optype, \"/\", HostName)\r\n| summarize Val=percentile(Val,$ptile) by NodeOp, TimeGenerated=bin(TimeGenerated,$__interval)\r\n| order by NodeOp asc, TimeGenerated asc\r\n| serialize\r\n| extend PrevVal = iif(prev(NodeOp) != NodeOp, 0.0, prev(Val)), PrevTimeGenerated = iif(prev(NodeOp) != NodeOp, datetime(null), prev(TimeGenerated))\r\n| where isnotnull(PrevTimeGenerated) and PrevTimeGenerated != TimeGenerated\r\n| extend Rate = iif(PrevVal > Val, Val / (datetime_diff('Second', TimeGenerated, PrevTimeGenerated) * 1), iif(PrevVal == Val, 0.0, (Val - PrevVal) / (datetime_diff('Second', TimeGenerated, PrevTimeGenerated) * 1)))\r\n| where isnotnull(Rate)\r\n| project TimeGenerated, NodeOp, Rate\r\n|render timechart",
+                        "resultFormat": "time_series",
+                        "workspace": ""
+                      },
+                      "azureMonitor": {
+                        "dimensionFilter": "*",
+                        "metricDefinition": "select",
+                        "metricName": "select",
+                        "metricNamespace": "select",
+                        "resourceGroup": "select",
+                        "resourceName": "select",
+                        "timeGrain": "auto"
+                      },
+                      "queryType": "Azure Log Analytics",
+                      "refId": "A",
+                      "subscription": ""
+                    }
+                  ],
+                  "thresholds": [],
+                  "timeFrom": null,
+                  "timeRegions": [],
+                  "timeShift": null,
+                  "title": "Kubelet Docker Ops/Sec ($ptile-th percentile) by operation/Node",
+                  "tooltip": {
+                    "shared": true,
+                    "sort": 0,
+                    "value_type": "individual"
+                  },
+                  "transparent": true,
+                  "type": "graph",
+                  "xaxis": {
+                    "buckets": null,
+                    "mode": "time",
+                    "name": null,
+                    "show": true,
+                    "values": []
+                  },
+                  "yaxes": [
+                    {
+                      "decimals": null,
+                      "format": "short",
+                      "label": null,
+                      "logBase": 1,
+                      "max": null,
+                      "min": null,
+                      "show": true
+                    },
+                    {
+                      "format": "short",
+                      "label": null,
+                      "logBase": 1,
+                      "max": null,
+                      "min": null,
+                      "show": true
+                    }
+                  ],
+                  "yaxis": {
+                    "align": false,
+                    "alignLevel": null
+                  }
+                },
+                {
+                  "aliasColors": {},
+                  "bars": false,
+                  "cacheTimeout": null,
+                  "dashLength": 10,
+                  "dashes": false,
+                  "datasource": "Azure Monitor",
+                  "description": "Docker Operation errors/sec ($ptile-th percentile) grouped by operation in each node",
+                  "fill": 0,
+                  "fillGradient": 0,
+                  "gridPos": {
+                    "h": 11,
+                    "w": 12,
+                    "x": 12,
+                    "y": 14
+                  },
+                  "id": 56,
+                  "legend": {
+                    "alignAsTable": true,
+                    "avg": false,
+                    "current": false,
+                    "max": false,
+                    "min": false,
+                    "rightSide": true,
+                    "show": true,
+                    "total": false,
+                    "values": false
+                  },
+                  "lines": true,
+                  "linewidth": 2,
+                  "links": [],
+                  "nullPointMode": "null",
+                  "options": {
+                    "dataLinks": []
+                  },
+                  "percentage": false,
+                  "pluginVersion": "6.3.3",
+                  "pointradius": 2,
+                  "points": false,
+                  "renderer": "flot",
+                  "scopedVars": {
+                    "clusterid": {
+                      "selected": true,
+                      "text": "/subscriptions/a0f4a733-4fce-4d49-b8a8-d30541fc1b45/resourceGroups/cloudnative-demo/providers/Microsoft.ContainerService/managedClusters/aks-demo-e25wbosx",
+                      "value": "/subscriptions/a0f4a733-4fce-4d49-b8a8-d30541fc1b45/resourceGroups/cloudnative-demo/providers/Microsoft.ContainerService/managedClusters/aks-demo-e25wbosx"
+                    }
+                  },
+                  "seriesOverrides": [],
+                  "spaceLength": 10,
+                  "stack": false,
+                  "steppedLine": false,
+                  "targets": [
+                    {
+                      "appInsights": {
+                        "groupBy": "none",
+                        "metricName": "select",
+                        "rawQuery": false,
+                        "rawQueryString": "",
+                        "spliton": "",
+                        "timeGrainType": "auto",
+                        "xaxis": "timestamp",
+                        "yaxis": ""
+                      },
+                      "azureLogAnalytics": {
+                        "query": "InsightsMetrics\r\n| where Origin == 'container.azm.ms/telegraf'\r\n| where Namespace == 'container.azm.ms/prometheus'\r\n| where Name == 'kubelet_docker_operations_errors'\r\n| where $__timeFilter(TimeGenerated) | extend Tags = todynamic(Tags)\r\n| extend HostName = tostring(Tags.hostName), optype = tostring(Tags.operation_type)\r\n, clusterId = tostring(Tags[\"container.azm.ms/clusterId\"])| where clusterId == '$clusterid'| extend NodeOp = strcat(optype, \"/\", HostName)\r\n| summarize Val=percentile(Val,$ptile) by NodeOp, TimeGenerated=bin(TimeGenerated,$__interval)\r\n| order by NodeOp asc, TimeGenerated asc\r\n| serialize\r\n| extend PrevVal = iif(prev(NodeOp) != NodeOp, 0.0, prev(Val)), PrevTimeGenerated = iif(prev(NodeOp) != NodeOp, datetime(null), prev(TimeGenerated))\r\n| where isnotnull(PrevTimeGenerated) and PrevTimeGenerated != TimeGenerated\r\n| extend Rate = iif(PrevVal > Val, Val / (datetime_diff('Second', TimeGenerated, PrevTimeGenerated) * 1), iif(PrevVal == Val, 0.0, (Val - PrevVal) / (datetime_diff('Second', TimeGenerated, PrevTimeGenerated) * 1)))\r\n| where isnotnull(Rate)\r\n| project TimeGenerated, NodeOp, Rate\r\n|render timechart",
+                        "resultFormat": "time_series",
+                        "workspace": ""
+                      },
+                      "azureMonitor": {
+                        "dimensionFilter": "*",
+                        "metricDefinition": "select",
+                        "metricName": "select",
+                        "metricNamespace": "select",
+                        "resourceGroup": "select",
+                        "resourceName": "select",
+                        "timeGrain": "auto"
+                      },
+                      "queryType": "Azure Log Analytics",
+                      "refId": "A"
+                    }
+                  ],
+                  "thresholds": [],
+                  "timeFrom": null,
+                  "timeRegions": [],
+                  "timeShift": null,
+                  "title": "Kubelet Docker operation errors/Sec ($ptile-th percentile) by operation/Node",
+                  "tooltip": {
+                    "shared": true,
+                    "sort": 0,
+                    "value_type": "individual"
+                  },
+                  "transparent": true,
+                  "type": "graph",
+                  "xaxis": {
+                    "buckets": null,
+                    "mode": "time",
+                    "name": null,
+                    "show": true,
+                    "values": []
+                  },
+                  "yaxes": [
+                    {
+                      "decimals": null,
+                      "format": "short",
+                      "label": null,
+                      "logBase": 1,
+                      "max": null,
+                      "min": null,
+                      "show": true
+                    },
+                    {
+                      "format": "short",
+                      "label": null,
+                      "logBase": 1,
+                      "max": null,
+                      "min": null,
+                      "show": true
+                    }
+                  ],
+                  "yaxis": {
+                    "align": false,
+                    "alignLevel": null
+                  }
+                }
+              ],
+              "repeat": "clusterid",
+              "scopedVars": {
+                "clusterid": {
+                  "selected": true,
+                  "text": "/subscriptions/a0f4a733-4fce-4d49-b8a8-d30541fc1b45/resourceGroups/cloudnative-demo/providers/Microsoft.ContainerService/managedClusters/aks-demo-e25wbosx",
+                  "value": "/subscriptions/a0f4a733-4fce-4d49-b8a8-d30541fc1b45/resourceGroups/cloudnative-demo/providers/Microsoft.ContainerService/managedClusters/aks-demo-e25wbosx"
+                }
+              },
+              "title": "Node - Kubelet Docker Operations",
+              "type": "row"
+            }
+          ],
+          "schemaVersion": 22,
+          "style": "dark",
+          "tags": [],
+          "templating": {
+            "list": [
+              {
+                "allValue": null,
+                "current": {
+                  "text": "/subscriptions/a0f4a733-4fce-4d49-b8a8-d30541fc1b45/resourceGroups/cloudnative-demo/providers/Microsoft.ContainerService/managedClusters/aks-demo-e25wbosx",
+                  "value": "/subscriptions/a0f4a733-4fce-4d49-b8a8-d30541fc1b45/resourceGroups/cloudnative-demo/providers/Microsoft.ContainerService/managedClusters/aks-demo-e25wbosx"
+                },
+                "datasource": "Azure Monitor",
+                "definition": "KubePodInventory | summarize n=count() by ClusterId |project ClusterId ",
+                "hide": 0,
+                "includeAll": false,
+                "index": -1,
+                "label": "Cluster",
+                "multi": false,
+                "name": "clusterid",
+                "options": [],
+                "query": "KubePodInventory | summarize n=count() by ClusterId |project ClusterId ",
+                "refresh": 1,
+                "regex": "",
+                "skipUrlSync": false,
+                "sort": 1,
+                "tagValuesQuery": "",
+                "tags": [],
+                "tagsQuery": "",
+                "type": "query",
+                "useTags": true
+              },
+              {
+                "allValue": null,
+                "current": {
+                  "tags": [],
+                  "text": "99",
+                  "value": "99"
+                },
+                "hide": 0,
+                "includeAll": false,
+                "label": "Percentile (applicable for percentile charts)",
+                "multi": false,
+                "name": "ptile",
+                "options": [
+                  {
+                    "selected": false,
+                    "text": "50",
+                    "value": "50"
+                  },
+                  {
+                    "selected": false,
+                    "text": "75",
+                    "value": "75"
+                  },
+                  {
+                    "selected": false,
+                    "text": "80",
+                    "value": "80"
+                  },
+                  {
+                    "selected": false,
+                    "text": "85",
+                    "value": "85"
+                  },
+                  {
+                    "selected": false,
+                    "text": "90",
+                    "value": "90"
+                  },
+                  {
+                    "selected": false,
+                    "text": "95",
+                    "value": "95"
+                  },
+                  {
+                    "selected": false,
+                    "text": "96",
+                    "value": "96"
+                  },
+                  {
+                    "selected": false,
+                    "text": "97",
+                    "value": "97"
+                  },
+                  {
+                    "selected": false,
+                    "text": "98",
+                    "value": "98"
+                  },
+                  {
+                    "selected": true,
+                    "text": "99",
+                    "value": "99"
+                  },
+                  {
+                    "selected": false,
+                    "text": "99.9",
+                    "value": "99.9"
+                  }
+                ],
+                "query": "50,75,80,85,90,95,96,97,98,99,99.9",
+                "skipUrlSync": false,
+                "type": "custom"
+              }
+            ]
+          },
+          "time": {
+            "from": "now-6h",
+            "to": "now"
+          },
+          "timepicker": {
+            "hidden": false,
+            "refresh_intervals": [
+              "5s",
+              "10s",
+              "30s",
+              "1m",
+              "5m",
+              "15m",
+              "30m",
+              "1h",
+              "2h",
+              "1d"
+            ]
+          },
+          "timezone": "",
+          "title": "Azure Monitor for Containers - Metrics",
+          "uid": "vFsw3edZk",
+          "variables": {
+            "list": []
+          },
+          "version": 2
+        }
