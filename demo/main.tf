@@ -38,6 +38,9 @@ resource "random_string" "prefix" {
   number = true
 }
 
+data "azurerm_client_config" "current" {
+}
+
 # Resource Group
 resource "azurerm_resource_group" "demo" {
   name     = "cloudnative-${var.env}"
@@ -365,4 +368,60 @@ resource "azurerm_key_vault" "demo" {
   purge_protection_enabled    = false
 
   sku_name = "standard"
+}
+
+resource "azurerm_key_vault_access_policy" "user" {
+  key_vault_id = azurerm_key_vault.demo.id
+
+  tenant_id = var.tenant_id
+  object_id = azurerm_user_assigned_identity.demo.principal_id
+
+  key_permissions = [
+    "get",
+  ]
+
+  secret_permissions = [
+    "get",
+  ]
+
+  certificate_permissions = [
+    "get",
+  ]
+}
+
+resource "azurerm_key_vault_access_policy" "terraform" {
+  key_vault_id = azurerm_key_vault.demo.id
+
+  tenant_id = var.tenant_id
+  object_id = data.azurerm_client_config.current.object_id
+
+    key_permissions = [
+      "create",
+      "get",
+    ]
+
+    secret_permissions = [
+      "set",
+      "get",
+      "delete",
+    ]
+
+  certificate_permissions = [
+    "get",
+    "create",
+  ]
+}
+
+resource "azurerm_key_vault_secret" "demo" {
+  name         = "psql-password"
+  value        = var.psql_password
+  key_vault_id = azurerm_key_vault.demo.id
+
+}
+
+# Managed identity
+resource "azurerm_user_assigned_identity" "demo" {
+  name = "secretsReader"
+  resource_group_name = azurerm_resource_group.demo.name
+  location            = azurerm_resource_group.demo.location
 }
