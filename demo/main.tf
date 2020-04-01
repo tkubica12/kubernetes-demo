@@ -13,9 +13,9 @@ variable "server_app_id" {}
 variable "server_app_secret" {}
 variable "tenant_app_id" {}
 
-# Configure the Microsoft Azure Provider
+# Configure the Azure and AAD provider
 provider "azurerm" {
-  version = "=2.2.0"
+  version = "=2.3.0"
   features {}
 }
 
@@ -155,6 +155,10 @@ resource "azurerm_kubernetes_cluster" "demo" {
     min_count           = 2
     availability_zones  = [1, 2, 3]
     vnet_subnet_id      = azurerm_subnet.aks.id
+  }
+
+  identity {
+    type = "SystemAssigned"
   }
 
   service_principal {
@@ -425,3 +429,4 @@ resource "azurerm_user_assigned_identity" "demo" {
   resource_group_name = azurerm_resource_group.demo.name
   location            = azurerm_resource_group.demo.location
 }
+
