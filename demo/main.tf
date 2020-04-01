@@ -157,9 +157,9 @@ resource "azurerm_kubernetes_cluster" "demo" {
     vnet_subnet_id      = azurerm_subnet.aks.id
   }
 
-  identity {
-    type = "SystemAssigned"
-  }
+  # identity {
+  #   type = "SystemAssigned"
+  # }
 
   service_principal {
     client_id     = var.client_id
@@ -420,7 +420,7 @@ resource "azurerm_key_vault_secret" "demo" {
   name         = "psql-password"
   value        = var.psql_password
   key_vault_id = azurerm_key_vault.demo.id
-
+  depends_on   = [azurerm_key_vault_access_policy.terraform]
 }
 
 # Managed identity
