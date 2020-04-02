@@ -14,11 +14,16 @@ spec:
       labels:
         app: {{ template "name" . }}-todo
         release: {{ .Release.Name }}
+        aadpodidbinding: secrets-reader
     spec:
       containers:
         - name: {{ .Chart.Name }}-todo
           image: "{{ .Values.apptodo.image.repository }}:{{ .Values.apptodo.image.tag | toString }}"
           imagePullPolicy: {{ .Values.apptodo.image.pullPolicy }}
+          volumeMounts:
+          - name: keyvault
+            mountPath: /keyvault
+            readOnly: true
           ports:
             - containerPort: {{ .Values.apptodo.service.internalPort }}
           livenessProbe:
@@ -29,14 +34,18 @@ spec:
             httpGet:
               path: /
               port: {{ .Values.apptodo.service.internalPort }}
-          env:
-            - name: POSTGRESQL_URL
-              valueFrom:
-                secretKeyRef:
-                  name: {{ template "fullname" . }}
-                  key: postgresqlurl
           resources:
 {{ toYaml .Values.apptodo.resources | indent 12 }}
+      volumes:
+        - name: keyvault
+          flexVolume:
+            driver: "azure/kv"
+            options:
+              usepodidentity: "true"       
+              keyvaultname: {{ .Values.keyvault.name }}             
+              keyvaultobjectnames: {{ .Values.keyvault.key }}       
+              keyvaultobjecttypes: secret  
+              tenantid: {{ .Values.keyvault.tenant }}       
     {{- if .Values.nodeSelector }}
       nodeSelector:
 {{ toYaml .Values.nodeSelector | indent 8 }}

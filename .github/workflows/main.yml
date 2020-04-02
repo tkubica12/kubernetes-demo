@@ -78,11 +78,17 @@ jobs:
       env:
         KUBECONFIG: "./kube_config"
         password: ${{ secrets.password }} 
+        ARM_SUBSCRIPTION_ID: ${{ secrets.subscription_id }}
+        ARM_CLIENT_ID: ${{ secrets.client_id }}
+        ARM_CLIENT_SECRET: ${{ secrets.client_secret }}
+        ARM_TENANT_ID: ${{ secrets.tenant_id }}
       run: |
         helm upgrade -i baseconfig ./helm/cluster \
           --set upn=admin@tomaskubicaoffice.onmicrosoft.com \
           --set username=tomas \
-          --set password=${password}
+          --set password=${password} \
+          --set secretsReader.resourceId=$(terraform output secretsReader_resourceId) \
+          --set secretsReader.clientId=$(terraform output secretsReader_clientId)
 
     - name: Deploy KEDA
       working-directory: ./demo
@@ -177,7 +183,10 @@ jobs:
           --set apptodo.image.repository=${registry_name}.azurecr.io/myapptodo \
           --set apptodo.image.tag=v1 \
           --set apphost=cloud.tomaskubica.in \
-          --set psqljdbc=$POSTGRESQL_URL
+          --set psqljdbc=$POSTGRESQL_URL \
+          --set keyvault.name=$(terraform output keyvault_name) \
+          --set keyvault.tenant=$(terraform output keyvault_tenantid) \
+          --set keyvault.key=$(terraform output keyvault_psql_keyname)
 
     - name: Deploy IIS application to Kubernetes
       working-directory: ./demo

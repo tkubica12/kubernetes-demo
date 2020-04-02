@@ -45,3 +45,25 @@ output "psql_name" {
 output "workspace_id" {
   value = azurerm_log_analytics_workspace.demo.workspace_id
 }
+
+output "secretsReader_resourceId" {
+  value = azurerm_user_assigned_identity.secretsReader.id
+}
+
+output "secretsReader_clientId" {
+  value = azurerm_user_assigned_identity.secretsReader.client_id
+}
+
+output "keyvault_name" {
+  value = azurerm_key_vault.demo.name
+}
+
+output "keyvault_tenantid" {
+  value = azurerm_key_vault.demo.tenant_id
+}
+
+output "keyvault_psql_keyname" {
+  value = azurerm_key_vault_secret.psql.name
+}
+
+

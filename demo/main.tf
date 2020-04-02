@@ -378,7 +378,7 @@ resource "azurerm_key_vault_access_policy" "user" {
   key_vault_id = azurerm_key_vault.demo.id
 
   tenant_id = var.tenant_id
-  object_id = azurerm_user_assigned_identity.demo.principal_id
+  object_id = azurerm_user_assigned_identity.secretsReader.principal_id
 
   key_permissions = [
     "get",
@@ -416,15 +416,15 @@ resource "azurerm_key_vault_access_policy" "terraform" {
   ]
 }
 
-resource "azurerm_key_vault_secret" "demo" {
-  name         = "psql-password"
-  value        = var.psql_password
+resource "azurerm_key_vault_secret" "psql" {
+  name         = "psql-jdbc"
+  value        = "jdbc:postgresql://${azurerm_postgresql_server.demo.fqdn}:5432/todo?user=tomas@${azurerm_postgresql_server.demo.name}&password=${var.psql_password}&ssl=true"
   key_vault_id = azurerm_key_vault.demo.id
   depends_on   = [azurerm_key_vault_access_policy.terraform]
 }
 
-# Managed identity
-resource "azurerm_user_assigned_identity" "demo" {
+# Managed identities
+resource "azurerm_user_assigned_identity" "secretsReader" {
   name = "secretsReader"
   resource_group_name = azurerm_resource_group.demo.name
   location            = azurerm_resource_group.demo.location

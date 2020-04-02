@@ -42,5 +42,8 @@ COPY --chown=user:user --from=build /usr/src/app/target/app.jar .
 # certificate for postgres
 RUN mkdir /home/user/.postgresql
 COPY --chown=user:user src/main/postgresql/root.crt /home/user/.postgresql/
+# init script
+COPY --chown=user:user src/start.sh /home/user/start.sh
+RUN chmod +x /home/user/start.sh
 # run it ...
-ENTRYPOINT [ "java", "-Djava.security.egd=file:/dev/./urandom", "-Duser.home=/home/user", "-jar", "app.jar" ]
+ENTRYPOINT [ "/home/user/start.sh" ]
