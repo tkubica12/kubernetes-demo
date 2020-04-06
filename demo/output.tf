@@ -2,6 +2,10 @@ output "kube_admin_config" {
   value = azurerm_kubernetes_cluster.demo.kube_admin_config_raw
 }
 
+output "kube_name" {
+  value = azurerm_kubernetes_cluster.demo.name
+}
+
 output "storage_account" {
   value = azurerm_storage_account.demo.name
 }
@@ -66,4 +70,11 @@ output "keyvault_psql_keyname" {
   value = azurerm_key_vault_secret.psql.name
 }
 
+output "appin_key" {
+  value = azurerm_application_insights.demo.instrumentation_key
+}
+
+output "appin_id" {
+  value = azurerm_application_insights.demo.app_id
+}
 

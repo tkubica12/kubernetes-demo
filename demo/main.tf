@@ -55,6 +55,13 @@ resource "azurerm_log_analytics_workspace" "demo" {
   sku                 = "PerGB2018"
 }
 
+resource "azurerm_application_insights" "demo" {
+  name                = "appin-${var.env}-${random_string.prefix.result}"
+  location            = azurerm_resource_group.demo.location
+  resource_group_name = azurerm_resource_group.demo.name
+  application_type    = "web"
+}
+
 # Networking
 resource "azurerm_virtual_network" "demo" {
   name                = "my-vnet"
