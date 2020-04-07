@@ -26,7 +26,7 @@ appspa:
 
 # TODO app
 apptodo:
-  replicaCount: 1
+  replicaCount: 2
   image:
     repository: acr/myimg
     tag: v1
@@ -48,5 +48,32 @@ apptodo:
       cpu: 1000m
       memory: 512Mi
     requests:
-      cpu: 500m
+      cpu: 200m
       memory: 256Mi
+
+# Node app
+appnode:
+  replicaCount: 2
+  image:
+    repository: acr/myimg
+    tag: v1
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    name: myappnode
+    internalPort: 3000
+    externalPort: 8080
+  ingress:
+    enabled: true
+    myservicepath: /api/node
+    annotations:
+      kubernetes.io/ingress.class: azure/application-gateway
+      nginx.ingress.kubernetes.io/rewrite-target: "/"
+    tls:
+  resources: 
+    limits:
+      cpu: 1000m
+      memory: 512Mi
+    requests:
+      cpu: 200m
+      memory: 128Mi

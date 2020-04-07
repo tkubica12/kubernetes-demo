@@ -1,0 +1,59 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "fullname" . }}-node
+  labels:
+    app: {{ template "name" . }}-node
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.appnode.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "name" . }}-node
+        release: {{ .Release.Name }}
+        aadpodidbinding: secrets-reader
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}-node
+          image: "{{ .Values.appnode.image.repository }}:{{ .Values.appnode.image.tag | toString }}"
+          imagePullPolicy: {{ .Values.appnode.image.pullPolicy }}
+          env:
+          - name: QUEUE_NAME
+            value: myapptodo
+          volumeMounts:
+          - name: keyvault
+            mountPath: /keyvault
+            readOnly: true
+          ports:
+            - containerPort: {{ .Values.appnode.service.internalPort }}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.appnode.service.internalPort }}
+          readinessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.appnode.service.internalPort }}
+          resources:
+{{ toYaml .Values.appnode.resources | indent 12 }}
+      volumes:
+        - name: keyvault
+          flexVolume:
+            driver: "azure/kv"
+            options:
+              usepodidentity: "true"       
+              keyvaultname: {{ .Values.keyvault.name }}             
+              keyvaultobjectnames: {{ .Values.keyvault.key }}       
+              keyvaultobjecttypes: secret  
+              tenantid: {{ .Values.keyvault.tenant }}       
+    {{- if .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+    {{- end }}
+      {{- if .Values.appnode.imagePullSecrets }}
+      imagePullSecrets:
+        - name: {{ .Values.appnode.imagePullSecrets }}
+      {{- end }}

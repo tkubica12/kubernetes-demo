@@ -1,0 +1,1 @@
+az network application-gateway stop -g cloudnative-demo -n $(terraform output appgw_name) 

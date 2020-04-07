@@ -163,6 +163,7 @@ jobs:
       run: |
         az acr build --registry $(terraform output registry_name) --image myappspa:v1 ./src/myappspa
         az acr build --registry $(terraform output registry_name) --image myapptodo:v1 ./src/myapptodo
+        az acr build --registry $(terraform output registry_name) --image myappnode:v1 ./src/myappnode
 
     - name: Deploy todo application to Kubernetes
       working-directory: ./demo
@@ -181,6 +182,8 @@ jobs:
           --set appspa.image.repository=${registry_name}.azurecr.io/myappspa \
           --set appspa.image.tag=v1 \
           --set apptodo.image.repository=${registry_name}.azurecr.io/myapptodo \
+          --set apptodo.image.tag=v1 \
+          --set apptodo.image.repository=${registry_name}.azurecr.io/myappnode \
           --set apptodo.image.tag=v1 \
           --set apphost=cloud.tomaskubica.in \
           --set psqljdbc=$POSTGRESQL_URL \

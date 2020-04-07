@@ -6,6 +6,10 @@ output "kube_name" {
   value = azurerm_kubernetes_cluster.demo.name
 }
 
+output "gw_name" {
+  value = azurerm_application_gateway.appgw.name
+}
+
 output "storage_account" {
   value = azurerm_storage_account.demo.name
 }
@@ -14,9 +18,13 @@ output "storage_key" {
   value = azurerm_storage_account.demo.primary_access_key
 }
 
-output "servicebus_connection" {
+output "servicebus_dapr_connection" {
   value = azurerm_servicebus_namespace_authorization_rule.demo.primary_connection_string
 }
+
+# output "servicebus_todo_connection" {
+#   value = azurerm_servicebus_queue_authorization_rule.myapptodo.primary_connection_string
+# }
 
 output "eventhub_connection" {
   value = azurerm_eventhub_authorization_rule.demo.primary_connection_string

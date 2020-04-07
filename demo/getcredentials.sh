@@ -1,0 +1,1 @@
+az aks get-credentials -g cloudnative-demo -n $(terraform output kube_name) --admin --overwrite-existing

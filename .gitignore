@@ -1,4 +1,5 @@
 .secrets
+node_modules
 _output/
 myKubeACS.json
 myKubeAzureNet.json

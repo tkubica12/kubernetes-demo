@@ -301,7 +301,7 @@ resource "azurerm_postgresql_firewall_rule" "demo" {
 #   partition_key_path  = "/id"
 # }
 
-# Service bus (DAPR demo)
+# Service bus
 resource "azurerm_servicebus_namespace" "demo" {
   name                = "servicebus-${var.env}-${random_string.prefix.result}"
   location            = azurerm_resource_group.demo.location
@@ -326,6 +326,27 @@ resource "azurerm_servicebus_namespace_authorization_rule" "demo" {
   send   = true
   manage = true
 }
+
+resource "azurerm_servicebus_queue" "myapptodo" {
+  name                = "myapptodo"
+  resource_group_name = azurerm_resource_group.demo.name
+  namespace_name      = azurerm_servicebus_namespace.demo.name
+
+  enable_partitioning = true
+}
+
+resource "azurerm_servicebus_queue_authorization_rule" "myapptodo" {
+  name                = "myapptodoauth"
+  namespace_name      = azurerm_servicebus_namespace.demo.name
+  queue_name          = azurerm_servicebus_queue.myapptodo.name
+  resource_group_name = azurerm_resource_group.demo.name
+
+  listen = true
+  send   = true
+  manage = false
+}
+
+
 
 # Storage account (DAPR demo)
 resource "azurerm_storage_account" "demo" {
@@ -426,6 +447,13 @@ resource "azurerm_key_vault_access_policy" "terraform" {
 resource "azurerm_key_vault_secret" "psql" {
   name         = "psql-jdbc"
   value        = "jdbc:postgresql://${azurerm_postgresql_server.demo.fqdn}:5432/todo?user=tomas@${azurerm_postgresql_server.demo.name}&password=${var.psql_password}&ssl=true"
+  key_vault_id = azurerm_key_vault.demo.id
+  depends_on   = [azurerm_key_vault_access_policy.terraform]
+}
+
+resource "azurerm_key_vault_secret" "servicebus-todo" {
+  name         = "servicebus-todo-connection"
+  value        = azurerm_servicebus_queue_authorization_rule.myapptodo.primary_connection_string
   key_vault_id = azurerm_key_vault.demo.id
   depends_on   = [azurerm_key_vault_access_policy.terraform]
 }
