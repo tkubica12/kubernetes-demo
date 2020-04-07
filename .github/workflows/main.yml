@@ -175,21 +175,19 @@ jobs:
         ARM_CLIENT_SECRET: ${{ secrets.client_secret }}
         ARM_TENANT_ID: ${{ secrets.tenant_id }}
       run: |
-        psql_name=$(terraform output psql_name)
         registry_name=$(terraform output registry_name)
-        POSTGRESQL_URL="jdbc:postgresql://${psql_name}.postgres.database.azure.com:5432/todo?user=tomas@${psql_name}&password=${TF_VAR_psql_password}&ssl=true"
         helm upgrade -i todo ./helm/myapp \
           --set appspa.image.repository=${registry_name}.azurecr.io/myappspa \
           --set appspa.image.tag=v1 \
           --set apptodo.image.repository=${registry_name}.azurecr.io/myapptodo \
           --set apptodo.image.tag=v1 \
-          --set apptodo.image.repository=${registry_name}.azurecr.io/myappnode \
-          --set apptodo.image.tag=v1 \
+          --set appnode.image.repository=${registry_name}.azurecr.io/myappnode \
+          --set appnode.image.tag=v1 \
           --set apphost=cloud.tomaskubica.in \
-          --set psqljdbc=$POSTGRESQL_URL \
           --set keyvault.name=$(terraform output keyvault_name) \
           --set keyvault.tenant=$(terraform output keyvault_tenantid) \
-          --set keyvault.key=$(terraform output keyvault_psql_keyname)
+          --set keyvault.key=$(terraform output keyvault_psql_keyname) \
+          --set keyvault.sbkey=servicebus-todo-connection
 
     - name: Deploy IIS application to Kubernetes
       working-directory: ./demo

@@ -21,7 +21,7 @@ appspa:
       cpu: 250m
       memory: 128Mi
     requests:
-      cpu: 100m
+      cpu: 50m
       memory: 128Mi
 
 # TODO app
@@ -48,7 +48,7 @@ apptodo:
       cpu: 1000m
       memory: 512Mi
     requests:
-      cpu: 200m
+      cpu: 50m
       memory: 256Mi
 
 # Node app
@@ -75,5 +75,5 @@ appnode:
       cpu: 1000m
       memory: 512Mi
     requests:
-      cpu: 200m
+      cpu: 50m
       memory: 128Mi

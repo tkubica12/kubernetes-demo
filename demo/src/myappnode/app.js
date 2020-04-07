@@ -21,7 +21,7 @@ const options = {
     method: 'GET'
   }
 
-app.get('/', function(req, res) {
+app.get('/api/node', function(req, res) {
     console.log('Sending message...');
     sender.send(message);
     console.log('Calling todo API...');
@@ -34,5 +34,9 @@ app.get('/', function(req, res) {
       });
     res.send('Sent');
   });
+
+app.get('/', function(req, res) {
+  res.send('OK');
+});
 
 app.listen(port, () => console.log(`App is listening`))

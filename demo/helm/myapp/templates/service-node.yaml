@@ -15,5 +15,5 @@ spec:
       protocol: TCP
       name: {{ .Values.appnode.service.name }}
   selector:
-    app: {{ template "name" . }}-todo
+    app: {{ template "name" . }}-node
     release: {{ .Release.Name }}

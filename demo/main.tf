@@ -158,8 +158,8 @@ resource "azurerm_kubernetes_cluster" "demo" {
     name                = "default"
     vm_size             = "Standard_B2s"
     enable_auto_scaling = true
-    max_count           = 5
-    min_count           = 2
+    max_count           = 6
+    min_count           = 3
     availability_zones  = [1, 2, 3]
     vnet_subnet_id      = azurerm_subnet.aks.id
   }

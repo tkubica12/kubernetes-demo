@@ -32,11 +32,11 @@ spec:
           livenessProbe:
             httpGet:
               path: /
-              port: {{ .Values.appnode.service.internalPort }}
+              port: {{ .Values.appspa.service.internalPort }}
           readinessProbe:
             httpGet:
               path: /
-              port: {{ .Values.appnode.service.internalPort }}
+              port: {{ .Values.appspa.service.internalPort }}
           resources:
 {{ toYaml .Values.appnode.resources | indent 12 }}
       volumes:
@@ -46,7 +46,7 @@ spec:
             options:
               usepodidentity: "true"       
               keyvaultname: {{ .Values.keyvault.name }}             
-              keyvaultobjectnames: {{ .Values.keyvault.key }}       
+              keyvaultobjectnames: {{ .Values.keyvault.sbkey }}       
               keyvaultobjecttypes: secret  
               tenantid: {{ .Values.keyvault.tenant }}       
     {{- if .Values.nodeSelector }}
