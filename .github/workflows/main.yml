@@ -103,14 +103,18 @@ jobs:
         ARM_CLIENT_SECRET: ${{ secrets.client_secret }}
         ARM_TENANT_ID: ${{ secrets.tenant_id }}
       run: |
-        sudo apt install dos2unix -y
-        wget https://github.com/microsoft/Application-Insights-K8s-Codeless-Attach/releases/download/Beta3/init.sh 
-        wget https://github.com/microsoft/Application-Insights-K8s-Codeless-Attach/releases/download/Beta3/helm-v0.8.4.tgz
-        . init.sh
-        helm upgrade -i local-forwarder ./helm-v0.8.4.tgz -f values.yaml \
-          --set namespaces={} \
-          --set namespaces[0].target=default \
-          --set namespaces[0].iKey=$(terraform output appin_key)
+        if helm list | grep local-forwarder
+          then echo Already installed
+          else
+            sudo apt install dos2unix -y
+            wget https://github.com/microsoft/Application-Insights-K8s-Codeless-Attach/releases/download/Beta3/init.sh 
+            wget https://github.com/microsoft/Application-Insights-K8s-Codeless-Attach/releases/download/Beta3/helm-v0.8.4.tgz
+            . init.sh
+            helm upgrade -i local-forwarder ./helm-v0.8.4.tgz -f values.yaml \
+              --set namespaces={} \
+              --set namespaces[0].target=default \
+              --set namespaces[0].iKey=$(terraform output appin_key)
+        fi
 
     - name: Deploy KEDA
       working-directory: ./demo
