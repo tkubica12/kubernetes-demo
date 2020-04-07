@@ -32,11 +32,11 @@ spec:
           livenessProbe:
             httpGet:
               path: /
-              port: {{ .Values.appspa.service.internalPort }}
+              port: {{ .Values.appnode.service.internalPort }}
           readinessProbe:
             httpGet:
               path: /
-              port: {{ .Values.appspa.service.internalPort }}
+              port: {{ .Values.appnode.service.internalPort }}
           resources:
 {{ toYaml .Values.appnode.resources | indent 12 }}
       volumes:
