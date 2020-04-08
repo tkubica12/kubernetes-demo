@@ -22,8 +22,6 @@ const options = {
   }
 
 app.get('/api/node', function(req, res) {
-    console.log('Sending message...');
-    sender.send(message);
     console.log('Calling todo API...');
     const apireq = https.request(options, apires => {
         console.log(`statusCode: ${apires.statusCode}`)
@@ -32,6 +30,9 @@ app.get('/api/node', function(req, res) {
           process.stdout.write(d)
         })
       });
+    console.log('Sending message...');
+    setTimeout(sender.send(message), 3000);
+//    sender.send(message);
     res.send('Sent');
   });
 

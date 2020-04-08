@@ -190,6 +190,7 @@ jobs:
         az acr build --registry $(terraform output registry_name) --image myappspa:$(cat version) ./src/myappspa
         az acr build --registry $(terraform output registry_name) --image myapptodo:$(cat version) ./src/myapptodo
         az acr build --registry $(terraform output registry_name) --image myappnode:$(cat version) ./src/myappnode
+        az acr build --registry $(terraform output registry_name) --image todogen:$(cat version) ./src/todoGen
 
     - name: Deploy todo application to Kubernetes
       working-directory: ./demo

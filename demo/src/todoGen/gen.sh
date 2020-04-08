@@ -1,4 +1,12 @@
 #!/bin/bash
+if [[ -z "${FQDN}" ]]; then
+  echo FQDN environmental variable not set
+  exit 1
+else
+  echo Generating load to $FWDN
+fi
+
+
 data='{"comment":"tfgen","category":"tfgen"}'
 
 echo Creating one...
@@ -17,19 +25,19 @@ do
     # Get one
     echo
     echo Reading one...
-    curl http://${FQDN}/api/todo/${id}
+    curl http://${FQDN}/api/todo/${id} -s
     sleep $(expr $RANDOM % 30)
 
     # Modify one
     echo
     echo Changing one...
-    curl -X PUT http://${FQDN}/api/todo/${id} -d $output -H 'Content-Type: application/json'
+    curl -X PUT http://${FQDN}/api/todo/${id} -s -d $output -H 'Content-Type: application/json'
     sleep $(expr $RANDOM % 30)
 
     # Calling node
     echo
     echo Calling node...
-    curl -X PUT http://${FQDN}/api/node
+    curl http://${FQDN}/api/node -s
     sleep $(expr $RANDOM % 30)
 
 done
