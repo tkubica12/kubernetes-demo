@@ -38,10 +38,9 @@ apptodo:
     externalPort: 8080
   ingress:
     enabled: true
-    myservicepath: /api/todo
+    myservicepath: "/api/todo*"
     annotations:
       kubernetes.io/ingress.class: azure/application-gateway
-      nginx.ingress.kubernetes.io/rewrite-target: "/api/todo"
     tls:
   resources: 
     limits:
@@ -65,10 +64,9 @@ appnode:
     externalPort: 8080
   ingress:
     enabled: true
-    myservicepath: /api/node
+    myservicepath: "/api/node*"
     annotations:
       kubernetes.io/ingress.class: azure/application-gateway
-      nginx.ingress.kubernetes.io/rewrite-target: "/"
     tls:
   resources: 
     limits:

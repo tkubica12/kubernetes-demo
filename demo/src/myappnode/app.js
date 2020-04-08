@@ -15,7 +15,7 @@ const message= {
   };
 const options = {
   //  hostname: 'todo-myapp-todo',
-    hostname: 'cloud.tomaskubica.in',
+    hostname: 'todo-myapp-todo',
     port: 8080,
     path: '/api/todo',
     method: 'GET'

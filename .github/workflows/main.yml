@@ -187,9 +187,9 @@ jobs:
         ARM_CLIENT_SECRET: ${{ secrets.client_secret }}
         ARM_TENANT_ID: ${{ secrets.tenant_id }}
       run: |
-        az acr build --registry $(terraform output registry_name) --image myappspa:v1 ./src/myappspa
-        az acr build --registry $(terraform output registry_name) --image myapptodo:v1 ./src/myapptodo
-        az acr build --registry $(terraform output registry_name) --image myappnode:v1 ./src/myappnode
+        az acr build --registry $(terraform output registry_name) --image myappspa:$(cat version) ./src/myappspa
+        az acr build --registry $(terraform output registry_name) --image myapptodo:$(cat version) ./src/myapptodo
+        az acr build --registry $(terraform output registry_name) --image myappnode:$(cat version) ./src/myappnode
 
     - name: Deploy todo application to Kubernetes
       working-directory: ./demo
@@ -204,11 +204,11 @@ jobs:
         registry_name=$(terraform output registry_name)
         helm upgrade -i todo ./helm/myapp \
           --set appspa.image.repository=${registry_name}.azurecr.io/myappspa \
-          --set appspa.image.tag=v1 \
+          --set appspa.image.tag=$(cat version) \
           --set apptodo.image.repository=${registry_name}.azurecr.io/myapptodo \
-          --set apptodo.image.tag=v1 \
+          --set apptodo.image.tag=$(cat version) \
           --set appnode.image.repository=${registry_name}.azurecr.io/myappnode \
-          --set appnode.image.tag=v1 \
+          --set appnode.image.tag=$(cat version) \
           --set apphost=cloud.tomaskubica.in \
           --set keyvault.name=$(terraform output keyvault_name) \
           --set keyvault.tenant=$(terraform output keyvault_tenantid) \
