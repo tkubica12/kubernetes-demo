@@ -23,6 +23,10 @@ spec:
           env:
           - name: QUEUE_NAME
             value: myapptodo
+          - name: TARGET_PORT
+            value: 80
+          - name: TARGET_HOST
+            value: {{ .Values.apphost }}
           volumeMounts:
           - name: keyvault
             mountPath: /keyvault

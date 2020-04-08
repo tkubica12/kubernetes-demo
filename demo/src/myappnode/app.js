@@ -6,16 +6,16 @@ const queueName = process.env.QUEUE_NAME;
 const app = express()
 const port = 3000
 
-// const sbClient = ServiceBusClient.createFromConnectionString(connectionString); 
-// const queueClient = sbClient.createQueueClient(queueName);
-// const sender = queueClient.createSender();
+const sbClient = ServiceBusClient.createFromConnectionString(connectionString); 
+const queueClient = sbClient.createQueueClient(queueName);
+const sender = queueClient.createSender();
 const message= {
     body: `Message sent`,
     label: `test`
   };
 const options = {
-    hostname: 'todo-myapp-todo',
-    port: 8080,
+    hostname: process.env.TARGET_HOST,
+    port: process.env.TARGET_PORT,
     path: '/api/todo',
     method: 'GET'
   }
@@ -30,7 +30,7 @@ app.get('/api/node', function(req, res) {
         })
       });
     console.log('Sending message...');
-    // sender.send(message);
+    sender.send(message);
     res.send('Sent');
   });
 
