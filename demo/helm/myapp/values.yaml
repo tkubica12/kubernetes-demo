@@ -75,3 +75,18 @@ appnode:
     requests:
       cpu: 50m
       memory: 128Mi
+
+# Traffic generator
+appgen:
+  replicaCount: 1
+  image:
+    repository: acr/myimg
+    tag: v1
+    pullPolicy: IfNotPresent
+  resources: 
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 10m
+      memory: 16Mi

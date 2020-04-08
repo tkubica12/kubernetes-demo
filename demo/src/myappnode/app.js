@@ -31,8 +31,7 @@ app.get('/api/node', function(req, res) {
         })
       });
     console.log('Sending message...');
-    setTimeout(sender.send(message), 3000);
-//    sender.send(message);
+    sender.send(message);
     res.send('Sent');
   });
 

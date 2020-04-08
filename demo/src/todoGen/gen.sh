@@ -19,7 +19,7 @@ do
     # List all
     echo
     echo Reading all...
-    curl http://${FQDN}/api/todo
+    curl http://${FQDN}/api/todo -s
     sleep $(expr $RANDOM % 30)
 
     # Get one

@@ -210,6 +210,8 @@ jobs:
           --set apptodo.image.tag=$(cat version) \
           --set appnode.image.repository=${registry_name}.azurecr.io/myappnode \
           --set appnode.image.tag=$(cat version) \
+          --set appgen.image.repository=${registry_name}.azurecr.io/todogen \
+          --set appgen.image.tag=$(cat version) \
           --set apphost=cloud.tomaskubica.in \
           --set keyvault.name=$(terraform output keyvault_name) \
           --set keyvault.tenant=$(terraform output keyvault_tenantid) \
