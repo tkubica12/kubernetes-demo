@@ -23,10 +23,8 @@ spec:
           env:
           - name: QUEUE_NAME
             value: myapptodo
-          - name: TARGET_PORT
-            value: 80
-          - name: TARGET_HOST
-            value: {{ .Values.apphost }}
+          - name: URL
+            value: "http://todo-myapp-todo:8080/api/todo"
           volumeMounts:
           - name: keyvault
             mountPath: /keyvault
