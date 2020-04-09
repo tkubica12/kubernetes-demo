@@ -4,6 +4,7 @@ const { ServiceBusClient } = require("@azure/service-bus");
 const connectionString = process.env.SERVICEBUS_TODO_CONNECTION;
 const queueName = process.env.QUEUE_NAME; 
 const url = process.env.URL; 
+const retryurl = process.env.RETRY_URL; 
 const app = express()
 const port = 3000
 
@@ -26,11 +27,27 @@ app.get('/api/node', async function(req, res) {
       resp.on('end', () => {
         console.log(data);
       });
+
+      }).on("error", (err) => {
+        console.log("Error: " + err.message);
+      });
     
-    }).on("error", (err) => {
-      console.log("Error: " + err.message);
-    });
-    console.log('Sending message...');
+    console.log('Calling retry service...');
+    http.get(retryurl, (rresp) => {
+      let rdata = '';
+      rresp.on('data', (rchunk) => {
+        rdata += rchunk;
+      });
+    
+      rresp.on('end', () => {
+        console.log(rdata);
+      });
+    
+      }).on("error", (err) => {
+        console.log("Error: " + err.message);
+      });
+
+    console.log('Sending message to queue...');
     sender.send(message);
     res.send('Sent');
   });

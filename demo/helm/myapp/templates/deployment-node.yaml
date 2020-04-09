@@ -25,6 +25,8 @@ spec:
             value: myapptodo
           - name: URL
             value: "http://todo-myapp-todo:8080/api/todo"
+          - name: RETRY_URL
+            value: "http://todo-myapp-retry?failRate=20&mode=crash"
           volumeMounts:
           - name: keyvault
             mountPath: /keyvault
