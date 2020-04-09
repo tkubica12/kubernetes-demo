@@ -26,9 +26,9 @@ output "servicebus_dapr_connection" {
 #   value = azurerm_servicebus_queue_authorization_rule.myapptodo.primary_connection_string
 # }
 
-output "eventhub_connection" {
-  value = azurerm_eventhub_authorization_rule.demo.primary_connection_string
-}
+# output "eventhub_connection" {
+#   value = azurerm_eventhub_authorization_rule.demo.primary_connection_string
+# }
 
 # output "cosmosdb_key" {
 #   value = azurerm_cosmosdb_account.demo.primary_master_key
