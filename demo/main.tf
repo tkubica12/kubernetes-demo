@@ -15,7 +15,7 @@ variable "tenant_app_id" {}
 
 # Configure the Azure and AAD provider
 provider "azurerm" {
-  version = "=2.3.0"
+  version = "=2.5.0"
   features {}
 }
 
@@ -164,14 +164,14 @@ resource "azurerm_kubernetes_cluster" "demo" {
     vnet_subnet_id      = azurerm_subnet.aks.id
   }
 
-  # identity {
-  #   type = "SystemAssigned"
-  # }
-
-  service_principal {
-    client_id     = var.client_id
-    client_secret = var.client_secret
+  identity {
+    type = "SystemAssigned"
   }
+
+  # service_principal {
+  #   client_id     = var.client_id
+  #   client_secret = var.client_secret
+  # }
 
   network_profile {
     network_plugin     = "azure"
@@ -202,10 +202,10 @@ resource "azurerm_kubernetes_cluster" "demo" {
     }
   }
 
-  windows_profile {
-    admin_username = "tomas"
-    admin_password = var.vm_password
-  }
+  # windows_profile {
+  #   admin_username = "tomas"
+  #   admin_password = var.vm_password
+  # }
 }
 
 resource "azurerm_kubernetes_cluster_node_pool" "demo" {
