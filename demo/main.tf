@@ -7,7 +7,6 @@ variable "client_id" {}
 variable "client_secret" {}
 variable "tenant_id" {}
 variable "psql_password" {}
-variable "vm_password" {}
 variable "client_app_id" {}
 variable "server_app_id" {}
 variable "server_app_secret" {}
@@ -168,11 +167,6 @@ resource "azurerm_kubernetes_cluster" "demo" {
     type = "SystemAssigned"
   }
 
-  # service_principal {
-  #   client_id     = var.client_id
-  #   client_secret = var.client_secret
-  # }
-
   network_profile {
     network_plugin     = "azure"
     network_policy     = "calico"
@@ -201,11 +195,6 @@ resource "azurerm_kubernetes_cluster" "demo" {
       enabled = true
     }
   }
-
-  # windows_profile {
-  #   admin_username = "tomas"
-  #   admin_password = var.vm_password
-  # }
 }
 
 resource "azurerm_kubernetes_cluster_node_pool" "demo" {
@@ -346,8 +335,6 @@ resource "azurerm_servicebus_queue_authorization_rule" "myapptodo" {
   manage = false
 }
 
-
-
 # Storage account (DAPR demo)
 resource "azurerm_storage_account" "demo" {
   name                     = "store${var.env}${random_string.prefix.result}"
@@ -364,30 +351,30 @@ resource "azurerm_storage_container" "demo" {
 }
 
 # Event Hub (DAPR demo)
-# resource "azurerm_eventhub_namespace" "demo" {
-#   name                = "eventhub-${var.env}-${random_string.prefix.result}"
-#   location            = azurerm_resource_group.demo.location
-#   resource_group_name = azurerm_resource_group.demo.name
-#   sku                 = "Basic"
-# }
+resource "azurerm_eventhub_namespace" "demo" {
+  name                = "eventhub-${var.env}-${random_string.prefix.result}"
+  location            = azurerm_resource_group.demo.location
+  resource_group_name = azurerm_resource_group.demo.name
+  sku                 = "Basic"
+}
 
-# resource "azurerm_eventhub" "demo" {
-#   name                = "dapreventhub"
-#   namespace_name      = azurerm_eventhub_namespace.demo.name
-#   resource_group_name = azurerm_resource_group.demo.name
-#   partition_count     = 2
-#   message_retention   = 1
-# }
+resource "azurerm_eventhub" "demo" {
+  name                = "dapreventhub"
+  namespace_name      = azurerm_eventhub_namespace.demo.name
+  resource_group_name = azurerm_resource_group.demo.name
+  partition_count     = 2
+  message_retention   = 1
+}
 
-# resource "azurerm_eventhub_authorization_rule" "demo" {
-#   name                = "daprauth"
-#   namespace_name      = azurerm_eventhub_namespace.demo.name
-#   eventhub_name       = azurerm_eventhub.demo.name
-#   resource_group_name = azurerm_resource_group.demo.name
-#   listen              = true
-#   send                = true
-#   manage              = false
-# }
+resource "azurerm_eventhub_authorization_rule" "demo" {
+  name                = "daprauth"
+  namespace_name      = azurerm_eventhub_namespace.demo.name
+  eventhub_name       = azurerm_eventhub.demo.name
+  resource_group_name = azurerm_resource_group.demo.name
+  listen              = true
+  send                = true
+  manage              = false
+}
 
 # Key Vault
 resource "azurerm_key_vault" "demo" {
@@ -458,10 +445,15 @@ resource "azurerm_key_vault_secret" "servicebus-todo" {
   depends_on   = [azurerm_key_vault_access_policy.terraform]
 }
 
-# Managed identities
+# Managed identities and RBAC
 resource "azurerm_user_assigned_identity" "secretsReader" {
   name = "secretsReader"
   resource_group_name = azurerm_resource_group.demo.name
   location            = azurerm_resource_group.demo.location
 }
 
+resource "azurerm_role_assignment" "aks" {
+  scope                = azurerm_resource_group.demo.id
+  role_definition_name = "Contributor"
+  principal_id         = azurerm_kubernetes_cluster.demo.service_principal.client_id
+}
