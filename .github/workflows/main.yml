@@ -86,10 +86,10 @@ jobs:
         rgName=$(terraform output resource_group)
         kubeletIdentity=$(az aks show -g $(terraform output resource_group) \
           -n $(terraform output kube_name) \
-          --query identityProfile.kubeletidentity.clientId -o tsv)
+          --query identityProfile.kubeletidentity.objectId -o tsv)
         az role assignment create --role "Managed Identity Operator" \
-          --assignee $kubeletIdentity \
-          --scope $(az group show -g $rgName --query id -o tsv)
+          --assignee-object-id $kubeletIdentity \
+          -g $rgName
 
     # - name: Prepare SDK auth file
     #   working-directory: ./demo
