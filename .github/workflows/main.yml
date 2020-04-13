@@ -64,18 +64,18 @@ jobs:
       uses: azure/setup-kubectl@v1
       id: install
 
-    - name: Prepare SDK auth file
-      working-directory: ./demo
-      env:
-        ARM_SUBSCRIPTION_ID: ${{ secrets.subscription_id }}
-        ARM_CLIENT_ID: ${{ secrets.client_id }}
-        ARM_CLIENT_SECRET: ${{ secrets.client_secret }}
-        ARM_TENANT_ID: ${{ secrets.tenant_id }}
-      run: |
-        sed -i "s/<azure_aubscription_id>/$ARM_SUBSCRIPTION_ID/g" sdk-auth.json
-        sed -i "s/<application_id>/$ARM_CLIENT_ID/g" sdk-auth.json
-        sed -i "s/<application_secret>/$ARM_CLIENT_SECRET/g" sdk-auth.json
-        sed -i "s/<tenant_id>/$ARM_TENANT_ID/g" sdk-auth.json
+    # - name: Prepare SDK auth file
+    #   working-directory: ./demo
+    #   env:
+    #     ARM_SUBSCRIPTION_ID: ${{ secrets.subscription_id }}
+    #     ARM_CLIENT_ID: ${{ secrets.client_id }}
+    #     ARM_CLIENT_SECRET: ${{ secrets.client_secret }}
+    #     ARM_TENANT_ID: ${{ secrets.tenant_id }}
+    #   run: |
+    #     sed -i "s/<azure_aubscription_id>/$ARM_SUBSCRIPTION_ID/g" sdk-auth.json
+    #     sed -i "s/<application_id>/$ARM_CLIENT_ID/g" sdk-auth.json
+    #     sed -i "s/<application_secret>/$ARM_CLIENT_SECRET/g" sdk-auth.json
+    #     sed -i "s/<tenant_id>/$ARM_TENANT_ID/g" sdk-auth.json
 
     - name: Deploy cluster base configuration
       working-directory: ./demo
@@ -142,8 +142,9 @@ jobs:
           --set appgw.subscriptionId=$ARM_SUBSCRIPTION_ID \
           --set appgw.usePrivateIP=False \
           --set kubernetes.watchNamespace="" \
-          --set armAuth.type=servicePrincipal \
-          --set armAuth.secretJSON=$(cat sdk-auth.json | base64 -w0) \
+          --set armAuth.type=aadPodIdentity \
+          --set armAuth.identityResourceID=$(terraform output ingressContributor_resource_id) \
+          --set armAuth.identityClientId=$(terraform output ingressContributor_client_id) \
           --set rbac.enabled=true
 
     - name: Deploy Grafana+Prometheus
@@ -169,15 +170,26 @@ jobs:
           --set workspaceId=$(terraform output workspace_id)
         helm upgrade -i prometheus stable/prometheus -n prometheus -f helm/cluster/prometheus-values.yaml
     
-    - name: Export SDK-AUTH as output
-      working-directory: ./demo
-      id: sdkfile
-      run: echo "##[set-output name=sdkauth;]$(tr -d '\n' < sdk-auth.json)"
+    # - name: Export SDK-AUTH as output
+    #   working-directory: ./demo
+    #   id: sdkfile
+    #   run: echo "##[set-output name=sdkauth;]$(tr -d '\n' < sdk-auth.json)"
+
+    # - name: Azure CLI login
+    #   uses: azure/login@v1
+    #   with:
+    #     creds: ${{ steps.sdkfile.outputs.sdkauth }}
 
     - name: Azure CLI login
-      uses: azure/login@v1
-      with:
-        creds: ${{ steps.sdkfile.outputs.sdkauth }}
+      working-directory: ./demo
+      env:
+        ARM_SUBSCRIPTION_ID: ${{ secrets.subscription_id }}
+        ARM_CLIENT_ID: ${{ secrets.client_id }}
+        ARM_CLIENT_SECRET: ${{ secrets.client_secret }}
+        ARM_TENANT_ID: ${{ secrets.tenant_id }}
+      run: |
+        az login --service-principal -u $ARM_CLIENT_ID -p $ARM_CLIENT_SECRET
+        az account set -s $ARM_SUBSCRIPTION_ID
 
     - name: Build apps
       working-directory: ./demo
@@ -196,7 +208,6 @@ jobs:
       working-directory: ./demo
       env:
         KUBECONFIG: "./kube_config"
-        TF_VAR_psql_password: ${{ secrets.psql_password }} 
         ARM_SUBSCRIPTION_ID: ${{ secrets.subscription_id }}
         ARM_CLIENT_ID: ${{ secrets.client_id }}
         ARM_CLIENT_SECRET: ${{ secrets.client_secret }}

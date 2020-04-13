@@ -446,14 +446,30 @@ resource "azurerm_key_vault_secret" "servicebus-todo" {
 }
 
 # Managed identities and RBAC
+## Identity for FlexVolume
 resource "azurerm_user_assigned_identity" "secretsReader" {
   name = "secretsReader"
   resource_group_name = azurerm_resource_group.demo.name
   location            = azurerm_resource_group.demo.location
 }
 
+## Identity for Application Gateway ingress controller
+resource "azurerm_user_assigned_identity" "ingress" {
+  name = "ingressContributor"
+  resource_group_name = azurerm_resource_group.demo.name
+  location            = azurerm_resource_group.demo.location
+}
+
+## AKS identity to access ACR
 resource "azurerm_role_assignment" "aks" {
-  scope                = azurerm_resource_group.demo.id
-  role_definition_name = "Contributor"
-  principal_id         = azurerm_kubernetes_cluster.demo.service_principal.client_id
+  scope                = azurerm_container_registry.demo.id
+  role_definition_name = "AcrPull"
+  principal_id         = azurerm_kubernetes_cluster.demo.identity[0].principal_id
+}
+
+## Application Gateway ingress identity to access Application Gateway
+resource "azurerm_role_assignment" "ingress" {
+  scope                = azurerm_application_gateway.appgw.id
+  role_definition_name = "AcrPull"
+  principal_id         = azurerm_user_assigned_identity.ingress.principal_id
 }
