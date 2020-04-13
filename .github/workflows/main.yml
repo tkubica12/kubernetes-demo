@@ -72,7 +72,7 @@ jobs:
         ARM_CLIENT_SECRET: ${{ secrets.client_secret }}
         ARM_TENANT_ID: ${{ secrets.tenant_id }}
       run: |
-        az login --service-principal -u $ARM_CLIENT_ID -p $ARM_CLIENT_SECRET
+        az login --service-principal -u $ARM_CLIENT_ID -p $ARM_CLIENT_SECRET -t $ARM_TENANT_ID
         az account set -s $ARM_SUBSCRIPTION_ID
 
     - name: TEMP WORKAROUND - assign kubelet identity to main RG for MIC AAD Pod Identity
