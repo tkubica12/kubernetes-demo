@@ -470,6 +470,24 @@ resource "azurerm_role_assignment" "aks" {
 ## Application Gateway ingress identity to access Application Gateway
 resource "azurerm_role_assignment" "ingress" {
   scope                = azurerm_application_gateway.appgw.id
-  role_definition_name = "AcrPull"
+  role_definition_name = "Contributor"
   principal_id         = azurerm_user_assigned_identity.ingress.principal_id
+}
+
+## AAD Pod Identity to get access to managed identities
+# resource "azurerm_role_assignment" "podidentity-ingress" {
+#   scope                = azurerm_user_assigned_identity.ingress.id
+#   role_definition_name = "Managed Identity Operator"
+#   principal_id         = azurerm_kubernetes_cluster.demo.identity[0].principal_id
+# }
+
+# resource "azurerm_role_assignment" "podidentity-secrets" {
+#   scope                = azurerm_user_assigned_identity.secretsReader.id
+#   role_definition_name = "Managed Identity Operator"
+#   principal_id         = azurerm_kubernetes_cluster.demo.identity[0].principal_id
+# }
+
+data "azurerm_resources" "aks" {
+  type = azurerm_kubernetes_cluster.demo.name
+  resource_group_name = azurerm_resource_group.demo.name
 }

@@ -93,3 +93,5 @@ output "ingressContributor_client_id" {
 output "ingressContributor_resource_id" {
   value = azurerm_user_assigned_identity.ingress.id
 }
+
+

@@ -64,6 +64,33 @@ jobs:
       uses: azure/setup-kubectl@v1
       id: install
 
+    - name: Azure CLI login
+      working-directory: ./demo
+      env:
+        ARM_SUBSCRIPTION_ID: ${{ secrets.subscription_id }}
+        ARM_CLIENT_ID: ${{ secrets.client_id }}
+        ARM_CLIENT_SECRET: ${{ secrets.client_secret }}
+        ARM_TENANT_ID: ${{ secrets.tenant_id }}
+      run: |
+        az login --service-principal -u $ARM_CLIENT_ID -p $ARM_CLIENT_SECRET
+        az account set -s $ARM_SUBSCRIPTION_ID
+
+    - name: TEMP WORKAROUND - assign kubelet identity to main RG for MIC AAD Pod Identity
+      working-directory: ./demo
+      env:
+        ARM_SUBSCRIPTION_ID: ${{ secrets.subscription_id }}
+        ARM_CLIENT_ID: ${{ secrets.client_id }}
+        ARM_CLIENT_SECRET: ${{ secrets.client_secret }}
+        ARM_TENANT_ID: ${{ secrets.tenant_id }}
+      run: |
+        rgName=$(terraform output resource_group)
+        kubeletIdentity=$(az aks show -g $(terraform output resource_group) \
+          -n $(terraform output kube_name) \
+          --query identityProfile.kubeletidentity.clientId -o tsv)
+        az role assignment create --role "Managed Identity Operator" \
+          --assignee $kubeletIdentity \
+          --scope $(az group show -g $rgName --query id -o tsv)
+
     # - name: Prepare SDK auth file
     #   working-directory: ./demo
     #   env:
@@ -144,7 +171,7 @@ jobs:
           --set kubernetes.watchNamespace="" \
           --set armAuth.type=aadPodIdentity \
           --set armAuth.identityResourceID=$(terraform output ingressContributor_resource_id) \
-          --set armAuth.identityClientId=$(terraform output ingressContributor_client_id) \
+          --set armAuth.identityClientID=$(terraform output ingressContributor_client_id) \
           --set rbac.enabled=true
 
     - name: Deploy Grafana+Prometheus
@@ -179,17 +206,6 @@ jobs:
     #   uses: azure/login@v1
     #   with:
     #     creds: ${{ steps.sdkfile.outputs.sdkauth }}
-
-    - name: Azure CLI login
-      working-directory: ./demo
-      env:
-        ARM_SUBSCRIPTION_ID: ${{ secrets.subscription_id }}
-        ARM_CLIENT_ID: ${{ secrets.client_id }}
-        ARM_CLIENT_SECRET: ${{ secrets.client_secret }}
-        ARM_TENANT_ID: ${{ secrets.tenant_id }}
-      run: |
-        az login --service-principal -u $ARM_CLIENT_ID -p $ARM_CLIENT_SECRET
-        az account set -s $ARM_SUBSCRIPTION_ID
 
     - name: Build apps
       working-directory: ./demo
