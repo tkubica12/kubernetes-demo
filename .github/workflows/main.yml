@@ -93,22 +93,12 @@ jobs:
         az role assignment create --role "AcrPull" \
           --assignee-object-id $kubeletIdentity \
           -g $rgName
-        az role assignment create --role "Contributor" \
+        az role assignment create --role "Virtual Machine Contributor" \
+          --assignee-object-id $kubeletIdentity \
+          -g $rgName
+        az role assignment create --role "Virtual Machine Contributor" \
           --assignee-object-id $kubeletIdentity \
           -g $rgName-aksresources
-
-    # - name: Prepare SDK auth file
-    #   working-directory: ./demo
-    #   env:
-    #     ARM_SUBSCRIPTION_ID: ${{ secrets.subscription_id }}
-    #     ARM_CLIENT_ID: ${{ secrets.client_id }}
-    #     ARM_CLIENT_SECRET: ${{ secrets.client_secret }}
-    #     ARM_TENANT_ID: ${{ secrets.tenant_id }}
-    #   run: |
-    #     sed -i "s/<azure_aubscription_id>/$ARM_SUBSCRIPTION_ID/g" sdk-auth.json
-    #     sed -i "s/<application_id>/$ARM_CLIENT_ID/g" sdk-auth.json
-    #     sed -i "s/<application_secret>/$ARM_CLIENT_SECRET/g" sdk-auth.json
-    #     sed -i "s/<tenant_id>/$ARM_TENANT_ID/g" sdk-auth.json
 
     - name: Deploy cluster base configuration
       working-directory: ./demo
@@ -203,16 +193,6 @@ jobs:
           --set workspaceId=$(terraform output workspace_id)
         helm upgrade -i prometheus stable/prometheus -n prometheus -f helm/cluster/prometheus-values.yaml
     
-    # - name: Export SDK-AUTH as output
-    #   working-directory: ./demo
-    #   id: sdkfile
-    #   run: echo "##[set-output name=sdkauth;]$(tr -d '\n' < sdk-auth.json)"
-
-    # - name: Azure CLI login
-    #   uses: azure/login@v1
-    #   with:
-    #     creds: ${{ steps.sdkfile.outputs.sdkauth }}
-
     - name: Build apps
       working-directory: ./demo
       env:
@@ -221,10 +201,12 @@ jobs:
         ARM_CLIENT_SECRET: ${{ secrets.client_secret }}
         ARM_TENANT_ID: ${{ secrets.tenant_id }}
       run: |
-        az acr build --registry $(terraform output registry_name) --image myappspa:$(cat version) ./src/myappspa
-        az acr build --registry $(terraform output registry_name) --image myapptodo:$(cat version) ./src/myapptodo
-        az acr build --registry $(terraform output registry_name) --image myappnode:$(cat version) ./src/myappnode
-        az acr build --registry $(terraform output registry_name) --image todogen:$(cat version) ./src/todoGen
+        registry=$(terraform output registry_name)
+        version=$(cat version)
+        az acr repository show -n $registry --image myappspa:$version && echo Image exists || az acr build -r $registry --image myappspa:$version ./src/myappspa
+        az acr repository show -n $registry --image myapptodo:$version && echo Image exists || az acr build -r $registry --image myapptodo:$version ./src/myapptodo
+        az acr repository show -n $registry --image myappnode:$version && echo Image exists || az acr build -r $registry --image myappnode:$version ./src/myappnode
+        az acr repository show -n $registry --image todogen:$version && echo Image exists || az acr build -r $registry --image todogen:$version ./src/todoGen
 
     - name: Deploy todo application to Kubernetes
       working-directory: ./demo
