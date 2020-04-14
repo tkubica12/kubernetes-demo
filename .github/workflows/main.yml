@@ -90,6 +90,12 @@ jobs:
         az role assignment create --role "Managed Identity Operator" \
           --assignee-object-id $kubeletIdentity \
           -g $rgName
+        az role assignment create --role "AcrPull" \
+          --assignee-object-id $kubeletIdentity \
+          -g $rgName
+        az role assignment create --role "Contributor" \
+          --assignee-object-id $kubeletIdentity \
+          -g $rgName-aksresources
 
     # - name: Prepare SDK auth file
     #   working-directory: ./demo
