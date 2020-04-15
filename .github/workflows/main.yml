@@ -216,6 +216,7 @@ jobs:
         az acr repository show -n $registry --image myapptodo:$version && echo Image exists || az acr build -r $registry --image myapptodo:$version ./src/myapptodo
         az acr repository show -n $registry --image myappnode:$version && echo Image exists || az acr build -r $registry --image myappnode:$version ./src/myappnode
         az acr repository show -n $registry --image todogen:$version && echo Image exists || az acr build -r $registry --image todogen:$version ./src/todoGen
+        az acr repository show -n $registry --image daprdemo:$version && echo Image exists || az acr build -r $registry --image daprdemo:$version ./src/daprdemo
 
     - name: Deploy todo application to Kubernetes
       working-directory: ./demo

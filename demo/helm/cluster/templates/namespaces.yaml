@@ -41,7 +41,7 @@ metadata:
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: dapr-system
+  name: dapr
 ---
 apiVersion: v1
 kind: Namespace
