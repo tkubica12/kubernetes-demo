@@ -148,6 +148,15 @@ jobs:
         helm repo update
         helm upgrade -i keda kedacore/keda -n keda
 
+    - name: Deploy DAPR
+      working-directory: ./demo
+      env:
+        KUBECONFIG: "./kube_config"
+      run: |
+        helm repo add dapr https://daprio.azurecr.io/helm/v1/repo
+        helm repo update
+        helm install dapr dapr/dapr -n dapr
+
     - name: Deploy Ingress controller for Azure App Gw
       working-directory: ./demo
       env:
@@ -233,9 +242,26 @@ jobs:
           --set keyvault.key=$(terraform output keyvault_psql_keyname) \
           --set keyvault.sbkey=servicebus-todo-connection
 
+    - name: Deploy DAPR demo
+      working-directory: ./demo
+      env:
+        KUBECONFIG: "./kube_config"
+        ARM_SUBSCRIPTION_ID: ${{ secrets.subscription_id }}
+        ARM_CLIENT_ID: ${{ secrets.client_id }}
+        ARM_CLIENT_SECRET: ${{ secrets.client_secret }}
+        ARM_TENANT_ID: ${{ secrets.tenant_id }}
+      run: |
+        registry_name=$(terraform output registry_name)
+        helm upgrade -i dapr-demo ./helm/dapr-demo -n dapr-demo \
+          --set serviceBus.connectionString=$(terraform output servicebus_dapr_connection) \
+          --set eventHub.connectionString=$(terraform output eventhub_connection) \
+          --set blob.storageAccount=$(terraform output storage_account) \
+          --set blob.key=$(terraform output storage_key) \
+          --set blob.container=daprcontainer
+
     - name: Deploy IIS application to Kubernetes
       working-directory: ./demo
       env:
         KUBECONFIG: "./kube_config"
       run: |
-        helm upgrade -i iis ./helm/windows --set apphost=iis.cloud.tomaskubica.in
+        helm upgrade -i -n windows iis ./helm/windows --set apphost=iis.cloud.tomaskubica.in
