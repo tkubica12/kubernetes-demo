@@ -1,0 +1,31 @@
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  name: b
+spec:
+  selector:
+    matchLabels:
+      app: anode
+  serviceName: anode
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+      dapr.io/enabled: "true"
+      dapr.io/id: "anode"
+      dapr.io/port: "5000"
+    labels:
+      app: anode
+    spec:
+      containers:
+      - name: container
+        image: "{{ .Values.appnodes.image.repository }}:{{ .Values.appnodes.image.tag | toString }}"
+        ports:
+          - containerPort: 5000
+        resources:
+          requests:
+            cpu: 10m
+            memory: 32M
+          limits:
+            cpu: 100M
+            memory: 128M

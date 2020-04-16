@@ -11,3 +11,6 @@ blob:
   container: <blob_container>
 eventHub:
   connectionString: <eventHub_connectionString>
+redis:
+  hostname: <hostname:port>
+  password: <password>
