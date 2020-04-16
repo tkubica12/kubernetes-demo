@@ -259,6 +259,8 @@ jobs:
           --set blob.storageAccount=$(terraform output storage_account) \
           --set blob.key=$(terraform output storage_key) \
           --set blob.container=daprcontainer
+          --set redis.hostname=$(terraform output redis_host) \
+          --set redis.password=$(terraform output redis_password)
 
     - name: Deploy IIS application to Kubernetes
       working-directory: ./demo

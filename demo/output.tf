@@ -30,6 +30,16 @@ output "eventhub_connection" {
   value = azurerm_eventhub_authorization_rule.demo.primary_connection_string
 }
 
+output "redis_host" {
+  value = "${azurerm_redis_cache.demo.hostname}:${azurerm_redis_cache.demo.ssl_port}"
+}
+
+output "redis_password" {
+  value = azurerm_redis_cache.demo.primary_access_key
+}
+
+
+
 # output "cosmosdb_key" {
 #   value = azurerm_cosmosdb_account.demo.primary_master_key
 # }

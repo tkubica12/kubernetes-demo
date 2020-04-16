@@ -377,6 +377,25 @@ resource "azurerm_eventhub_authorization_rule" "demo" {
   manage              = false
 }
 
+# Redis (DAPR demo)
+resource "azurerm_redis_cache" "demo" {
+  name                = "redis-${var.env}-${random_string.prefix.result}"
+  location            = azurerm_resource_group.demo.location
+  resource_group_name = azurerm_resource_group.demo.name
+  capacity            = 0
+  family              = "C"
+  sku_name            = "Basic"
+  enable_non_ssl_port = false
+}
+
+resource "azurerm_redis_firewall_rule" "example" {
+  name                = "allAzure"
+  redis_cache_name    = azurerm_redis_cache.demo.name
+  resource_group_name = azurerm_resource_group.demo.name
+  start_ip            = "0.0.0.0"
+  end_ip              = "0.0.0.0"
+}
+
 # Key Vault
 resource "azurerm_key_vault" "demo" {
   name                        = "vault-${var.env}-${random_string.prefix.result}"
