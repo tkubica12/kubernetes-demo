@@ -225,3 +225,4 @@ spec:
   PodLabels:
     app: mic
     component: mic
+    app.kubernetes.io/component: mic

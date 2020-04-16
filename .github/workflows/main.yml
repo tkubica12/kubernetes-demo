@@ -100,6 +100,16 @@ jobs:
           --assignee-object-id $kubeletIdentity \
           -g $rgName-aksresources
 
+    - name: Deploy AAD Pod Identity
+      working-directory: ./demo
+      env:
+        KUBECONFIG: "./kube_config"
+      run: |
+        kubectl create namespace aadpodidentity
+        helm repo add aad-pod-identity https://raw.githubusercontent.com/Azure/aad-pod-identity/master/charts
+        helm repo update
+        helm install aadpodidentity aad-pod-identity/aad-pod-identity -n aadpodidentity
+
     - name: Deploy cluster base configuration
       working-directory: ./demo
       env:
@@ -218,7 +228,7 @@ jobs:
         az acr repository show -n $registry --image todogen:$version && echo Image exists || az acr build -r $registry --image todogen:$version ./src/todoGen
         az acr repository show -n $registry --image daprdemo:$version && echo Image exists || az acr build -r $registry --image daprdemo:$version ./src/daprdemo
 
-    - name: Deploy todo application to Kubernetes
+    - name: Deploy todo application
       working-directory: ./demo
       env:
         KUBECONFIG: "./kube_config"
@@ -241,9 +251,7 @@ jobs:
           --set keyvault.name=$(terraform output keyvault_name) \
           --set keyvault.tenant=$(terraform output keyvault_tenantid) \
           --set keyvault.key=$(terraform output keyvault_psql_keyname) \
-          --set keyvault.sbkey=servicebus-todo-connection \
-          --set appnodes.image.repository=${registry_name}.azurecr.io/myappspa \
-          --set appnodes.image.tag=$(cat version)
+          --set keyvault.sbkey=servicebus-todo-connection
 
     - name: Deploy DAPR demo
       working-directory: ./demo
@@ -260,11 +268,13 @@ jobs:
           --set eventHub.connectionString=$(terraform output eventhub_connection) \
           --set blob.storageAccount=$(terraform output storage_account) \
           --set blob.key=$(terraform output storage_key) \
-          --set blob.container=daprcontainer
+          --set blob.container=daprcontainer \
           --set redis.hostname=$(terraform output redis_host) \
-          --set redis.password=$(terraform output redis_password)
+          --set redis.password=$(terraform output redis_password) \
+          --set appnodes.image.repository=${registry_name}.azurecr.io/myappspa \
+          --set appnodes.image.tag=$(cat version)
 
-    - name: Deploy IIS application to Kubernetes
+    - name: Deploy IIS application
       working-directory: ./demo
       env:
         KUBECONFIG: "./kube_config"

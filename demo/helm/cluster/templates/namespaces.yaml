@@ -36,11 +36,6 @@ metadata:
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: aadpodidentity
----
-apiVersion: v1
-kind: Namespace
-metadata:
   name: dapr
 ---
 apiVersion: v1

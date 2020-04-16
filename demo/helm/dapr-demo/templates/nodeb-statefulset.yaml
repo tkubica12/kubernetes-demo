@@ -11,11 +11,11 @@ spec:
   template:
     metadata:
       annotations:
-      dapr.io/enabled: "true"
-      dapr.io/id: "bnode"
-      dapr.io/port: "5000"
-    labels:
-      app: bnode
+        dapr.io/enabled: "true"
+        dapr.io/id: "bnode"
+        dapr.io/port: "5000"
+      labels:
+        app: bnode
     spec:
       containers:
       - name: container

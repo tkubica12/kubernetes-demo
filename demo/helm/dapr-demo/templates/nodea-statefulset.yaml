@@ -1,7 +1,7 @@
 apiVersion: apps/v1beta1
 kind: StatefulSet
 metadata:
-  name: b
+  name: anode
 spec:
   selector:
     matchLabels:
@@ -11,11 +11,11 @@ spec:
   template:
     metadata:
       annotations:
-      dapr.io/enabled: "true"
-      dapr.io/id: "anode"
-      dapr.io/port: "5000"
-    labels:
-      app: anode
+        dapr.io/enabled: "true"
+        dapr.io/id: "anode"
+        dapr.io/port: "5000"
+      labels:
+        app: anode
     spec:
       containers:
       - name: container
