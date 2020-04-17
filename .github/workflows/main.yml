@@ -128,7 +128,9 @@ jobs:
           --set username=tomas \
           --set password=${password} \
           --set secretsReader.resourceId=$(terraform output secretsReader_resourceId) \
-          --set secretsReader.clientId=$(terraform output secretsReader_clientId)
+          --set secretsReader.clientId=$(terraform output secretsReader_clientId) \
+          --set keda.resourceId=$(terraform output keda_resourceId) \
+          --set keda.clientId=$(terraform output keda_clientId)
 
     - name: Appliction Insights codeless injector
       working-directory: ./demo
