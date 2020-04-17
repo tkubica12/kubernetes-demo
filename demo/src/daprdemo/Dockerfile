@@ -7,4 +7,4 @@ ENV PATH="/home/user/.local/bin:${PATH}"
 RUN pip install --user flask flask_cors
 COPY --chown=user:user *.py /home/user/
 
-CMD ["tail -f /dev/null"]
+ENTRYPOINT ["tail", "-f", "/dev/null"]

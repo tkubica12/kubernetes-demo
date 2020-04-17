@@ -90,6 +90,9 @@ jobs:
         az role assignment create --role "Managed Identity Operator" \
           --assignee-object-id $kubeletIdentity \
           -g $rgName
+        az role assignment create --role "Managed Identity Operator" \
+          --assignee-object-id $kubeletIdentity \
+          -g $rgName-aksresources
         az role assignment create --role "AcrPull" \
           --assignee-object-id $kubeletIdentity \
           -g $rgName
@@ -271,7 +274,7 @@ jobs:
           --set blob.container=daprcontainer \
           --set redis.hostname=$(terraform output redis_host) \
           --set redis.password=$(terraform output redis_password) \
-          --set appnodes.image.repository=${registry_name}.azurecr.io/myappspa \
+          --set appnodes.image.repository=${registry_name}.azurecr.io/daprdemo \
           --set appnodes.image.tag=$(cat version)
 
     - name: Deploy IIS application
