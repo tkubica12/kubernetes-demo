@@ -6,5 +6,6 @@ USER user
 ENV PATH="/home/user/.local/bin:${PATH}"
 RUN pip install --user flask flask_cors
 COPY --chown=user:user *.py /home/user/
+WORKDIR /home/user
 
 ENTRYPOINT ["tail", "-f", "/dev/null"]

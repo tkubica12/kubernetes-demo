@@ -473,6 +473,13 @@ resource "azurerm_user_assigned_identity" "secretsReader" {
   location            = azurerm_resource_group.demo.location
 }
 
+## Identity for KEDA
+resource "azurerm_user_assigned_identity" "keda" {
+  name = "keda"
+  resource_group_name = azurerm_resource_group.demo.name
+  location            = azurerm_resource_group.demo.location
+}
+
 ## Identity for Application Gateway ingress controller
 resource "azurerm_user_assigned_identity" "ingress" {
   name = "ingressContributor"
@@ -492,6 +499,13 @@ resource "azurerm_role_assignment" "ingress" {
   scope                = azurerm_application_gateway.appgw.id
   role_definition_name = "Contributor"
   principal_id         = azurerm_user_assigned_identity.ingress.principal_id
+}
+
+## KEDA - Service Bus reader
+resource "azurerm_role_assignment" "keda-servicebus" {
+  scope                = azurerm_servicebus_namespace.demo.id
+  role_definition_name = "Contributor"
+  principal_id         = azurerm_user_assigned_identity.keda.principal_id
 }
 
 ## AAD Pod Identity to get access to managed identities

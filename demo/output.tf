@@ -76,6 +76,14 @@ output "secretsReader_clientId" {
   value = azurerm_user_assigned_identity.secretsReader.client_id
 }
 
+output "keda_resourceId" {
+  value = azurerm_user_assigned_identity.keda.id
+}
+
+output "keda_clientId" {
+  value = azurerm_user_assigned_identity.keda.client_id
+}
+
 output "keyvault_name" {
   value = azurerm_key_vault.demo.name
 }

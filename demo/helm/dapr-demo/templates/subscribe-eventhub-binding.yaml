@@ -1,24 +1,28 @@
 apiVersion: apps/v1beta1
-kind: StatefulSet
+kind: Deployment
 metadata:
-  name: nodeb
+  name: subscribeeventhub
 spec:
   selector:
     matchLabels:
-      app: nodeb
-  serviceName: nodeb
+      app: subscribeeventhub
   replicas: 1
   template:
     metadata:
       annotations:
         dapr.io/enabled: "true"
-        dapr.io/id: "nodeb"
+        dapr.io/id: "subscribeeventhub"
+        dapr.io/port: "5000"
       labels:
-        app: nodeb
+        app: subscribeeventhub
     spec:
       containers:
       - name: container
         image: "{{ .Values.appnodes.image.repository }}:{{ .Values.appnodes.image.tag | toString }}"
+        command: ["python"]
+        args: ["/home/user/binding.py"]
+        ports:
+          - containerPort: 5000
         resources:
           requests:
             cpu: 10m

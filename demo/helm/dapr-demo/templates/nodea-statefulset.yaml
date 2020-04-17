@@ -1,27 +1,24 @@
 apiVersion: apps/v1beta1
 kind: StatefulSet
 metadata:
-  name: anode
+  name: nodea
 spec:
   selector:
     matchLabels:
-      app: anode
-  serviceName: anode
+      app: nodea
+  serviceName: nodea
   replicas: 1
   template:
     metadata:
       annotations:
         dapr.io/enabled: "true"
-        dapr.io/id: "anode"
-        dapr.io/port: "5000"
+        dapr.io/id: "nodea"
       labels:
-        app: anode
+        app: nodea
     spec:
       containers:
       - name: container
         image: "{{ .Values.appnodes.image.repository }}:{{ .Values.appnodes.image.tag | toString }}"
-        ports:
-          - containerPort: 5000
         resources:
           requests:
             cpu: 10m

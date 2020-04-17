@@ -1,0 +1,16 @@
+apiVersion: "aadpodidentity.k8s.io/v1"
+kind: AzureIdentity
+metadata:
+  name: keda
+spec:
+  type: 0
+  ResourceID: {{ .Values.keda.resourceId }}
+  ClientID: {{ .Values.keda.clientId }}
+---
+apiVersion: "aadpodidentity.k8s.io/v1"
+kind: AzureIdentityBinding
+metadata:
+  name: keda-binding
+spec: 
+  AzureIdentity: keda
+  Selector: keda

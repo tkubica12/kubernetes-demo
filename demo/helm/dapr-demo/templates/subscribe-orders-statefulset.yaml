@@ -1,24 +1,28 @@
 apiVersion: apps/v1beta1
-kind: StatefulSet
+kind: Deployment
 metadata:
-  name: nodeb
+  name: subscribeorders
 spec:
   selector:
     matchLabels:
-      app: nodeb
-  serviceName: nodeb
+      app: subscribeorders
   replicas: 1
   template:
     metadata:
       annotations:
         dapr.io/enabled: "true"
-        dapr.io/id: "nodeb"
+        dapr.io/id: "subscribeorders"
+        dapr.io/port: "5000"
       labels:
-        app: nodeb
+        app: subscribeorders
     spec:
       containers:
       - name: container
         image: "{{ .Values.appnodes.image.repository }}:{{ .Values.appnodes.image.tag | toString }}"
+        command: ["python"]
+        args: ["/home/user/sub.py"]
+        ports:
+          - containerPort: 5000
         resources:
           requests:
             cpu: 10m
