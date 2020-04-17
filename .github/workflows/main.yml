@@ -161,11 +161,7 @@ jobs:
       run: |
         helm repo add kedacore https://kedacore.github.io/charts
         helm repo update
-        helm upgrade -i keda kedacore/keda -n keda \
-          --set podAnnotations.keda[0].key=aadpodidbinding \
-          --set podAnnotations.keda[0].value=keda \
-          --set podAnnotations.metricsAdapter[0].key=aadpodidbinding \
-          --set podAnnotations.metricsAdapter[0].value=keda
+        helm upgrade -i keda kedacore/keda -n keda --set aadPodIdentity=keda
 
     - name: Deploy DAPR
       working-directory: ./demo
