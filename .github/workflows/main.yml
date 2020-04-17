@@ -168,7 +168,7 @@ jobs:
       run: |
         helm repo add dapr https://daprio.azurecr.io/helm/v1/repo
         helm repo update
-        helm install dapr dapr/dapr -n dapr
+        helm upgrade -i dapr dapr/dapr -n dapr
 
     - name: Deploy Ingress controller for Azure App Gw
       working-directory: ./demo
