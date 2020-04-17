@@ -2,6 +2,7 @@ apiVersion: keda.k8s.io/v1alpha1
 kind: TriggerAuthentication
 metadata:
   name: azure-servicebus-auth
+  namespace: dapr-demo
 spec:
   podIdentity:
     provider: azure
@@ -10,15 +11,20 @@ apiVersion: keda.k8s.io/v1alpha1
 kind: ScaledObject
 metadata:
   name: azure-servicebus-queue-scaledobject
-  namespace: default
+  namespace: dapr-demo
 spec:
   scaleTargetRef:
-    deploymentName: azure-servicebus-queue-function
+    deploymentName: subscribeorders
+  pollingInterval: 5
+  cooldownPeriod:  15
+  minReplicaCount: 0
+  maxReplicaCount: 10
   triggers:
   - type: azure-servicebus
     metadata:
+      namespace: servicebus-demo-e25wbosx
       topicName: orders
-      subscriptionName: keda-subscription
+      subscriptionName: subscribeorders
       queueLength: "2"
     authenticationRef:
         name: azure-servicebus-auth
