@@ -108,7 +108,7 @@ jobs:
       env:
         KUBECONFIG: "./kube_config"
       run: |
-        kubectl create namespace aadpodidentity
+        kubectl create namespace aadpodidentity && echo Namespace created || echo Namespace existed
         helm repo add aad-pod-identity https://raw.githubusercontent.com/Azure/aad-pod-identity/master/charts
         helm repo update
         helm install aadpodidentity aad-pod-identity/aad-pod-identity -n aadpodidentity
