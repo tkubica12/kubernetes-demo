@@ -7,3 +7,5 @@ spec:
   metadata:
   - name: connectionString
     value: {{ .Values.serviceBus.connectionString }}
+  - name: queueName
+    value: binding

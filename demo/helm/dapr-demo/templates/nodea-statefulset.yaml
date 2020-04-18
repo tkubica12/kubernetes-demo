@@ -15,6 +15,7 @@ spec:
         dapr.io/id: "nodea"
       labels:
         app: nodea
+        aadpodidbinding: secrets-reader
     spec:
       containers:
       - name: container

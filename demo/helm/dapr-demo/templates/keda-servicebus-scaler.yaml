@@ -22,7 +22,7 @@ spec:
   triggers:
   - type: azure-servicebus
     metadata:
-      namespace: servicebus-demo-e25wbosx
+      namespace: {{ .Values.serviceBus.namespace }}
       queueName: binding
       queueLength: "2"
     authenticationRef:

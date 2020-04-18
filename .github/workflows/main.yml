@@ -270,14 +270,16 @@ jobs:
         registry_name=$(terraform output registry_name)
         helm upgrade -i dapr-demo ./helm/dapr-demo -n dapr-demo \
           --set serviceBus.connectionString=$(terraform output servicebus_dapr_connection) \
-          --set eventHub.connectionString=$(terraform output eventhub_connection) \
+          --set serviceBus.namespace=$(terraform output servicebus_namespace) \
           --set blob.storageAccount=$(terraform output storage_account) \
           --set blob.key=$(terraform output storage_key) \
           --set blob.container=daprcontainer \
           --set redis.hostname=$(terraform output redis_host) \
           --set redis.password=$(terraform output redis_password) \
           --set appnodes.image.repository=${registry_name}.azurecr.io/daprdemo \
-          --set appnodes.image.tag=$(cat version)
+          --set appnodes.image.tag=$(cat version) \
+          --set keyVault.name=$(terraform output keyvault_name) \
+          --set keyVault.readerClientId=$(terraform output secretsReader_clientId)
 
     - name: Deploy IIS application
       working-directory: ./demo

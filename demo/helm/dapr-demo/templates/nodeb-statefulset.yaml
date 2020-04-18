@@ -15,6 +15,7 @@ spec:
         dapr.io/id: "nodeb"
       labels:
         app: nodeb
+        aadpodidbinding: secrets-reader
     spec:
       containers:
       - name: container

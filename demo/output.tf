@@ -26,6 +26,10 @@ output "servicebus_todo_connection" {
   value = azurerm_servicebus_queue_authorization_rule.myapptodo.primary_connection_string
 }
 
+output "servicebus_namespace" {
+  value = azurerm_servicebus_namespace.demo.name
+}
+
 output "redis_host" {
   value = "${azurerm_redis_cache.demo.hostname}:${azurerm_redis_cache.demo.ssl_port}"
 }
@@ -33,16 +37,6 @@ output "redis_host" {
 output "redis_password" {
   value = azurerm_redis_cache.demo.primary_access_key
 }
-
-
-
-# output "cosmosdb_key" {
-#   value = azurerm_cosmosdb_account.demo.primary_master_key
-# }
-
-# output "cosmosdb_url" {
-#   value = azurerm_cosmosdb_account.demo.endpoint
-# }
 
 output "resource_group" {
   value = azurerm_resource_group.demo.name
