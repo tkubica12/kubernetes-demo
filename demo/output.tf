@@ -26,10 +26,6 @@ output "servicebus_todo_connection" {
   value = azurerm_servicebus_queue_authorization_rule.myapptodo.primary_connection_string
 }
 
-output "eventhub_connection" {
-  value = azurerm_eventhub_authorization_rule.demo.primary_connection_string
-}
-
 output "redis_host" {
   value = "${azurerm_redis_cache.demo.hostname}:${azurerm_redis_cache.demo.ssl_port}"
 }
