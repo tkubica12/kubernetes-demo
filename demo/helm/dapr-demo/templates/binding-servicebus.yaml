@@ -1,20 +1,20 @@
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
-  name: subscribeeventhub
+  name: bindingservicebus
 spec:
   selector:
     matchLabels:
-      app: subscribeeventhub
+      app: bindingservicebus
   replicas: 1
   template:
     metadata:
       annotations:
         dapr.io/enabled: "true"
-        dapr.io/id: "subscribeeventhub"
+        dapr.io/id: "bindingservicebus"
         dapr.io/port: "5000"
       labels:
-        app: subscribeeventhub
+        app: bindingservicebus
     spec:
       containers:
       - name: container

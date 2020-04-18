@@ -7,7 +7,7 @@ import sys
 app = flask.Flask(__name__)
 CORS(app)
 
-@app.route('/binding-eventhub', methods=['POST'])
+@app.route('/binding-queue', methods=['POST'])
 def a_subscriber():
     print(f'message: {request.json}', flush=True)
     return "OK", 200

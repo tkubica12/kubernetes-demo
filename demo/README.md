@@ -56,7 +56,20 @@ Check Grafana dashboards and grafana.cloud.tomaskubica.in:
 Check Prometheus telemetry scrapped in Azure Monitor
 
 ## DAPR and KEDA
-TBD
+
+Store and retrieve state
+
+```bash
+kubectl exec -ti nodea-0 -n dapr-demo -- bash write.sh
+kubectl exec -ti nodeb-0 -n dapr-demo -- bash read.sh
+```
+
+DAPR is configured to enable messaging between services using Service Bus backend. Connect to nodea-0 and use curl to send message to DAPR. Deployment subscribeorders will receive message. Also look into Service Bus in portal to see subscriber has been created in orders topic.
+
+```bash
+kubectl exec -ti nodea-0 -n dapr-demo -- bash createorder.sh
+kubectl logs -l app=subscribeeventhub -n dapr-demo -c container
+```
 
 ## Windows nodes
 Basic IIS instance is accessible at iis.cloud.tomaskubica.in

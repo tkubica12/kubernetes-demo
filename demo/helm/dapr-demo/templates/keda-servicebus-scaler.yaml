@@ -14,7 +14,7 @@ metadata:
   namespace: dapr-demo
 spec:
   scaleTargetRef:
-    deploymentName: subscribeorders
+    deploymentName: bindingservicebus
   pollingInterval: 5
   cooldownPeriod:  15
   minReplicaCount: 0
@@ -23,8 +23,7 @@ spec:
   - type: azure-servicebus
     metadata:
       namespace: servicebus-demo-e25wbosx
-      topicName: orders
-      subscriptionName: subscribeorders
+      queueName: binding
       queueLength: "2"
     authenticationRef:
         name: azure-servicebus-auth
