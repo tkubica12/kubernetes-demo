@@ -473,6 +473,27 @@ resource "azurerm_key_vault_secret" "servicebus-todo" {
   depends_on   = [azurerm_key_vault_access_policy.terraform]
 }
 
+resource "azurerm_key_vault_secret" "servicebus-dapr" {
+  name         = "servicebus-dapr-connection"
+  value        = azurerm_servicebus_namespace_authorization_rule.demo.primary_connection_string
+  key_vault_id = azurerm_key_vault.demo.id
+  depends_on   = [azurerm_key_vault_access_policy.terraform]
+}
+
+resource "azurerm_key_vault_secret" "redis-password" {
+  name         = "redis-password"
+  value        = azurerm_redis_cache.demo.primary_access_key
+  key_vault_id = azurerm_key_vault.demo.id
+  depends_on   = [azurerm_key_vault_access_policy.terraform]
+}
+
+resource "azurerm_key_vault_secret" "blob-key" {
+  name         = "blob-key"
+  value        = azurerm_storage_account.demo.primary_access_key
+  key_vault_id = azurerm_key_vault.demo.id
+  depends_on   = [azurerm_key_vault_access_policy.terraform]
+}
+
 # Managed identities and RBAC
 ## Identity for FlexVolume
 resource "azurerm_user_assigned_identity" "secretsReader" {

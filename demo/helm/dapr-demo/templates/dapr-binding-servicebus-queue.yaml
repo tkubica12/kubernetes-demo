@@ -6,6 +6,9 @@ spec:
   type: bindings.azure.servicebusqueues
   metadata:
   - name: connectionString
-    value: {{ .Values.serviceBus.connectionString }}
+    secretKeyRef:
+      name: servicebus-dapr-connection
   - name: queueName
-    value: binding
+    value: 
+auth:
+  secretStore: azurekeyvault

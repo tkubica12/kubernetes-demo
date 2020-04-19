@@ -8,6 +8,9 @@ spec:
   - name: storageAccount
     value: {{ .Values.blob.storageAccount }}
   - name: storageAccessKey
-    value: {{ .Values.blob.key }}
+    secretKeyRef:
+      name: blob-key
   - name: container
     value: {{ .Values.blob.container }}
+auth:
+  secretStore: azurekeyvault

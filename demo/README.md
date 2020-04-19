@@ -75,9 +75,7 @@ kubectl logs -l app=subscribeeventhub -n dapr-demo -c container
 Service bindingservicebus is configured with binding to DAPR events from Service Bus queue binding. There is KEDA scaling bounded to this queue so you should not see any Pods running. Go to nodea to generate 20 messages and whats Pods being created to deal with load.
 
 ```bash
-kubectl exec -ti nodea-0 -n dapr-demo -- bash
-export SERVICEBUS='myconnectionstring'
-python sendMessageToServiceBus.py
+kubectl exec -ti nodea-0 -n dapr-demo -- python sendMessageToServiceBus.py
 ```
 
 DAPR provides Blob Storage output binding for nodea. Check it out.
@@ -93,7 +91,6 @@ kubectl exec -ti nodea-0 -n dapr-demo -- bash /home/user/getsecret.sh
 ```
 
 TBD:
-- Key Vault secrets
 - Service2Service communication
 - Prometheus telemetry
 - OpenCensus distributed tracing to Application Insights

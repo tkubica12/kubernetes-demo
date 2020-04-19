@@ -18,10 +18,6 @@ output "storage_key" {
   value = azurerm_storage_account.demo.primary_access_key
 }
 
-output "servicebus_dapr_connection" {
-  value = azurerm_servicebus_namespace_authorization_rule.demo.primary_connection_string
-}
-
 output "servicebus_todo_connection" {
   value = azurerm_servicebus_queue_authorization_rule.myapptodo.primary_connection_string
 }
@@ -32,10 +28,6 @@ output "servicebus_namespace" {
 
 output "redis_host" {
   value = "${azurerm_redis_cache.demo.hostname}:${azurerm_redis_cache.demo.ssl_port}"
-}
-
-output "redis_password" {
-  value = azurerm_redis_cache.demo.primary_access_key
 }
 
 output "resource_group" {

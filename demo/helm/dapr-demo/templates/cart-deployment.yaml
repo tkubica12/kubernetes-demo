@@ -1,29 +1,32 @@
 apiVersion: apps/v1beta1
-kind: StatefulSet
+kind: Deployment
 metadata:
-  name: nodea
+  name: cart
 spec:
   selector:
     matchLabels:
-      app: nodea
-  serviceName: nodea
+      app: cart
   replicas: 1
   template:
     metadata:
       annotations:
         dapr.io/enabled: "true"
-        dapr.io/id: "nodea"
+        dapr.io/id: "cart"
+        dapr.io/port: "5000"
         dapr.io/log-as-json: "true"
         prometheus.io/scrape: "true"
         prometheus.io/port: "9090"
         prometheus.io/path: "/"
       labels:
-        app: nodea
-        aadpodidbinding: secrets-reader
+        app: cart
     spec:
       containers:
       - name: container
         image: "{{ .Values.appnodes.image.repository }}:{{ .Values.appnodes.image.tag | toString }}"
+        command: ["python"]
+        args: ["/home/user/cartapi.py"]
+        ports:
+          - containerPort: 5000
         resources:
           requests:
             cpu: 10m

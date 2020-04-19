@@ -13,6 +13,10 @@ spec:
         dapr.io/enabled: "true"
         dapr.io/id: "bindingservicebus"
         dapr.io/port: "5000"
+        dapr.io/log-as-json: "true"
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090"
+        prometheus.io/path: "/"
       labels:
         app: bindingservicebus
     spec:

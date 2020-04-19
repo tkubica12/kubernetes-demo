@@ -170,7 +170,7 @@ jobs:
       run: |
         helm repo add dapr https://daprio.azurecr.io/helm/v1/repo
         helm repo update
-        helm upgrade -i dapr dapr/dapr -n dapr
+        helm upgrade -i dapr dapr/dapr -n dapr --set global.logAsJson=true
 
     - name: Deploy Ingress controller for Azure App Gw
       working-directory: ./demo
@@ -269,13 +269,10 @@ jobs:
       run: |
         registry_name=$(terraform output registry_name)
         helm upgrade -i dapr-demo ./helm/dapr-demo -n dapr-demo \
-          --set serviceBus.connectionString=$(terraform output servicebus_dapr_connection) \
           --set serviceBus.namespace=$(terraform output servicebus_namespace) \
           --set blob.storageAccount=$(terraform output storage_account) \
-          --set blob.key=$(terraform output storage_key) \
           --set blob.container=daprcontainer \
           --set redis.hostname=$(terraform output redis_host) \
-          --set redis.password=$(terraform output redis_password) \
           --set appnodes.image.repository=${registry_name}.azurecr.io/daprdemo \
           --set appnodes.image.tag=$(cat version) \
           --set keyVault.name=$(terraform output keyvault_name) \
