@@ -229,9 +229,9 @@ resource "azurerm_postgresql_server" "demo" {
 
   storage_profile {
     storage_mb            = 5120
-    backup_retention_days = 30
-    auto_grow             = "Enabled"
-    geo_redundant_backup  = "Enabled"
+    backup_retention_days = 7
+    auto_grow             = "Disabled"
+    geo_redundant_backup  = "Disabled"
   }
 
   administrator_login          = "tomas"
