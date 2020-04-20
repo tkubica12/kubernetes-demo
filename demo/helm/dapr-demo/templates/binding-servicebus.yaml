@@ -14,11 +14,13 @@ spec:
         dapr.io/id: "bindingservicebus"
         dapr.io/port: "5000"
         dapr.io/log-as-json: "true"
+        dapr.io/config: "tracing"
         prometheus.io/scrape: "true"
         prometheus.io/port: "9090"
         prometheus.io/path: "/"
       labels:
         app: bindingservicebus
+        aadpodidbinding: secrets-reader
     spec:
       containers:
       - name: container

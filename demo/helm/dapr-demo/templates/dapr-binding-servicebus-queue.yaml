@@ -9,6 +9,6 @@ spec:
     secretKeyRef:
       name: servicebus-dapr-connection
   - name: queueName
-    value: 
+    value: binding
 auth:
   secretStore: azurekeyvault

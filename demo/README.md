@@ -69,13 +69,13 @@ DAPR is configured to enable messaging between services using Service Bus backen
 
 ```bash
 kubectl exec -ti nodea-0 -n dapr-demo -- bash /home/user/createorder.sh
-kubectl logs -l app=subscribeeventhub -n dapr-demo -c container
+kubectl logs -l app=subscribeorders -n dapr-demo -c container
 ```
 
 Service bindingservicebus is configured with binding to DAPR events from Service Bus queue binding. There is KEDA scaling bounded to this queue so you should not see any Pods running. Go to nodea to generate 20 messages and whats Pods being created to deal with load.
 
 ```bash
-kubectl exec -ti nodea-0 -n dapr-demo -- python sendMessageToServiceBus.py
+kubectl exec -ti nodea-0 -n dapr-demo -- python /home/user/sendMessagesToServiceBus.py
 ```
 
 DAPR provides Blob Storage output binding for nodea. Check it out.
@@ -90,10 +90,16 @@ DAPR Secrets API is configured to point to Azure Key Vault. Use DAPR API to read
 kubectl exec -ti nodea-0 -n dapr-demo -- bash /home/user/getsecret.sh
 ```
 
-TBD:
-- Service2Service communication
-- Prometheus telemetry
-- OpenCensus distributed tracing to Application Insights
+Service cart comes with /add API call of type POST. You can use DAPR sidecar to call other services.
+
+```bash
+kubectl exec -ti nodea-0 -n dapr-demo -- bash /home/user/add.sh
+```
+
+Grafana demo install has some Dashboards defined connected to Prometheus.
+Find it at https://grafana.cloud.tomaskubica.in
+
+Telemetry and logs are also gathered to Azure Monitor.
 
 ## Windows nodes
 Basic IIS instance is accessible at iis.cloud.tomaskubica.in and runs in windows namespace.

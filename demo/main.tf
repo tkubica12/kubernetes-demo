@@ -14,7 +14,7 @@ variable "tenant_app_id" {}
 
 # Configure the Azure and AAD provider
 provider "azurerm" {
-  version = "=2.5.0"
+  version = "=2.6.0"
   features {}
 }
 
@@ -225,7 +225,7 @@ resource "azurerm_postgresql_server" "demo" {
   location            = azurerm_resource_group.demo.location
   resource_group_name = azurerm_resource_group.demo.name
 
-  sku_name = "GP_Gen5_2"
+  sku_name = "B_Gen5_1"
 
   storage_profile {
     storage_mb            = 5120
@@ -358,32 +358,6 @@ resource "azurerm_storage_container" "demo" {
   storage_account_name  = azurerm_storage_account.demo.name
   container_access_type = "private"
 }
-
-# Event Hub (DAPR demo)
-# resource "azurerm_eventhub_namespace" "demo" {
-#   name                = "eventhub-${var.env}-${random_string.prefix.result}"
-#   location            = azurerm_resource_group.demo.location
-#   resource_group_name = azurerm_resource_group.demo.name
-#   sku                 = "Basic"
-# }
-
-# resource "azurerm_eventhub" "demo" {
-#   name                = "dapreventhub"
-#   namespace_name      = azurerm_eventhub_namespace.demo.name
-#   resource_group_name = azurerm_resource_group.demo.name
-#   partition_count     = 2
-#   message_retention   = 1
-# }
-
-# resource "azurerm_eventhub_authorization_rule" "demo" {
-#   name                = "daprauth"
-#   namespace_name      = azurerm_eventhub_namespace.demo.name
-#   eventhub_name       = azurerm_eventhub.demo.name
-#   resource_group_name = azurerm_resource_group.demo.name
-#   listen              = true
-#   send                = true
-#   manage              = false
-# }
 
 # Redis (DAPR demo)
 resource "azurerm_redis_cache" "demo" {
@@ -523,6 +497,37 @@ resource "azurerm_role_assignment" "aks" {
   principal_id         = azurerm_kubernetes_cluster.demo.identity[0].principal_id
 }
 
+resource "azurerm_role_assignment" "akskubelet" {
+  scope                = azurerm_container_registry.demo.id
+  role_definition_name = "AcrPull"
+  principal_id         = azurerm_kubernetes_cluster.demo.kubelet_identity[0].object_id
+}
+
+## AKS-kubelet identity for AAD Pod Identity solution
+resource "azurerm_role_assignment" "kubelet-mainrg-vmcontributor" {
+  scope                = azurerm_resource_group.demo.name
+  role_definition_name = "Virtual Machine Contributor"
+  principal_id         = azurerm_kubernetes_cluster.demo.kubelet_identity[0].object_id
+}
+
+resource "azurerm_role_assignment" "kubelet-mainrg-identityoperator" {
+  scope                = azurerm_resource_group.demo.name
+  role_definition_name = "Managed Identity Operator"
+  principal_id         = azurerm_kubernetes_cluster.demo.kubelet_identity[0].object_id
+}
+
+resource "azurerm_role_assignment" "kubelet-resourcesrg-vmcontributor" {
+  scope                = azurerm_kubernetes_cluster.demo.node_resource_group
+  role_definition_name = "Virtual Machine Contributor"
+  principal_id         = azurerm_kubernetes_cluster.demo.kubelet_identity[0].object_id
+}
+
+resource "azurerm_role_assignment" "kubelet-resourcesrg-identityoperator" {
+  scope                = azurerm_kubernetes_cluster.demo.node_resource_group
+  role_definition_name = "Managed Identity Operator"
+  principal_id         = azurerm_kubernetes_cluster.demo.kubelet_identity[0].object_id
+}
+
 ## Application Gateway ingress identity to access Application Gateway
 resource "azurerm_role_assignment" "ingress" {
   scope                = azurerm_application_gateway.appgw.id
@@ -535,22 +540,4 @@ resource "azurerm_role_assignment" "keda-servicebus" {
   scope                = azurerm_servicebus_namespace.demo.id
   role_definition_name = "Contributor"
   principal_id         = azurerm_user_assigned_identity.keda.principal_id
-}
-
-## AAD Pod Identity to get access to managed identities
-# resource "azurerm_role_assignment" "podidentity-ingress" {
-#   scope                = azurerm_user_assigned_identity.ingress.id
-#   role_definition_name = "Managed Identity Operator"
-#   principal_id         = azurerm_kubernetes_cluster.demo.identity[0].principal_id
-# }
-
-# resource "azurerm_role_assignment" "podidentity-secrets" {
-#   scope                = azurerm_user_assigned_identity.secretsReader.id
-#   role_definition_name = "Managed Identity Operator"
-#   principal_id         = azurerm_kubernetes_cluster.demo.identity[0].principal_id
-# }
-
-data "azurerm_resources" "aks" {
-  type = azurerm_kubernetes_cluster.demo.name
-  resource_group_name = azurerm_resource_group.demo.name
 }
