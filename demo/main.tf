@@ -505,25 +505,29 @@ resource "azurerm_role_assignment" "akskubelet" {
 
 ## AKS-kubelet identity for AAD Pod Identity solution
 resource "azurerm_role_assignment" "kubelet-mainrg-vmcontributor" {
-  scope                = azurerm_resource_group.demo.name
+  scope                = azurerm_resource_group.demo.id
   role_definition_name = "Virtual Machine Contributor"
   principal_id         = azurerm_kubernetes_cluster.demo.kubelet_identity[0].object_id
 }
 
 resource "azurerm_role_assignment" "kubelet-mainrg-identityoperator" {
-  scope                = azurerm_resource_group.demo.name
+  scope                = azurerm_resource_group.demo.id
   role_definition_name = "Managed Identity Operator"
   principal_id         = azurerm_kubernetes_cluster.demo.kubelet_identity[0].object_id
 }
 
+data "azurerm_resource_group" "aksresources-rg" {
+  name = azurerm_kubernetes_cluster.demo.node_resource_group
+}
+
 resource "azurerm_role_assignment" "kubelet-resourcesrg-vmcontributor" {
-  scope                = azurerm_kubernetes_cluster.demo.node_resource_group
+  scope                = data.azurerm_resource_group.aksresources-rg.id
   role_definition_name = "Virtual Machine Contributor"
   principal_id         = azurerm_kubernetes_cluster.demo.kubelet_identity[0].object_id
 }
 
 resource "azurerm_role_assignment" "kubelet-resourcesrg-identityoperator" {
-  scope                = azurerm_kubernetes_cluster.demo.node_resource_group
+  scope                = data.azurerm_resource_group.aksresources-rg.id
   role_definition_name = "Managed Identity Operator"
   principal_id         = azurerm_kubernetes_cluster.demo.kubelet_identity[0].object_id
 }
