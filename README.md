@@ -1,18 +1,8 @@
 # Kubernetes in Azure
 This repo contains my Kubernetes demo in Azure.
 
-# Recently added (late 2019)
-- DAPR
-- KEDA with Azure Functions
-- Istio refresh
-- Linkerd
-- RUDR
-- Flagger
-
-# TODO
-- Azure Monitor and Prometheus
-- More on Service Mesh Interface
-- Azure DevOps
+# Recently added (April 202)
+- Complex [demo environment](demo/README.md)
 
 # Table of Contents
 - [Deploying and operating Kubernetes on Azure (provisioning, scaling, VM-less cluster)](docs/aks.md)

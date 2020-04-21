@@ -39,7 +39,6 @@ jobs:
         TF_VAR_client_secret: ${{ secrets.client_secret }}
         TF_VAR_tenant_id: ${{ secrets.tenant_id }}
         TF_VAR_psql_password: ${{ secrets.psql_password }} 
-        TF_VAR_vm_password: ${{ secrets.password }} 
         TF_VAR_client_app_id: ${{ secrets.client_app_id }}
         TF_VAR_server_app_id: ${{ secrets.server_app_id }}
         TF_VAR_server_app_secret: ${{ secrets.server_app_secret }}
@@ -74,34 +73,6 @@ jobs:
       run: |
         az login --service-principal -u $ARM_CLIENT_ID -p $ARM_CLIENT_SECRET -t $ARM_TENANT_ID
         az account set -s $ARM_SUBSCRIPTION_ID
-
-    # - name: TEMP WORKAROUND - assign kubelet identity to main RG for MIC AAD Pod Identity
-    #   working-directory: ./demo
-    #   env:
-    #     ARM_SUBSCRIPTION_ID: ${{ secrets.subscription_id }}
-    #     ARM_CLIENT_ID: ${{ secrets.client_id }}
-    #     ARM_CLIENT_SECRET: ${{ secrets.client_secret }}
-    #     ARM_TENANT_ID: ${{ secrets.tenant_id }}
-    #   run: |
-    #     rgName=$(terraform output resource_group)
-    #     kubeletIdentity=$(az aks show -g $(terraform output resource_group) \
-    #       -n $(terraform output kube_name) \
-    #       --query identityProfile.kubeletidentity.objectId -o tsv)
-    #     az role assignment create --role "Managed Identity Operator" \
-    #       --assignee-object-id $kubeletIdentity \
-    #       -g $rgName
-    #     az role assignment create --role "Managed Identity Operator" \
-    #       --assignee-object-id $kubeletIdentity \
-    #       -g $rgName-aksresources
-    #     az role assignment create --role "AcrPull" \
-    #       --assignee-object-id $kubeletIdentity \
-    #       -g $rgName
-    #     az role assignment create --role "Virtual Machine Contributor" \
-    #       --assignee-object-id $kubeletIdentity \
-    #       -g $rgName
-    #     az role assignment create --role "Virtual Machine Contributor" \
-    #       --assignee-object-id $kubeletIdentity \
-    #       -g $rgName-aksresources
 
     - name: Deploy AAD Pod Identity
       working-directory: ./demo
@@ -194,6 +165,16 @@ jobs:
           --set armAuth.identityClientID=$(terraform output ingressContributor_client_id) \
           --set rbac.enabled=true
 
+    - name: Deploy Linkerd service mesh
+      working-directory: ./demo
+      env:
+        KUBECONFIG: "./kube_config"
+      run: |
+        export LINKERD_VERSION=stable-2.7.1
+        curl -sLO "https://github.com/linkerd/linkerd2/releases/download/$LINKERD_VERSION/linkerd2-cli-$LINKERD_VERSION-linux"
+        mv ./linkerd2-cli-$LINKERD_VERSION-linux ./linkerd
+        ./linkerd install | kubectl apply -f -
+
     - name: Deploy Grafana+Prometheus
       working-directory: ./demo
       env:
@@ -253,6 +234,31 @@ jobs:
           --set appgen.image.repository=${registry_name}.azurecr.io/todogen \
           --set appgen.image.tag=$(cat version) \
           --set apphost=cloud.tomaskubica.in \
+          --set keyvault.name=$(terraform output keyvault_name) \
+          --set keyvault.tenant=$(terraform output keyvault_tenantid) \
+          --set keyvault.key=$(terraform output keyvault_psql_keyname) \
+          --set keyvault.sbkey=servicebus-todo-connection
+
+    - name: Deploy todo application with Linkerd
+      working-directory: ./demo
+      env:
+        KUBECONFIG: "./kube_config"
+        ARM_SUBSCRIPTION_ID: ${{ secrets.subscription_id }}
+        ARM_CLIENT_ID: ${{ secrets.client_id }}
+        ARM_CLIENT_SECRET: ${{ secrets.client_secret }}
+        ARM_TENANT_ID: ${{ secrets.tenant_id }}
+      run: |
+        registry_name=$(terraform output registry_name)
+        helm upgrade -i todo ./helm/myapp -n linkerd-demo \
+          --set appspa.image.repository=${registry_name}.azurecr.io/myappspa \
+          --set appspa.image.tag=$(cat version) \
+          --set apptodo.image.repository=${registry_name}.azurecr.io/myapptodo \
+          --set apptodo.image.tag=$(cat version) \
+          --set appnode.image.repository=${registry_name}.azurecr.io/myappnode \
+          --set appnode.image.tag=$(cat version) \
+          --set appgen.image.repository=${registry_name}.azurecr.io/todogen \
+          --set appgen.image.tag=$(cat version) \
+          --set apphost=linkerd.cloud.tomaskubica.in \
           --set keyvault.name=$(terraform output keyvault_name) \
           --set keyvault.tenant=$(terraform output keyvault_tenantid) \
           --set keyvault.key=$(terraform output keyvault_psql_keyname) \
