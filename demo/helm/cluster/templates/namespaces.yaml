@@ -38,6 +38,13 @@ metadata:
 apiVersion: v1
 kind: Namespace
 metadata:
+  name: canary
+  annotations:
+    linkerd.io/inject: enabled
+---
+apiVersion: v1
+kind: Namespace
+metadata:
   name: prometheus
 ---
 apiVersion: v1
