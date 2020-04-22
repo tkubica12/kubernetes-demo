@@ -187,7 +187,7 @@ jobs:
         curl -sLO "https://github.com/linkerd/linkerd2/releases/download/$LINKERD_VERSION/linkerd2-cli-$LINKERD_VERSION-linux"
         mv ./linkerd2-cli-$LINKERD_VERSION-linux ./linkerd
         chmod +x ./linkerd
-        ./linkerd install | kubectl apply -f -
+        ./linkerd check && echo Linkerd OK || ./linkerd install | kubectl apply -f -
 
     - name: Deploy Grafana+Prometheus
       working-directory: ./demo
