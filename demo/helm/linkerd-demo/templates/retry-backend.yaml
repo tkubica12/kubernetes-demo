@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: retry-backend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: retry
+  template:
+    metadata:
+      labels:
+        app: retry
+    spec:
+      containers:
+      - name: retry-backend
+        image: tkubica/retry-backend
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16M
+          limits:
+            cpu: 100M
+            memory: 128M
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: retry-service
+spec:
+  selector:
+    app: retry
+  ports:
+  - protocol: TCP
+    name: http
+    port: 80
+    targetPort: 80

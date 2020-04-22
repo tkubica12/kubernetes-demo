@@ -46,10 +46,13 @@ Check policy engine in Azure Policy
 
 ## Todo applicaiton
 Access todo application at cloud.tomaskubica.in (Ingress via Application Gateway)
+
+Traffic generator is deployed so we can see some traffic in monitoring.
+
 Check telemetry and distributed tracing gathered in Application Insights (appid-blabla workspace) - codeless attach is used (no built-in support in app itself)
 FlexVolume is used to pass PostgreSQL secrets from Key Vault
 Check Prometheus telemetry gathered in Prometheus at prometheus.cloud.tomaskubica.in
-Check Grafana dashboards and grafana.cloud.tomaskubica.in:
+Check Grafana dashboards and grafana.cloud.tomaskubica.in via login tomas/Azure12345678:
     - AKS cluster dashboard
     - Prometheus telemetry via Prometheus
     - Prometheus telemetry via Azure Monitor backend
@@ -96,7 +99,7 @@ Service cart comes with /add API call of type POST. You can use DAPR sidecar to 
 kubectl exec -ti nodea-0 -n dapr-demo -- bash /home/user/add.sh
 ```
 
-Grafana demo install has some Dashboards defined connected to Prometheus.
+Grafana demo install has some Dashboards defined connected to Prometheus. Login is tomas/Azure12345678.
 Find it at https://grafana.cloud.tomaskubica.in
 
 Telemetry and logs are also gathered to Azure Monitor.
@@ -104,5 +107,11 @@ Telemetry and logs are also gathered to Azure Monitor.
 ## Windows nodes
 Basic IIS instance is accessible at iis.cloud.tomaskubica.in and runs in windows namespace.
 
+## Linkerd Service Mesh
+Todo application is deployed in linkerd-demo namespace and can be accessed at [http://linkerd.cloud.tomaskubica.in](http://linkerd.cloud.tomaskubica.in)
 
+Traffic generator is deployed so we can see some traffic in monitoring.
+
+Checkout Linkerd dashboard (including Grafana) at [http://linkerd.nginx.cloud.tomaskubica.in](http://linkerd.nginx.cloud.tomaskubica.in)
+Login is tomas/Azure12345678.
 

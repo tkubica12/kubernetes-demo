@@ -30,11 +30,11 @@ terraform {
 
 # Pseudorandom prefix
 resource "random_string" "prefix" {
-  length = 8
+  length  = 8
   special = false
-  lower = true
-  upper = false
-  number = true
+  lower   = true
+  upper   = false
+  number  = true
 }
 
 data "azurerm_client_config" "current" {
@@ -84,6 +84,13 @@ resource "azurerm_subnet" "appgw" {
   address_prefix       = "10.0.0.0/24"
 }
 
+resource "azurerm_subnet" "nginx" {
+  name                 = "nginx"
+  resource_group_name  = azurerm_resource_group.demo.name
+  virtual_network_name = azurerm_virtual_network.demo.name
+  address_prefix       = "10.0.1.0/24"
+}
+
 resource "azurerm_public_ip" "appgw" {
   name                = "appgwip-${var.env}"
   resource_group_name = azurerm_resource_group.demo.name
@@ -120,7 +127,8 @@ resource "azurerm_application_gateway" "appgw" {
   }
 
   backend_address_pool {
-    name = "bepool"
+    name         = "nginx"
+    ip_addresses = ["10.0.1.100"]
   }
 
   backend_http_settings {
@@ -128,20 +136,35 @@ resource "azurerm_application_gateway" "appgw" {
     port                  = 80
     protocol              = "Http"
     cookie_based_affinity = "Disabled"
+    probe_name            = "nginx-default"
   }
 
   http_listener {
-    name                           = "httpListener"
+    name                           = "nginx-listener"
     frontend_ip_configuration_name = "my-frontend-ip-configuration"
     frontend_port_name             = "web"
     protocol                       = "Http"
+    host_name                      = "linkerd.nginx.cloud.tomaskubica.in"
+  }
+
+  probe {
+    name                = "nginx-default"
+    host                = "linkerd.nginx.cloud.tomaskubica.in"
+    interval            = 5
+    protocol            = "Http"
+    path                = "/"
+    timeout             = 5
+    unhealthy_threshold = 2
+    match {
+      status_code = ["200","401", "404"]
+    }
   }
 
   request_routing_rule {
-    name                       = "rule1"
+    name                       = "nginx-rule"
     rule_type                  = "Basic"
-    http_listener_name         = "httpListener"
-    backend_address_pool_name  = "bepool"
+    http_listener_name         = "nginx-listener"
+    backend_address_pool_name  = "nginx"
     backend_http_settings_name = "http"
   }
 }
@@ -416,16 +439,16 @@ resource "azurerm_key_vault_access_policy" "terraform" {
   tenant_id = var.tenant_id
   object_id = data.azurerm_client_config.current.object_id
 
-    key_permissions = [
-      "create",
-      "get",
-    ]
+  key_permissions = [
+    "create",
+    "get",
+  ]
 
-    secret_permissions = [
-      "set",
-      "get",
-      "delete",
-    ]
+  secret_permissions = [
+    "set",
+    "get",
+    "delete",
+  ]
 
   certificate_permissions = [
     "get",
@@ -471,21 +494,21 @@ resource "azurerm_key_vault_secret" "blob-key" {
 # Managed identities and RBAC
 ## Identity for FlexVolume
 resource "azurerm_user_assigned_identity" "secretsReader" {
-  name = "secretsReader"
+  name                = "secretsReader"
   resource_group_name = azurerm_resource_group.demo.name
   location            = azurerm_resource_group.demo.location
 }
 
 ## Identity for KEDA
 resource "azurerm_user_assigned_identity" "keda" {
-  name = "keda"
+  name                = "keda"
   resource_group_name = azurerm_resource_group.demo.name
   location            = azurerm_resource_group.demo.location
 }
 
 ## Identity for Application Gateway ingress controller
 resource "azurerm_user_assigned_identity" "ingress" {
-  name = "ingressContributor"
+  name                = "ingressContributor"
   resource_group_name = azurerm_resource_group.demo.name
   location            = azurerm_resource_group.demo.location
 }
@@ -501,6 +524,13 @@ resource "azurerm_role_assignment" "akskubelet" {
   scope                = azurerm_container_registry.demo.id
   role_definition_name = "AcrPull"
   principal_id         = azurerm_kubernetes_cluster.demo.kubelet_identity[0].object_id
+}
+
+## AKS identity to access VNET
+resource "azurerm_role_assignment" "aks-network" {
+  scope                = azurerm_resource_group.demo.id
+  role_definition_name = "Network Contributor"
+  principal_id         = azurerm_kubernetes_cluster.demo.identity[0].principal_id
 }
 
 ## AKS-kubelet identity for AAD Pod Identity solution
