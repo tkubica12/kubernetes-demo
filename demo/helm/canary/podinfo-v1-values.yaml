@@ -6,7 +6,7 @@ ingress:
   hosts: 
   - canary.nginx.linkerd.cloud.tomaskubica.in
 ui:
-  color: #34577c
+  color: #34577b
   message: 'Ahoj z V1'
 linkerd:
   profile:
