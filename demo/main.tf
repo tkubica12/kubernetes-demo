@@ -106,9 +106,9 @@ resource "azurerm_application_gateway" "appgw" {
   location            = azurerm_resource_group.demo.location
 
   sku {
-    name     = "WAF_v2"
-    tier     = "WAF_v2"
-    capacity = 2
+    name     = "Standard_v2"
+    tier     = "Standard_v2"
+    capacity = 1
   }
 
   gateway_ip_configuration {
@@ -179,12 +179,13 @@ resource "azurerm_kubernetes_cluster" "demo" {
 
   default_node_pool {
     name                = "default"
-    vm_size             = "Standard_B2s"
+    vm_size             = "Standard_B2ms"
     enable_auto_scaling = true
     max_count           = 6
-    min_count           = 3
+    min_count           = 2
     availability_zones  = [1, 2, 3]
     vnet_subnet_id      = azurerm_subnet.aks.id
+    max_pods            = 100
   }
 
   identity {

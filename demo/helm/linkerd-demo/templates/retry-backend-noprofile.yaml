@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: retry-backend-noprofile
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: retry-noprofile
+  template:
+    metadata:
+      labels:
+        app: retry-noprofile
+    spec:
+      containers:
+      - name: retry-backend
+        image: tkubica/retry-backend
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16M
+          limits:
+            cpu: 100M
+            memory: 128M
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: retry-service-noprofile
+spec:
+  selector:
+    app: retry-noprofile
+  ports:
+  - protocol: TCP
+    name: http
+    port: 80
+    targetPort: 80

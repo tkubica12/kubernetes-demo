@@ -1,0 +1,33 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: myweb-deployment-v1
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: myweb
+      version: v1
+  template:
+    metadata:
+      annotations:
+        linkerd.io/inject: enabled
+      labels:
+        app: myweb
+        version: v1
+    spec:
+      containers:
+      - name: myweb
+        image: tkubica/web:1
+        env:
+        - name: PORT
+          value: "80"
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16M
+          limits:
+            cpu: 100M
+            memory: 128M

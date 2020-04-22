@@ -115,3 +115,20 @@ Traffic generator is deployed so we can see some traffic in monitoring.
 Checkout Linkerd dashboard (including Grafana) at [http://linkerd.nginx.cloud.tomaskubica.in](http://linkerd.nginx.cloud.tomaskubica.in)
 Login is tomas/Azure12345678.
 
+Test retry policy. Access service with no retry policy (failRate means % of requests that will cause crash). You will likely see failed responses.
+
+```bash
+kubectl exec client-0 -c container -n linkerd-demo -- curl -vs -m 30 retry-service-noprofile?failRate=50
+```
+
+Try accessing service with retry policy. Even if container fails Linkerd should hold your connection and retry.
+
+```bash
+kubectl exec client-0 -c container -n linkerd-demo -- curl -vs -m 30 retry-service?failRate=50
+```
+
+Canary - there are v1 and v2 deployments and services (myweb-service-v1 and myweb-service-v2). Also there is production service myweb-service with TrafficSplit configured for 90% of traffic going to v1. Test it.
+
+```bash
+kubectl exec client-0 -c container -n linkerd-demo -- bash -c 'for x in {0..30}; do curl -s myweb-service; echo; done'
+```

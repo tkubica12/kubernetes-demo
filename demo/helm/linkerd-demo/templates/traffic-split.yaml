@@ -1,0 +1,11 @@
+apiVersion: split.smi-spec.io/v1alpha1
+kind: TrafficSplit
+metadata:
+  name: myweb-service
+spec:
+  service: myweb-service
+  backends:
+  - service: myweb-service-v1
+    weight: 900m
+  - service: myweb-service-v2
+    weight: 100m

@@ -1,0 +1,17 @@
+apiVersion: linkerd.io/v1alpha2
+kind: ServiceProfile
+metadata:
+  creationTimestamp: null
+  name: retry-service.linkerd-demo.svc.cluster.local
+  namespace: linkerd-demo
+spec:
+  retryBudget:
+    retryRatio: 0.2
+    minRetriesPerSecond: 10
+    ttl: 30s
+  routes:
+  - condition:
+      method: GET
+      pathRegex: /
+    name: GET /
+    isRetryable: true

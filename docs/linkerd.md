@@ -1,7 +1,7 @@
 - [Install Linkerd CLI](#install-linkerd-cli)
 - [Install Linkerd](#install-linkerd)
 - [Accessing Linkerd dashboard](#accessing-linkerd-dashboard)
-- [Install &quot;app&quot; and make sure Linkerd sidecar is injected](#install-quotappquot-and-make-sure-linkerd-sidecar-is-injected)
+- [Install "app" and make sure Linkerd sidecar is injected](#install-%22app%22-and-make-sure-linkerd-sidecar-is-injected)
   - [Retry functionality](#retry-functionality)
   - [Canary deployments (traffic split)](#canary-deployments-traffic-split)
 - [Load balancing](#load-balancing)

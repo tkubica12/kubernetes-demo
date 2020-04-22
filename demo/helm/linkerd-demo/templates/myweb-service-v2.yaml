@@ -1,0 +1,16 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: myweb-service-v2
+  labels:
+    app: myweb
+    version: v2
+spec:
+  selector:
+    app: myweb
+    version: v2
+  ports:
+  - protocol: TCP
+    name: http
+    port: 80
+    targetPort: 80
