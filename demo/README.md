@@ -132,3 +132,46 @@ Canary - there are v1 and v2 deployments and services (myweb-service-v1 and mywe
 ```bash
 kubectl exec client-0 -c container -n linkerd-demo -- bash -c 'for x in {0..30}; do curl -s myweb-service; echo; done'
 ```
+
+## Automated canary releasing with Flagger
+Flagger supports automated canary releasing with NGINX Ingress, Linkerd Service Mesh, Istio Service Mesh and others.
+
+### Flagger using NGINX Ingress
+- Supports canary, green/blue and A/B testing (header based routing)
+- Easy to use, very lightweight (no sidecars)
+- Does not solve backend service-to-service canary via internal path (must go via Ingress)
+
+Application is exposed at [http://canary.ingress.nginx.cloud.tomaskubica.in](podinfo.ingress.nginx.cloud.tomaskubica.in). You should see v1 message and blue background and load-balanced response from multiple instances. Keep window open so traffic is generated.
+
+Check status of Canary release (should be in initialized phase)
+
+```bash
+kubectl describe canary podinfo-ingress -n canary
+```
+while true; do curl http://podinfo.ingress.nginx.cloud.tomaskubica.in/version; done
+Deploy new version, watch Flagger orchestrating process and measuring success rate and watch browser.
+```bash
+helm upgrade -i canary ./helm/canary -n canary --reuse-values \
+    --set ingress.ui.color="#32CD32" \
+    --set ingress.ui.message="Ahoj z v2" \
+    --set ingress.imagetag="3\.2\.2"
+
+kubectl describe canary podinfo-ingress -n canary
+```
+
+
+
+### Flagger using Linkerd
+- Supports canary, green/blue
+- Does not support A/B testing (header based routing)
+- Dependency on Linkerd (sidecars), more overhead
+- Supports internal service-to-service traffic
+
+TBD
+
+### Flagger using Istio
+- Supports canary, green/blue, A/B testing (header based routing) and mirroring
+- Dependency on Istio (sidecars), significant overhead
+- Supports internal service-to-service traffic
+
+TBD

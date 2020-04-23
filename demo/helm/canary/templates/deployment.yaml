@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: podinfo-ingress
+spec:
+  replicas: {{ .Values.replicaCount }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: podinfo-ingress
+  template:
+    metadata:
+      labels:
+        app: podinfo-ingress
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8090"
+    spec:
+      containers:
+      - name: podinfo
+        image: "stefanprodan/podinfo:{{ .Values.ingress.imagetag }}"
+        env:
+        - name: PODINFO_UI_MESSAGE
+          value: {{ .Values.ingress.ui.message }}
+        - name: PODINFO_UI_COLOR
+          value: {{ .Values.ingress.ui.color }}
+        ports:
+        - containerPort: 8080
+        command:
+            - ./podinfo
+            - --port=8080
+            - --port-metrics=8090
+            {{- if .Values.ingress.faults.unhealthy }}
+            - --unhealthy
+            {{- end }}
+            {{- if .Values.ingress.faults.unready }}
+            - --unready
+            {{- end }}
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16M
+          limits:
+            cpu: 100m
+            memory: 64M

@@ -14,3 +14,10 @@ spec:
           serviceName: ingress-nginx-nginx-ingress-controller
           servicePort: 80
         path: /
+  - host: podinfo.ingress.nginx.cloud.tomaskubica.in
+    http:
+      paths:
+      - backend:
+          serviceName: ingress-nginx-nginx-ingress-controller
+          servicePort: 80
+        path: /

@@ -1,0 +1,11 @@
+replicaCount: 3
+ingress:
+  host: canary.ingress.nginx.cloud.tomaskubica.in
+  abhost: ab.ingress.nginx.cloud.tomaskubica.in
+  imagetag: 3.2.1
+  ui:
+    color: #34577b
+    message: 'Ahoj z v1'
+  faults:
+    unhealthy: false
+    unready: false
