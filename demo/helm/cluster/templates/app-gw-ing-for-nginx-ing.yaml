@@ -1,0 +1,16 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: azure/application-gateway
+  name: todo-myapp-spa
+  namespace: ingress
+spec:
+  rules:
+  - host: linkerd.nginx.cloud.tomaskubica.in
+    http:
+      paths:
+      - backend:
+          serviceName: ingress-nginx-nginx-ingress-controller
+          servicePort: 80
+        path: /
