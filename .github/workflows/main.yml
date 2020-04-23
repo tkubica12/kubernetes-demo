@@ -154,7 +154,10 @@ jobs:
         helm upgrade -i ingress-nginx stable/nginx-ingress -n ingress \
           --set controller.service.loadBalancerIP=10.0.1.100 \
           --set controller.service.annotations."service\.beta\.kubernetes\.io\/azure-load-balancer-internal"=true \
-          --set controller.service.annotations."service\.beta\.kubernetes\.io\/azure-load-balancer-internal-subnet"=nginx
+          --set controller.service.annotations."service\.beta\.kubernetes\.io\/azure-load-balancer-internal-subnet"=nginx \
+          --set controller.podAnnotations."prometheus\.io/scrape"=true \
+          --set controller.podAnnotations."prometheus\.io/port"=10254 \
+          --set controller.metrics.enabled=true
 
     - name: Deploy Ingress controller for Azure App Gw
       working-directory: ./demo
@@ -287,6 +290,17 @@ jobs:
       run: |
         # kubectl delete ingress --all -n linkerd-demo
         helm upgrade -i linkerd-demo ./helm/linkerd-demo -n linkerd-demo
+
+    - name: Deploy Flagger
+      working-directory: ./demo
+      env:
+        KUBECONFIG: "./kube_config"
+      run: |
+        helm repo add flagger https://flagger.app
+        helm upgrade -i flagger ./helm/linkerd-demo -n canary \
+          --set meshProvider=nginx \
+          --set metricsServer="http://prometheus-server\.prometheus:9090" \
+          --set podMonitor.enabled
 
     - name: Deploy DAPR demo
       working-directory: ./demo
