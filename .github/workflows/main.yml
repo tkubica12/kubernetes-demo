@@ -177,7 +177,6 @@ jobs:
           --set armAuth.identityResourceID=$(terraform output ingressContributor_resource_id) \
           --set armAuth.identityClientID=$(terraform output ingressContributor_client_id) \
           --set rbac.enabled=true
-        kubectl delete azureingressprohibitedtargets/prohibit-all-targets -n ingress
 
     - name: Deploy Linkerd service mesh
       working-directory: ./demo
@@ -203,7 +202,7 @@ jobs:
         ARM_CLIENT_SECRET: ${{ secrets.client_secret }}
         ARM_TENANT_ID: ${{ secrets.tenant_id }}
       run: |
-        kubectl delete ingress --all -n grafana
+        # kubectl delete ingress --all -n grafana
         helm repo add stable https://kubernetes-charts.storage.googleapis.com
         helm repo update
         helm upgrade -i grafana stable/grafana -n grafana -f helm/cluster/grafana-values.yaml \
@@ -239,7 +238,7 @@ jobs:
         ARM_CLIENT_SECRET: ${{ secrets.client_secret }}
         ARM_TENANT_ID: ${{ secrets.tenant_id }}
       run: |
-        kubectl delete ingress --all -n default
+        # kubectl delete ingress --all -n default
         registry_name=$(terraform output registry_name)
         helm upgrade -i todo ./helm/myapp \
           --set appspa.image.repository=${registry_name}.azurecr.io/myappspa \
@@ -286,7 +285,7 @@ jobs:
       env:
         KUBECONFIG: "./kube_config"
       run: |
-        kubectl delete ingress --all -n linkerd-demo
+        # kubectl delete ingress --all -n linkerd-demo
         helm upgrade -i linkerd-demo ./helm/linkerd-demo -n linkerd-demo
 
     - name: Deploy DAPR demo
