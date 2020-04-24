@@ -2,17 +2,17 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   labels:
-    app: canary-nginx
+    app: ab-nginx
   annotations:
     kubernetes.io/ingress.class: nginx
     ingress.kubernetes.io/rewrite-target: /
-  name: canary-nginx
+  name: ab-nginx
 spec:
   rules:
-    - host: "{{ .Values.ingress.canary.host }}"
+    - host: "{{ .Values.ingress.ab.host }}"
       http:
         paths:
           - path: /
             backend:
-              serviceName: canary-nginx
+              serviceName: ab-nginx
               servicePort: 80

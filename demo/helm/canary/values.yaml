@@ -1,10 +1,20 @@
 replicaCount: 3
 ingress:
-  host: canary.nginx.i.cloud.tomaskubica.in
-  imagetag: 3.2.0
-  ui:
-    color: #34577b
-    message: 'Ahojky!'
-  faults:
-    unhealthy: false
-    unready: false
+  canary:
+    host: canary.nginx.i.cloud.tomaskubica.in
+    imagetag: 3.2.0
+    ui:
+      color: #34577b
+      message: 'Ahojky!'
+    faults:
+      unhealthy: false
+      unready: false
+  ab:
+    host: ab.nginx.i.cloud.tomaskubica.in
+    imagetag: 3.2.0
+    ui:
+      color: #34577b
+      message: 'Ahojky!'
+    faults:
+      unhealthy: false
+      unready: false

@@ -1,17 +1,17 @@
 apiVersion: flagger.app/v1beta1
 kind: Canary
 metadata:
-  name: canary-nginx
+  name: ab-nginx
 spec:
   provider: nginx
   targetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: canary-nginx
+    name: ab-nginx
   ingressRef:
     apiVersion: extensions/v1beta1
     kind: Ingress
-    name: canary-nginx
+    name: ab-nginx
   progressDeadlineSeconds: 60
   service:
     port: 80
@@ -21,6 +21,15 @@ spec:
     threshold: 10
     maxWeight: 50
     stepWeight: 10
+    match:
+    # curl -H 'X-Canary: insider' http://app.example.com
+    - headers:
+        x-canary:
+          exact: "insider"
+    # curl -b 'canary=always' http://app.example.com
+    - headers:
+        cookie:
+          exact: "canary"
     metrics:
     - name: "latency"
       templateRef:

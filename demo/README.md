@@ -51,18 +51,22 @@ Check ASC recommendations for ACR and AKS
 
 Check policy engine in Azure Policy
 
-## Todo applicaiton
-Access todo application at cloud.tomaskubica.in (Ingress via Application Gateway)
+## Todo application
+Access todo application at [http://cloud.tomaskubica.in](http://cloud.tomaskubica.in) (Ingress via Application Gateway)
 
 Traffic generator is deployed so we can see some traffic in monitoring.
 
 Check telemetry and distributed tracing gathered in Application Insights (appid-blabla workspace) - codeless attach is used (no built-in support in app itself)
+
 FlexVolume is used to pass PostgreSQL secrets from Key Vault
-Check Prometheus telemetry gathered in Prometheus at prometheus.cloud.tomaskubica.in
-Check Grafana dashboards and grafana.cloud.tomaskubica.in via login tomas/Azure12345678:
+
+Check Prometheus telemetry gathered in Prometheus at [http://prometheus.cloud.tomaskubica.in](http://prometheus.cloud.tomaskubica.in)
+
+Check Grafana dashboards and [http://grafana.cloud.tomaskubica.in](http://grafana.cloud.tomaskubica.in) via login tomas/Azure12345678:
     - AKS cluster dashboard
     - Prometheus telemetry via Prometheus
     - Prometheus telemetry via Azure Monitor backend
+
 Check Prometheus telemetry scrapped in Azure Monitor
 
 ## DAPR and KEDA
@@ -107,7 +111,7 @@ kubectl exec -ti nodea-0 -n dapr-demo -- bash /home/user/add.sh
 ```
 
 Grafana demo install has some Dashboards defined connected to Prometheus. Login is tomas/Azure12345678.
-Find it at https://grafana.cloud.tomaskubica.in
+Find it at [http://grafana.cloud.tomaskubica.in](http://grafana.cloud.tomaskubica.in)
 
 Telemetry and logs are also gathered to Azure Monitor.
 
@@ -150,10 +154,18 @@ Flagger supports automated canary releasing with NGINX Ingress, Linkerd Service 
 
 Application is exposed at [http://canary.nginx.i.cloud.tomaskubica.in](http://canary.nginx.i.cloud.tomaskubica.in). You should see v1 message and blue background and load-balanced response from multiple instances. Keep window open so traffic is generated.
 
+Should you need to restart this scenario, you can do this:
+
+```bash
+helm delete canary -n canary
+helm upgrade -i canary ./helm/canary -n canary -f ./helm/canary/values.yaml
+```
+
+#### Canary
 Check status of Canary release (should be in initialized phase)
 
 ```bash
-kubectl describe canary podinfo-ingress -n canary
+kubectl describe canary canary-nginx -n canary
 ```
 
 In separate window start generating traffic. 
@@ -166,7 +178,7 @@ Deploy new version, watch Flagger orchestrating process. Application exposes lat
 
 ```bash
 helm upgrade -i canary ./helm/canary -n canary --reuse-values \
-    --set ingress.imagetag="3\.2\.1"
+    --set ingress.canary.imagetag="3\.2\.1"
 
 kubectl describe canary canary-nginx -n canary
 ```
@@ -181,11 +193,53 @@ Roll new version. Because some calls get routed to delay function metrics for ca
 
 ```bash
 helm upgrade -i canary ./helm/canary -n canary --reuse-values \
-    --set ingress.imagetag="3\.2\.2"
+    --set ingress.canary.imagetag="3\.2\.2"
 
 kubectl describe canary canary-nginx -n canary
 ```
 
+#### A/B
+In previous example percentage of connections was routed to new release. With A/B scenario we will not do this randomly, but rather decide based on header or cookie. As an example only internal or beta users will get routed to new version to test it out before complete rollout.
+
+Check status of Canary release (should be in initialized phase)
+
+```bash
+kubectl describe canary an-nginx -n canary
+```
+
+In separate window start generating traffic. 
+
+```bash
+while true; do curl http://ab.nginx.i.cloud.tomaskubica.in/version; done
+```
+
+Deploy new version, watch Flagger orchestrating process. In another window start curl using beta tester header to reach new version when deployed.
+
+```bash
+while true; do curl -H 'X-Canary: insider' http://ab.nginx.i.cloud.tomaskubica.in/version; done
+```
+
+Application exposes latency metrics which are evaluated by Flagger. Since latency is bellow 500ms we should see Flagger progressing and finaly moving all users to new version.
+
+```bash
+helm upgrade -i canary ./helm/canary -n canary --reuse-values --set ingress.ab.imagetag="3\.2\.1"
+
+kubectl describe canary ab-nginx -n canary
+```
+
+We will now try next version, but this time simulate long latency. In new window run this:
+
+```bash
+while true; do curl -H 'X-Canary: insider' http://ab.nginx.i.cloud.tomaskubica.in/delay/3; done
+```
+
+Roll new version. Because some calls get routed to delay function metrics for canary version are likely to go worse over time and Flagger should halt advancement and rollback.
+
+```bash
+helm upgrade -i canary ./helm/canary -n canary --reuse-values --set ingress.ab.imagetag="3\.2\.2"
+
+kubectl describe canary ab-nginx -n canary
+```
 
 ### Flagger using Linkerd
 - Supports canary, green/blue

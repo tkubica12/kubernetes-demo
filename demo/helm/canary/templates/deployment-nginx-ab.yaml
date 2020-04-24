@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: canary-nginx
+  name: ab-nginx
 spec:
   replicas: {{ .Values.replicaCount }}
   strategy:
@@ -10,33 +10,33 @@ spec:
       maxUnavailable: 1
   selector:
     matchLabels:
-      app: canary-nginx
+      app: ab-nginx
   template:
     metadata:
       labels:
-        app: canary-nginx
+        app: ab-nginx
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "8090"
     spec:
       containers:
       - name: podinfo
-        image: "stefanprodan/podinfo:{{ .Values.ingress.canary.imagetag }}"
+        image: "stefanprodan/podinfo:{{ .Values.ingress.ab.imagetag }}"
         env:
         - name: PODINFO_UI_MESSAGE
-          value: {{ .Values.ingress.canary.ui.message }}
+          value: {{ .Values.ingress.ab.ui.message }}
         - name: PODINFO_UI_COLOR
-          value: {{ .Values.ingress.canary.ui.color }}
+          value: {{ .Values.ingress.ab.ui.color }}
         ports:
         - containerPort: 8080
         command:
             - ./podinfo
             - --port=8080
             - --port-metrics=8090
-            {{- if .Values.ingress.canary.faults.unhealthy }}
+            {{- if .Values.ingress.ab.faults.unhealthy }}
             - --unhealthy
             {{- end }}
-            {{- if .Values.ingress.canary.faults.unready }}
+            {{- if .Values.ingress.ab.faults.unready }}
             - --unready
             {{- end }}
         resources:
