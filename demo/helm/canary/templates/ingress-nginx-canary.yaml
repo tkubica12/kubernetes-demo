@@ -2,11 +2,11 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   labels:
-    app: podinfo-ingress-ingress
+    app: canary-nginx
   annotations:
     kubernetes.io/ingress.class: nginx
     ingress.kubernetes.io/rewrite-target: /
-  name: podinfo-ingress-ingress
+  name: canary-nginx
 spec:
   rules:
     - host: "{{ .Values.ingress.host }}"
@@ -14,5 +14,5 @@ spec:
         paths:
           - path: /
             backend:
-              serviceName: podinfo-ingress
+              serviceName: canary-nginx
               servicePort: 80

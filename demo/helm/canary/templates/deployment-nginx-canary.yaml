@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: podinfo-ingress
+  name: canary-nginx
 spec:
   replicas: {{ .Values.replicaCount }}
   strategy:
@@ -10,11 +10,11 @@ spec:
       maxUnavailable: 1
   selector:
     matchLabels:
-      app: podinfo-ingress
+      app: canary-nginx
   template:
     metadata:
       labels:
-        app: podinfo-ingress
+        app: canary-nginx
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "8090"

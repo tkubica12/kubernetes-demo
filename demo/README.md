@@ -14,20 +14,27 @@ Currently covered
 - Azure Application Gateway Web Application Firewall as Ingress
 - Azure Monitor for Containers including Prometheus scrapper
 - Azure Database for PostgreSQL
-- Azure Event Hub
 - Azure Blob Storage
 - Azure Service Bus
 - Grafana with Azure Monitor datasource
 - Prometheus
 - Windows nodes
 - DAPR
+  - State
+  - Pub/sub
+  - Trigger (input binding) with KEDA scaling
+  - Connector (output binding)
+  - Secrets API
+  - Service-to-service communication
+  - OpenTelemetry export to Application Insights
+- KEDA
 - AAD Pod Identity
 - Key Vault FlexVolume
+- Linkerd
+- Flagger
 
 Planned
 - RUDR
-- Linkerd
-- Flagger
 - Azure CosmosDB
 
 # Demonstrations
@@ -112,7 +119,7 @@ Todo application is deployed in linkerd-demo namespace and can be accessed at [h
 
 Traffic generator is deployed so we can see some traffic in monitoring.
 
-Checkout Linkerd dashboard (including Grafana) at [http://linkerd.nginx.cloud.tomaskubica.in](http://linkerd.nginx.cloud.tomaskubica.in)
+Checkout Linkerd dashboard (including Grafana) at [http://linkerd.i.cloud.tomaskubica.in](http://linkerd.i.cloud.tomaskubica.in)
 Login is tomas/Azure12345678.
 
 Test retry policy. Access service with no retry policy (failRate means % of requests that will cause crash). You will likely see failed responses.
@@ -136,29 +143,48 @@ kubectl exec client-0 -c container -n linkerd-demo -- bash -c 'for x in {0..30};
 ## Automated canary releasing with Flagger
 Flagger supports automated canary releasing with NGINX Ingress, Linkerd Service Mesh, Istio Service Mesh and others.
 
-### Flagger using NGINX Ingress
+### Flagger using NGINX Ingress and custom application metric
 - Supports canary, green/blue and A/B testing (header based routing)
 - Easy to use, very lightweight (no sidecars)
 - Does not solve backend service-to-service canary via internal path (must go via Ingress)
 
-Application is exposed at [http://canary.ingress.nginx.cloud.tomaskubica.in](podinfo.ingress.nginx.cloud.tomaskubica.in). You should see v1 message and blue background and load-balanced response from multiple instances. Keep window open so traffic is generated.
+Application is exposed at [http://canary.nginx.i.cloud.tomaskubica.in](http://canary.nginx.i.cloud.tomaskubica.in). You should see v1 message and blue background and load-balanced response from multiple instances. Keep window open so traffic is generated.
 
 Check status of Canary release (should be in initialized phase)
 
 ```bash
 kubectl describe canary podinfo-ingress -n canary
 ```
-while true; do curl http://podinfo.ingress.nginx.cloud.tomaskubica.in/version; done
-Deploy new version, watch Flagger orchestrating process and measuring success rate and watch browser.
-```bash
-helm upgrade -i canary ./helm/canary -n canary --reuse-values \
-    --set ingress.ui.color="#32CD32" \
-    --set ingress.ui.message="Ahoj z v2" \
-    --set ingress.imagetag="3\.2\.2"
 
-kubectl describe canary podinfo-ingress -n canary
+In separate window start generating traffic. 
+
+```bash
+while true; do curl http://canary.nginx.i.cloud.tomaskubica.in/version; done
 ```
 
+Deploy new version, watch Flagger orchestrating process. Application exposes latency metrics which are evaluated by Flagger. Since latency is bellow 500ms we should see Flagger progressing and finaly moving all users to new version.
+
+```bash
+helm upgrade -i canary ./helm/canary -n canary --reuse-values \
+    --set ingress.imagetag="3\.2\.1"
+
+kubectl describe canary canary-nginx -n canary
+```
+
+We will now try next version, but this time simulate long latency. In new window run this:
+
+```bash
+while true; do curl http://canary.nginx.i.cloud.tomaskubica.in/delay/3; done
+```
+
+Roll new version. Because some calls get routed to delay function metrics for canary version are likely to go worse over time and Flagger should halt advancement and rollback.
+
+```bash
+helm upgrade -i canary ./helm/canary -n canary --reuse-values \
+    --set ingress.imagetag="3\.2\.2"
+
+kubectl describe canary canary-nginx -n canary
+```
 
 
 ### Flagger using Linkerd

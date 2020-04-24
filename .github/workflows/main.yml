@@ -102,7 +102,7 @@ jobs:
           --set secretsReader.clientId=$(terraform output secretsReader_clientId) \
           --set keda.resourceId=$(terraform output keda_resourceId) \
           --set keda.clientId=$(terraform output keda_clientId) \
-          --set linkerdhost=linkerd.nginx.cloud.tomaskubica.in
+          --set linkerdhost=canary.nginx.i.cloud.tomaskubica.in
 
     - name: Appliction Insights codeless injector
       working-directory: ./demo
@@ -300,7 +300,7 @@ jobs:
         helm upgrade -i flagger flagger/flagger -n canary \
           --set meshProvider=nginx \
           --set metricsServer="http://prometheus-server\.prometheus:9090"
-        helm upgrade -i flagger-loadtester flagger/loadtester -n canary
+        # helm upgrade -i flagger-loadtester flagger/loadtester -n canary
 
     - name: Deploy DAPR demo
       working-directory: ./demo

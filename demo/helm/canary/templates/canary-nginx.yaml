@@ -1,0 +1,31 @@
+apiVersion: flagger.app/v1beta1
+kind: Canary
+metadata:
+  name: canary-nginx
+spec:
+  provider: nginx
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: canary-nginx
+  ingressRef:
+    apiVersion: extensions/v1beta1
+    kind: Ingress
+    name: canary-nginx
+  progressDeadlineSeconds: 60
+  service:
+    port: 80
+    targetPort: 8080
+  analysis:
+    interval: 20s
+    threshold: 10
+    maxWeight: 50
+    stepWeight: 10
+    metrics:
+    metrics:
+    - name: "latency"
+      templateRef:
+        name: latency
+      thresholdRange:
+        max: 0.5
+      interval: 10s

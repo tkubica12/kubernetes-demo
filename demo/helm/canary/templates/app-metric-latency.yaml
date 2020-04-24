@@ -1,0 +1,18 @@
+apiVersion: flagger.app/v1beta1
+kind: MetricTemplate
+metadata:
+  name: latency
+  namespace: canary
+spec:
+  provider:
+    type: prometheus
+    address: http://prometheus-server.prometheus
+  query: |
+    histogram_quantile(0.99,
+      sum(
+          http_request_duration_seconds_bucket{
+            kubernetes_namespace="{{ "{{" }} namespace {{ "}}" }}",
+            kubernetes_pod_name=~"{{ "{{" }} target {{ "}}" }}-[0-9a-zA-Z]+(-[0-9a-zA-Z]+)"
+          }
+      ) by (le)
+    )

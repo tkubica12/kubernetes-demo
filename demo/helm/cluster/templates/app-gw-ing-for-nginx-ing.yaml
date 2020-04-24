@@ -7,14 +7,21 @@ metadata:
   namespace: ingress
 spec:
   rules:
-  - host: linkerd.nginx.cloud.tomaskubica.in
+  - host: linkerd.i.cloud.tomaskubica.in
     http:
       paths:
       - backend:
           serviceName: ingress-nginx-nginx-ingress-controller
           servicePort: 80
         path: /
-  - host: podinfo.ingress.nginx.cloud.tomaskubica.in
+  - host: canary.nginx.i.cloud.tomaskubica.in
+    http:
+      paths:
+      - backend:
+          serviceName: ingress-nginx-nginx-ingress-controller
+          servicePort: 80
+        path: /
+  - host: ab.nginx.i.cloud.tomaskubica.in
     http:
       paths:
       - backend:
