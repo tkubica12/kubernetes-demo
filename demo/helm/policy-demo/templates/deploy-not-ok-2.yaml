@@ -1,0 +1,22 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: policy-deploy-ko-2
+spec:
+  selector:
+    matchLabels:
+      app: policy-deploy-ko-2
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: policy-deploy-ko-2
+        release-type: test
+    spec:
+      containers:
+      - name: container
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | toString }}"
+        ports:
+          - containerPort: 80
+        securityContext:
+          privileged: true

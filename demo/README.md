@@ -1,3 +1,21 @@
+- [Demo environment via GitHub Actions](#demo-environment-via-github-actions)
+- [Included compontents](#included-compontents)
+- [Demonstrations](#demonstrations)
+  - [Todo application](#todo-application)
+  - [DAPR and KEDA](#dapr-and-keda)
+  - [Windows nodes](#windows-nodes)
+  - [Linkerd Service Mesh](#linkerd-service-mesh)
+  - [Automated canary releasing with Flagger](#automated-canary-releasing-with-flagger)
+    - [Flagger using NGINX Ingress and custom application metric](#flagger-using-nginx-ingress-and-custom-application-metric)
+      - [Canary](#canary)
+      - [A/B](#ab)
+    - [Flagger using Linkerd](#flagger-using-linkerd)
+    - [Flagger using Istio](#flagger-using-istio)
+  - [Security](#security)
+    - [Azure Policy](#azure-policy)
+    - [Azure Security Center](#azure-security-center)
+    - [Azure Active Directory integration](#azure-active-directory-integration)
+
 # Demo environment via GitHub Actions
 This demo uses GitHub Actions to orchestrate deployment of infrastructure, application build and applicatio deployment.
 1. Terraform is used to deploy AKS cluster (including monitoring, policy engine and AAD integration), Application Gateway (WAF), PostgreSQL as a Service, Key Vault, Service Bus, Event Hub and other infrastructure components. **In main.tf check what variables are needed and store them in your GitHub secrets to fit your environment**
@@ -38,18 +56,6 @@ Planned
 - Azure CosmosDB
 
 # Demonstrations
-## Cluster operations
-Check AAD integration
-
-```bash
-rm ~/.kube/config
-az aks get-credentials -n tomasdemoaks-test -g aks-test
-kubectl get nodes   # login as admin@tomaskubicaoffice.onmicrosoft.com
-```
-
-Check ASC recommendations for ACR and AKS
-
-Check policy engine in Azure Policy
 
 ## Todo application
 Access todo application at [http://cloud.tomaskubica.in](http://cloud.tomaskubica.in) (Ingress via Application Gateway)
@@ -255,3 +261,26 @@ TBD
 - Supports internal service-to-service traffic
 
 TBD
+
+## Security
+### Azure Policy
+Work in progress
+
+AKS resource group is configured with Azure Policy (ARM is using connector for Gatekeeper v3) with exceptions for most namespaces except namespace "policy". 6 policies are configured:
+- No public IP on load balancer
+- Must include label release-type
+- Ingress must be HTTPS (no HTTP)
+- Only container repos with azurecr.io in name are allowed (no Docker Hub)
+- Must include limits on resources, but never more than 200m and 128Mi
+- No privileged containers
+
+### Azure Security Center
+TBD
+
+### Azure Active Directory integration 
+
+```bash
+rm ~/.kube/config
+az aks get-credentials -n tomasdemoaks-test -g aks-test
+kubectl get nodes   # login as admin@tomaskubicaoffice.onmicrosoft.com
+```

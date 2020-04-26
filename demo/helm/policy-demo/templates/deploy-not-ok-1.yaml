@@ -1,0 +1,23 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: policy-deploy-ko-1
+spec:
+  selector:
+    matchLabels:
+      app: policy-deploy-ko-1
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: policy-deploy-ko-1
+    spec:
+      containers:
+      - name: container
+        image: "nginx:latest"
+        ports:
+          - containerPort: 80
+        resources:
+          limits:
+            cpu: 400m
+            memory: 512Mi

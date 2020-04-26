@@ -329,6 +329,19 @@ jobs:
       run: |
         helm upgrade -i canary ./helm/canary -n canary -f ./helm/canary/values.yaml
 
+    - name: Deploy Azure Policy demo
+      working-directory: ./demo
+      env:
+        KUBECONFIG: "./kube_config"
+        ARM_SUBSCRIPTION_ID: ${{ secrets.subscription_id }}
+        ARM_CLIENT_ID: ${{ secrets.client_id }}
+        ARM_CLIENT_SECRET: ${{ secrets.client_secret }}
+        ARM_TENANT_ID: ${{ secrets.tenant_id }}
+      run: |
+        helm upgrade -i policy-demo ./helm/policy-demo -n policy \
+          --set image.repository=$(terraform output registry_name).azurecr.io/myappspa \
+          --set image.tag=$(cat version)
+
     - name: Deploy IIS application
       working-directory: ./demo
       env:
