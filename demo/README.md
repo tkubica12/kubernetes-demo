@@ -112,7 +112,43 @@ Visualizations can be also done in Grafana for both backends - Prometheus and Az
 - NGINX Controller dashboard
 
 ### Logs
-TBD
+Logs from containers are in following table:
+
+```
+ContainerLog 
+```
+
+Audit logs from Kubernetes API, Application Gateway, PostgreSQL and other sources.
+
+```
+AzureDiagnostics
+| where Category == "kube-apiserver"
+```
+
+```
+AzureDiagnostics
+| where Category == "cluster-autoscaler"
+```
+
+```
+AzureDiagnostics
+| where Category == "kube-audit"
+```
+
+```
+AzureDiagnostics
+| where Category == "kube-controller-manager"
+```
+
+```
+AzureDiagnostics
+| where Category == "PostgreSQLLogs"
+```
+
+```
+AzureDiagnostics
+| where Category == "ApplicationGatewayAccessLog"
+```
 
 ## Todo application
 Access todo application at [http://cloud.tomaskubica.in](http://cloud.tomaskubica.in) (Ingress via Application Gateway)
