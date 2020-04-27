@@ -102,7 +102,11 @@ jobs:
           --set secretsReader.clientId=$(terraform output secretsReader_clientId) \
           --set keda.resourceId=$(terraform output keda_resourceId) \
           --set keda.clientId=$(terraform output keda_clientId) \
+          --set azurepolicy.resourceId=$(terraform output azurepolicy_resourceId) \
+          --set azurepolicy.clientId=$(terraform output azurepolicy_clientId) \
           --set linkerdhost=canary.nginx.i.cloud.tomaskubica.in
+        # Policy workaround (preview does not correctly include pod identity)
+        # kubectl patch deployment azure-policy -n kube-system --type strategic --patch '{"spec": {"template": {"metadata": {"labels": {"aadpodidbinding": "azurepolicy"}}}}}'
 
     - name: Appliction Insights codeless injector
       working-directory: ./demo

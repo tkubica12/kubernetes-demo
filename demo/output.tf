@@ -58,6 +58,14 @@ output "secretsReader_clientId" {
   value = azurerm_user_assigned_identity.secretsReader.client_id
 }
 
+output "azurepolicy_resourceId" {
+  value = data.azurerm_user_assigned_identity.azurepolicy.id
+}
+
+output "azurepolicy_clientId" {
+  value = data.azurerm_user_assigned_identity.azurepolicy.client_id
+}
+
 output "keda_resourceId" {
   value = azurerm_user_assigned_identity.keda.id
 }

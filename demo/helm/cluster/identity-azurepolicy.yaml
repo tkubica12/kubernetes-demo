@@ -1,0 +1,16 @@
+apiVersion: "aadpodidentity.k8s.io/v1"
+kind: AzureIdentity
+metadata:
+  name: azurepolicy
+spec:
+  type: 0
+  ResourceID: {{ .Values.azurepolicy.resourceId }}
+  ClientID: {{ .Values.azurepolicy.clientId }}
+---
+apiVersion: "aadpodidentity.k8s.io/v1"
+kind: AzureIdentityBinding
+metadata:
+  name: azurepolicy-binding
+spec: 
+  AzureIdentity: azurepolicy
+  Selector: azurepolicy

@@ -61,6 +61,20 @@ resource "azurerm_application_insights" "demo" {
   application_type    = "web"
 }
 
+resource "azurerm_monitor_diagnostic_setting" "aks-diag" {
+  name                       = "aks-diag"
+  target_resource_id         = azurerm_kubernetes_cluster.demo.id
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.demo.id
+
+  log {
+    category = "kube-apiserver"
+    retention_policy {
+      enabled = false
+    }
+
+  }
+}
+
 # Networking
 resource "azurerm_virtual_network" "demo" {
   name                = "my-vnet"
@@ -156,7 +170,7 @@ resource "azurerm_application_gateway" "appgw" {
     timeout             = 5
     unhealthy_threshold = 2
     match {
-      status_code = ["200","401", "404"]
+      status_code = ["200", "401", "404"]
     }
   }
 
@@ -575,6 +589,12 @@ resource "azurerm_role_assignment" "keda-servicebus" {
   scope                = azurerm_servicebus_namespace.demo.id
   role_definition_name = "Contributor"
   principal_id         = azurerm_user_assigned_identity.keda.principal_id
+}
+
+## Get id of Azure Policy identity
+data "azurerm_user_assigned_identity" "azurepolicy" {
+  name                = "azurepolicy-aks-${var.env}-${random_string.prefix.result}"
+  resource_group_name = data.azurerm_resource_group.aksresources-rg.name
 }
 
 # Azure Policy
