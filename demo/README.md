@@ -1,6 +1,10 @@
 - [Demo environment via GitHub Actions](#demo-environment-via-github-actions)
 - [Included compontents](#included-compontents)
 - [Demonstrations](#demonstrations)
+  - [Monitoring](#monitoring)
+    - [Distributed tracing and app telemetry with Application Insights](#distributed-tracing-and-app-telemetry-with-application-insights)
+    - [Telemetry](#telemetry)
+    - [Logs](#logs)
   - [Todo application](#todo-application)
   - [DAPR and KEDA](#dapr-and-keda)
   - [Windows nodes](#windows-nodes)
@@ -50,6 +54,8 @@ Currently covered
 - Key Vault FlexVolume
 - Linkerd
 - Flagger
+  - NGINX ingress
+- Monitoring -> diagnostic logs
 
 Planned
 - RUDR and/or Crossplane
@@ -61,14 +67,55 @@ Planned
 - Hybrid -> Azure Monitor for Containers on non-AKS cluster
 - Hybrid -> Azure Arc for Kubernetes
 - GitOps
-- Monitoring -> diagnostic logs
+- Flagger
+  - with Linker
+  - with Istio
+- Linkerd telemetry to Application Insights
+- OpenTelemetry app demo
 
 # Demonstrations
 
+## Monitoring
+Todo application is deployed with traffic generator so we can see some telemetry information in monitoring tools.
+
+### Distributed tracing and app telemetry with Application Insights
+Todo application in default namespace is not instrumented with application insights natively in code, but codeless attach is used to still get distributed tracing and telemetry to Application Insights - check appid-blabla workspace in Azure.
+
+Application dapr-demo is instrumented for distributed tracing via DAPR OpenTelemetry export to Application Insights.
+
+### Telemetry
+Application does not include Prometheus telemetry, but myappspa is built on nginx container and sidecar adapter has been used to expose NGINX telemetry as Prometheus telemetry. This is gathered to non/persistent Prometheus instance [http://prometheus.cloud.tomaskubica.in](http://prometheus.cloud.tomaskubica.in). Eg. see telemetry with this PromQL:
+
+```
+nginx_http_requests_total { app="myapp-spa" }
+```
+
+Also Azure Monitor is configured to gather Prometheus telemetry from applications and store it in Azure. Open Logs and see metrics from myappspa using followign Kusto query:
+
+```
+InsightsMetrics
+| where Namespace == "prometheus"
+| where Name == "nginx_http_requests_total"
+| extend podName = tostring(parse_json(Tags).pod_name)
+| summarize metrics = percentile(Val,95) by bin(TimeGenerated, 5m), podName
+| order by TimeGenerated asc
+| render timechart 
+```
+
+Azure Monitor allows for rich visualizations (Workbooks), deep realtime analytics and machine learning, Alerting capabilities including complex workflows with Logic Apps or analyzing data in Azure Sentinel (SIEM).
+
+Visualizations can be also done in Grafana for both backends - Prometheus and Azure Monitor. Open Grafana at [http://grafana.cloud.tomaskubica.in](http://grafana.cloud.tomaskubica.in) (login is tomas/Azure12345678) and see:
+- AKS cluster dashboard (based on data from Azure Monitor)
+- Prometheus telemetry for myappspa (based on data from Prometheus backend)
+- Prometheus telemetry for myappspa (based on data from Azure Monitor)
+- DAPR dashboards
+- NGINX Controller dashboard
+
+### Logs
+TBD
+
 ## Todo application
 Access todo application at [http://cloud.tomaskubica.in](http://cloud.tomaskubica.in) (Ingress via Application Gateway)
-
-Traffic generator is deployed so we can see some traffic in monitoring.
 
 Check telemetry and distributed tracing gathered in Application Insights (appid-blabla workspace) - codeless attach is used (no built-in support in app itself)
 
