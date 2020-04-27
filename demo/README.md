@@ -52,8 +52,16 @@ Currently covered
 - Flagger
 
 Planned
-- RUDR
+- RUDR and/or Crossplane
+- Azure Policy with Gatekeeper v3
+- Istio
+- Osiris
 - Azure CosmosDB
+- PSQL managed identity access
+- Hybrid -> Azure Monitor for Containers on non-AKS cluster
+- Hybrid -> Azure Arc for Kubernetes
+- GitOps
+- Monitoring -> diagnostic logs
 
 # Demonstrations
 
@@ -264,7 +272,7 @@ TBD
 
 ## Security
 ### Azure Policy
-Work in progress
+**Work in progress**
 
 AKS resource group is configured with Azure Policy (ARM is using connector for Gatekeeper v3) with exceptions for most namespaces except namespace "policy". 6 policies are configured:
 - No public IP on load balancer
@@ -275,9 +283,14 @@ AKS resource group is configured with Azure Policy (ARM is using connector for G
 - No privileged containers
 
 ### Azure Security Center
-TBD
+Go to Azure Security Center to see found issues in our AKS cluster and Azure Container Registry vulnerabilities in images (powered by Qualys).
+
+![](images/asc1.png)
+
+![](images/asc2.png)
 
 ### Azure Active Directory integration 
+Check AAD integration for Kubernetes users
 
 ```bash
 rm ~/.kube/config
