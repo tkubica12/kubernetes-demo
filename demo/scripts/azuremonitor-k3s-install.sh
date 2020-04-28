@@ -1,3 +1,5 @@
+#!/bin/sh
+
 # sudo -i
 
 # Install K3s
