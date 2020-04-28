@@ -44,3 +44,4 @@ kuberesources/identity1.yaml
 /keda/keda-worker
 /demo/.secrets
 /demo/.terraform
+demo/errored.tfstate

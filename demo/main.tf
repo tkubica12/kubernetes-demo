@@ -198,6 +198,28 @@ resource "azurerm_subnet" "nginx" {
   address_prefix       = "10.0.1.0/24"
 }
 
+resource "azurerm_subnet" "k3s" {
+  name                 = "k3s"
+  resource_group_name  = azurerm_resource_group.demo.name
+  virtual_network_name = azurerm_virtual_network.demo.name
+  address_prefix       = "10.0.2.0/24"
+}
+
+# resource "azurerm_subnet" "aci" {
+#   name                 = "aci"
+#   resource_group_name  = azurerm_resource_group.demo.name
+#   virtual_network_name = azurerm_virtual_network.demo.name
+#   address_prefix       = "10.0.3.0/24"
+
+#   delegation {
+#     name = "aciDelegation"
+#     service_delegation {
+#       name    = "Microsoft.ContainerInstance/containerGroups"
+#       actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
+#     }
+#   }
+# }
+
 resource "azurerm_public_ip" "appgw" {
   name                = "appgwip-${var.env}"
   resource_group_name = azurerm_resource_group.demo.name
@@ -326,6 +348,10 @@ resource "azurerm_kubernetes_cluster" "demo" {
     azure_policy {
       enabled = true
     }
+    # aci_connector_linux {
+    #   enabled     = true
+    #   subnet_name = "aci"
+    # }
   }
 }
 
@@ -338,6 +364,48 @@ resource "azurerm_kubernetes_cluster_node_pool" "demo" {
   os_type               = "Windows"
   node_taints           = ["os=windows:NoSchedule"]
   vnet_subnet_id        = azurerm_subnet.aks.id
+}
+
+# K3s
+resource "azurerm_network_interface" "k3s" {
+  name                = "k3s-nic"
+  location            = azurerm_resource_group.demo.location
+  resource_group_name = azurerm_resource_group.demo.name
+
+  ip_configuration {
+    name                          = "internal"
+    subnet_id                     = azurerm_subnet.k3s.id
+    private_ip_address_allocation = "Static"
+    private_ip_address            = "10.0.2.100"
+  }
+}
+
+resource "azurerm_linux_virtual_machine" "k3s" {
+  name                = "k3s"
+  resource_group_name = azurerm_resource_group.demo.name
+  location            = azurerm_resource_group.demo.location
+  size                = "Standard_B2s"
+  admin_username      = "tomas"
+  network_interface_ids = [
+    azurerm_network_interface.k3s.id,
+  ]
+
+  admin_ssh_key {
+    username   = "adminuser"
+    public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDFhm1FUhzt/9roX7SmT/dI+vkpyQVZp3Oo5HC23YkUVtpmTdHje5oBV0LMLBB1Q5oSNMCWiJpdfD4VxURC31yet4mQxX2DFYz8oEUh0Vpv+9YWwkEhyDy4AVmVKVoISo5rAsl3JLbcOkSqSO8FaEfO5KIIeJXB6yGI3UQOoL1owMR9STEnI2TGPZzvk/BdRE73gJxqqY0joyPSWOMAQ75Xr9ddWHul+v//hKjibFuQF9AFzaEwNbW5HxDsQj8gvdG/5d6mt66SfaY+UWkKldM4vRiZ1w11WlyxRJn5yZNTeOxIYU4WLrDtvlBklCMgB7oF0QfiqahauOEo6m5Di2Ex"
+  }
+
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+  }
+
+  source_image_reference {
+    publisher = "Canonical"
+    offer     = "UbuntuServer"
+    sku       = "18.04-LTS"
+    version   = "latest"
+  }
 }
 
 # Container registry
