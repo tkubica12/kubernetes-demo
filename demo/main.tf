@@ -391,7 +391,7 @@ resource "azurerm_linux_virtual_machine" "k3s" {
   ]
 
   admin_ssh_key {
-    username   = "adminuser"
+    username   = "tomas"
     public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDFhm1FUhzt/9roX7SmT/dI+vkpyQVZp3Oo5HC23YkUVtpmTdHje5oBV0LMLBB1Q5oSNMCWiJpdfD4VxURC31yet4mQxX2DFYz8oEUh0Vpv+9YWwkEhyDy4AVmVKVoISo5rAsl3JLbcOkSqSO8FaEfO5KIIeJXB6yGI3UQOoL1owMR9STEnI2TGPZzvk/BdRE73gJxqqY0joyPSWOMAQ75Xr9ddWHul+v//hKjibFuQF9AFzaEwNbW5HxDsQj8gvdG/5d6mt66SfaY+UWkKldM4vRiZ1w11WlyxRJn5yZNTeOxIYU4WLrDtvlBklCMgB7oF0QfiqahauOEo6m5Di2Ex"
   }
 
@@ -406,6 +406,27 @@ resource "azurerm_linux_virtual_machine" "k3s" {
     sku       = "18.04-LTS"
     version   = "latest"
   }
+}
+
+resource "azurerm_virtual_machine_extension" "k3s" {
+  name                 = "k3s"
+  virtual_machine_id   = azurerm_linux_virtual_machine.k3s.id
+  publisher            = "Microsoft.Azure.Extensions"
+  type                 = "CustomScript"
+  type_handler_version = "2.0"
+
+  settings = <<SETTINGS
+    {
+        "fileUris": ["https://raw.githubusercontent.com/tkubica12/kubernetes-demo/master/demo/scripts/azuremonitor-k3s-install.sh"]
+    }
+SETTINGS
+
+  protected_settings = <<PROTECTEDSETTINGS
+    {
+        "commandToExecute": "./azuremonitor-k3s-install.sh ${azurerm_log_analytics_workspace.demo.workspace_id} ${azurerm_log_analytics_workspace.demo.primary_shared_key}"
+    }
+PROTECTEDSETTINGS
+
 }
 
 # Container registry
