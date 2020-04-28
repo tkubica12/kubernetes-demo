@@ -5,6 +5,7 @@
     - [Distributed tracing and app telemetry with Application Insights](#distributed-tracing-and-app-telemetry-with-application-insights)
     - [Telemetry](#telemetry)
     - [Logs](#logs)
+    - [Azure Monitor for Containers](#azure-monitor-for-containers)
   - [Todo application](#todo-application)
   - [DAPR and KEDA](#dapr-and-keda)
   - [Windows nodes](#windows-nodes)
@@ -19,6 +20,7 @@
     - [Azure Policy](#azure-policy)
     - [Azure Security Center](#azure-security-center)
     - [Azure Active Directory integration](#azure-active-directory-integration)
+    - [Managed Identity](#managed-identity)
 
 # Demo environment via GitHub Actions
 This demo uses GitHub Actions to orchestrate deployment of infrastructure, application build and applicatio deployment.
@@ -56,15 +58,16 @@ Currently covered
 - Flagger
   - NGINX ingress
 - Monitoring -> diagnostic logs
+- Azure Monitor for Containers (non-AKS cluster monitoring)
 
 Planned
+- Virtual Nodes (after vnet limitations are resolved)
 - RUDR and/or Crossplane
 - Azure Policy with Gatekeeper v3
 - Istio
 - Osiris
 - Azure CosmosDB
 - PSQL managed identity access
-- Hybrid -> Azure Monitor for Containers on non-AKS cluster
 - Hybrid -> Azure Arc for Kubernetes
 - GitOps
 - Flagger
@@ -150,21 +153,19 @@ AzureDiagnostics
 | where Category == "ApplicationGatewayAccessLog"
 ```
 
+### Azure Monitor for Containers
+There is Kubernetes cluster deployed in VM K3s configured with Azure Monitor for Containers agent. Got to Azure Monitor -> Containers and select clusters from all environments (Azure and Non-Azure).
+
+![](images/monitorext1.png)
+
+![](images/monitorext2.png)
+
 ## Todo application
 Access todo application at [http://cloud.tomaskubica.in](http://cloud.tomaskubica.in) (Ingress via Application Gateway)
 
-Check telemetry and distributed tracing gathered in Application Insights (appid-blabla workspace) - codeless attach is used (no built-in support in app itself)
+Check monitoring - Application Insights, codeless attach, Prometheus, Grafana, Azure Monitor.
 
 FlexVolume is used to pass PostgreSQL secrets from Key Vault
-
-Check Prometheus telemetry gathered in Prometheus at [http://prometheus.cloud.tomaskubica.in](http://prometheus.cloud.tomaskubica.in)
-
-Check Grafana dashboards and [http://grafana.cloud.tomaskubica.in](http://grafana.cloud.tomaskubica.in) via login tomas/Azure12345678:
-    - AKS cluster dashboard
-    - Prometheus telemetry via Prometheus
-    - Prometheus telemetry via Azure Monitor backend
-
-Check Prometheus telemetry scrapped in Azure Monitor
 
 ## DAPR and KEDA
 DAPR and KEDA components are deployed in dapr and keda namespaces. KEDA is configured to leverage AAD Pod Identity for authentication to Service Bus. DAPR currently does not offer this for Service Bus component, but AAD pod identity is used for accessing Key Vault secrets.
@@ -380,3 +381,46 @@ rm ~/.kube/config
 az aks get-credentials -n tomasdemoaks-test -g aks-test
 kubectl get nodes   # login as admin@tomaskubicaoffice.onmicrosoft.com
 ```
+
+### Managed Identity
+This demo is extensively using concept of Managed Identity so applications can securely access secrets and resources without need to handover passwords.
+
+AAD Pod Identity is used to bring managed identity to AKS on per-Pod basis with AzureIdentity and AzureIdentityBinding CRDs. This how to get short-lived token and use it to access Key Vault.
+
+```bash
+# Get Pod name
+nodepod=$(kubectl get pods -l app=myapp-node -o name | head -n 1)
+
+# Get Key Vault name
+terraform output keyvault_name
+
+# Use managed identity
+kubectl exec -ti $nodepod -- bash 
+  # Get token
+  curl -s "http://169.254.169.254/metadata/identity/oauth2/token?resource=https://vault.azure.net"
+  # Parse and store token
+  export token=$(curl -s http://169.254.169.254/metadata/identity/oauth2/token?resource=https://vault.azure.net | jq -r '.access_token')
+  # Access Key Vault with token
+  keyvault=vault-demo-e25wbosx
+  curl -H "Authorization: Bearer ${token}" https://$keyvault.vault.azure.net/secrets/psql-jdbc?api-version=7.0
+```
+
+Azure Key Vault FlexVolume is used to pass Key Vault secrets as files. On backend it is using Managed Identity, but application does not need to ask for token, secret is mapped to its file system directly.
+
+```bash
+# Get Pod name
+todopod=$(kubectl get pods -l app=myapp-todo -o name | head -n 1)
+kubectl exec -ti $todopod -- bash -c 'ls -lah /keyvault; cat /keyvault/psql-jdbc'
+```
+
+Some components deployed in this demo also access Azure resources via Managed Identity:
+- Azure Monitor
+- FlexVolume
+- AAD Pod Identity (it needs to talk to Azure and is using managed identity for that)
+- Kubernetes itself
+- KEDA autoscaler
+- Application Gateway Ingress Controller
+
+Some components are using standard passwords/connection_strings until managed identity is supported. This includes:
+- Some DAPR components
+- PostgreSQL connection

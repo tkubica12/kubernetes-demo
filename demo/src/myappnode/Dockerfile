@@ -1,5 +1,7 @@
 FROM node:10
 
+RUN apt update && apt install jq -y
+
 WORKDIR /app
 
 COPY package*.json ./
