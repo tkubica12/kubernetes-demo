@@ -302,7 +302,7 @@ In previous example percentage of connections was routed to new release. With A/
 Check status of Canary release (should be in initialized phase)
 
 ```bash
-kubectl describe canary an-nginx -n canary
+kubectl describe canary ab-nginx -n canary
 ```
 
 In separate window start generating traffic. 
