@@ -1,0 +1,12 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: dapr-dashboard
+  namespace: dapr
+spec:
+  selector:
+    app: dapr-dashboard
+  ports:
+  - protocol: TCP
+    port: 8080
+    targetPort: 8080

@@ -1,0 +1,22 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: deployment-reader
+rules:
+- apiGroups: ["", "dapr.io", "apps", "extensions"]
+  resources: ["deployments", "pods", "pods/log", "components"]
+  verbs: ["get", "list"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: deployment-reader-global
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: dapr
+roleRef:
+  kind: ClusterRole
+  name: deployment-reader
+  apiGroup: rbac.authorization.k8s.io
