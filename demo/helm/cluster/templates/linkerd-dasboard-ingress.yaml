@@ -10,7 +10,7 @@ data:
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: dashboard-ingress
+  name: linkerd-dashboard-ingress
   namespace: linkerd
   annotations:
     kubernetes.io/ingress.class: "nginx"

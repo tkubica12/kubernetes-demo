@@ -3,7 +3,7 @@ kind: Ingress
 metadata:
   annotations:
     kubernetes.io/ingress.class: azure/application-gateway
-  name: todo-myapp-spa
+  name: ingress-to-nginx
   namespace: ingress
 spec:
   rules:
