@@ -61,6 +61,13 @@ resource "azurerm_application_insights" "demo" {
   application_type    = "web"
 }
 
+resource "azurerm_application_insights" "dapr" {
+  name                = "appin-dapr-${var.env}-${random_string.prefix.result}"
+  location            = azurerm_resource_group.demo.location
+  resource_group_name = azurerm_resource_group.demo.name
+  application_type    = "web"
+}
+
 resource "azurerm_monitor_diagnostic_setting" "aks-diag" {
   name                       = "aks-diag"
   target_resource_id         = azurerm_kubernetes_cluster.demo.id

@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: dapr-dashboard
-  namespace: dapr
   labels:
     app: dapr-dashboard
 spec:

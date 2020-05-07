@@ -94,6 +94,14 @@ output "appin_id" {
   value = azurerm_application_insights.demo.app_id
 }
 
+output "appin_dapr_key" {
+  value = azurerm_application_insights.dapr.instrumentation_key
+}
+
+output "appin_dapr_id" {
+  value = azurerm_application_insights.dapr.app_id
+}
+
 output "ingressContributor_client_id" {
   value = azurerm_user_assigned_identity.ingress.client_id
 }
