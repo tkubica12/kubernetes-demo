@@ -44,11 +44,11 @@ Currently covered
 - Prometheus
 - Windows nodes
 - DAPR
-  - State
-  - Pub/sub
-  - Trigger (input binding) with KEDA scaling
-  - Connector (output binding)
-  - Secrets API
+  - State (with Cosmos DB)
+  - Pub/sub (With Service Bus)
+  - Trigger (Service Bus) with KEDA scaling
+  - Connector (Blob Storage)
+  - Secrets API (Key Vault)
   - Service-to-service communication
   - OpenTelemetry export to Application Insights
 - KEDA
@@ -61,12 +61,12 @@ Currently covered
 - Azure Monitor for Containers (non-AKS cluster monitoring)
 
 Planned
+- DAPR OAuth middleware
 - Virtual Nodes (after vnet limitations are resolved)
 - RUDR and/or Crossplane
 - Azure Policy with Gatekeeper v3
 - Istio
 - Osiris
-- Azure CosmosDB
 - PSQL managed identity access
 - Hybrid -> Azure Arc for Kubernetes
 - GitOps

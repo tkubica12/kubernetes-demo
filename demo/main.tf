@@ -14,7 +14,7 @@ variable "tenant_app_id" {}
 
 # Configure the Azure and AAD provider
 provider "azurerm" {
-  version = "=2.7.0"
+  version = "=2.9.0"
   features {}
 }
 
@@ -362,6 +362,17 @@ resource "azurerm_kubernetes_cluster" "demo" {
   }
 }
 
+resource "azurerm_devspace_controller" "demo" {
+  name                = "acctestdsc1"
+  location            = azurerm_resource_group.demo.location
+  resource_group_name = azurerm_resource_group.demo.name
+
+  sku_name = "S1"
+
+  target_container_host_resource_id        = "${azurerm_kubernetes_cluster.demo.id}"
+  target_container_host_credentials_base64 = "${base64encode(azurerm_kubernetes_cluster.demo.kube_admin_config_raw)}"
+}
+
 resource "azurerm_kubernetes_cluster_node_pool" "demo" {
   name                  = "wokna"
   kubernetes_cluster_id = azurerm_kubernetes_cluster.demo.id
@@ -484,39 +495,39 @@ resource "azurerm_postgresql_firewall_rule" "demo" {
 }
 
 # Cosmos DB (DAPR demo)
-# resource "azurerm_cosmosdb_account" "demo" {
-#   name                = "cosmos-${var.env}-${random_string.prefix.result}"
-#   location            = azurerm_resource_group.demo.location
-#   resource_group_name = azurerm_resource_group.demo.name
-#   offer_type          = "Standard"
-#   kind                = "GlobalDocumentDB"
+resource "azurerm_cosmosdb_account" "demo" {
+  name                = "cosmos-${var.env}-${random_string.prefix.result}"
+  location            = azurerm_resource_group.demo.location
+  resource_group_name = azurerm_resource_group.demo.name
+  offer_type          = "Standard"
+  kind                = "GlobalDocumentDB"
 
-#   enable_automatic_failover = false
+  enable_automatic_failover = false
 
-#   consistency_policy {
-#     consistency_level       = "Session"
-#   }
+  consistency_policy {
+    consistency_level       = "Session"
+  }
 
-#   geo_location {
-#     location          = azurerm_resource_group.demo.location
-#     failover_priority = 0
-#   }
-# }
+  geo_location {
+    location          = azurerm_resource_group.demo.location
+    failover_priority = 0
+  }
+}
 
-# resource "azurerm_cosmosdb_sql_database" "demo" {
-#   name                = "daprdb "
-#   resource_group_name = azurerm_cosmosdb_account.demo.resource_group_name
-#   account_name        = azurerm_cosmosdb_account.demo.name
-#   throughput          = 400
-# }
+resource "azurerm_cosmosdb_sql_database" "demo" {
+  name                = "daprdb"
+  resource_group_name = azurerm_cosmosdb_account.demo.resource_group_name
+  account_name        = azurerm_cosmosdb_account.demo.name
+  throughput          = 400
+}
 
-# resource "azurerm_cosmosdb_sql_container" "demo" {
-#   name                = "statecont"
-#   resource_group_name = azurerm_resource_group.demo.name
-#   account_name        = azurerm_cosmosdb_account.demo.name
-#   database_name       = azurerm_cosmosdb_sql_database.demo.name
-#   partition_key_path  = "/id"
-# }
+resource "azurerm_cosmosdb_sql_container" "demo" {
+  name                = "statecont"
+  resource_group_name = azurerm_resource_group.demo.name
+  account_name        = azurerm_cosmosdb_account.demo.name
+  database_name       = azurerm_cosmosdb_sql_database.demo.name
+  partition_key_path  = "/id"
+}
 
 # Service bus
 resource "azurerm_servicebus_namespace" "demo" {
@@ -684,6 +695,13 @@ resource "azurerm_key_vault_secret" "servicebus-dapr" {
 resource "azurerm_key_vault_secret" "redis-password" {
   name         = "redis-password"
   value        = azurerm_redis_cache.demo.primary_access_key
+  key_vault_id = azurerm_key_vault.demo.id
+  depends_on   = [azurerm_key_vault_access_policy.terraform]
+}
+
+resource "azurerm_key_vault_secret" "cosmos-key" {
+  name         = "cosmos-key"
+  value        = azurerm_cosmosdb_account.demo.primary_master_key
   key_vault_id = azurerm_key_vault.demo.id
   depends_on   = [azurerm_key_vault_access_policy.terraform]
 }

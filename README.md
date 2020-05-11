@@ -1,7 +1,7 @@
 # Kubernetes in Azure
 This repo contains my Kubernetes demo in Azure.
 
-# Recently added (April 202)
+# Recently added (April/May 2020)
 - Complex [demo environment](demo/README.md)
 
 # Table of Contents

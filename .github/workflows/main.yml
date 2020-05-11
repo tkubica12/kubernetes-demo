@@ -324,7 +324,9 @@ jobs:
           --set serviceBus.namespace=$(terraform output servicebus_namespace) \
           --set blob.storageAccount=$(terraform output storage_account) \
           --set blob.container=daprcontainer \
-          --set redis.hostname=$(terraform output redis_host) \
+          --set cosmos.host=$(terraform output cosmos_host) \
+          --set cosmos.db=$(terraform output cosmos_db) \
+          --set cosmos.col=$(terraform output cosmos_col) \
           --set appnodes.image.repository=${registry_name}.azurecr.io/daprdemo \
           --set appnodes.image.tag=$(cat version) \
           --set keyVault.name=$(terraform output keyvault_name) \

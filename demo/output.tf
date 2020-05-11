@@ -27,7 +27,19 @@ output "servicebus_namespace" {
 }
 
 output "redis_host" {
-  value = "${azurerm_redis_cache.demo.hostname}:${azurerm_redis_cache.demo.ssl_port}"
+ value = "${azurerm_redis_cache.demo.hostname}:${azurerm_redis_cache.demo.ssl_port}"
+}
+
+output "cosmos_host" {
+ value = azurerm_cosmosdb_account.demo.endpoint
+}
+
+output "cosmos_db" {
+ value = azurerm_cosmosdb_sql_database.demo.name
+}
+
+output "cosmos_col" {
+ value = azurerm_cosmosdb_sql_container.demo.name
 }
 
 output "resource_group" {
