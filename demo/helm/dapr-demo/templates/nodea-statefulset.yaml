@@ -7,7 +7,7 @@ spec:
     matchLabels:
       app: nodea
   serviceName: nodea
-  replicas: 1
+  replicas: 2
   template:
     metadata:
       annotations:

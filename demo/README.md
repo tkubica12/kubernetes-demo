@@ -173,8 +173,8 @@ DAPR and KEDA components are deployed in dapr and keda namespaces. KEDA is confi
 Store and retrieve state
 
 ```bash
-kubectl exec -ti nodea-0 -n dapr-demo -- bash /home/user/write.sh
-kubectl exec -ti nodeb-0 -n dapr-demo -- bash /home/user/read.sh
+kubectl exec -ti nodea-0 -n dapr -- bash /home/user/write.sh
+kubectl exec -ti nodea-1 -n dapr -- bash /home/user/read.sh
 ```
 
 DAPR is configured to enable messaging between services using Service Bus backend. Connect to nodea-0 and use curl to send message to DAPR. Deployment subscribeorders will receive message. Also look into Service Bus in portal to see subscriber has been created in orders topic.
