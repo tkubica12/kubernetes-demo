@@ -43,7 +43,7 @@ data "azurerm_client_config" "current" {
 # Resource Group
 resource "azurerm_resource_group" "demo" {
   name     = "cloudnative-${var.env}"
-  location = "centralus"
+  location = "westeurope"
 }
 
 # Azure Monitor
