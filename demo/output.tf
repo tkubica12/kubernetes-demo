@@ -26,10 +26,6 @@ output "servicebus_namespace" {
   value = azurerm_servicebus_namespace.demo.name
 }
 
-output "redis_host" {
- value = "${azurerm_redis_cache.demo.hostname}:${azurerm_redis_cache.demo.ssl_port}"
-}
-
 output "cosmos_host" {
  value = azurerm_cosmosdb_account.demo.endpoint
 }
