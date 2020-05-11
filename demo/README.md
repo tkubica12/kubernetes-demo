@@ -180,32 +180,32 @@ kubectl exec -ti nodea-1 -n dapr -- bash /home/user/read.sh
 DAPR is configured to enable messaging between services using Service Bus backend. Connect to nodea-0 and use curl to send message to DAPR. Deployment subscribeorders will receive message. Also look into Service Bus in portal to see subscriber has been created in orders topic.
 
 ```bash
-kubectl exec -ti nodea-0 -n dapr-demo -- bash /home/user/createorder.sh
-kubectl logs -l app=subscribeorders -n dapr-demo -c container
+kubectl exec -ti nodea-0 -n dapr -- bash /home/user/createorder.sh
+kubectl logs -l app=subscribeorders -n dapr -c container
 ```
 
 Service bindingservicebus is configured with binding to DAPR events from Service Bus queue binding. There is KEDA scaling bounded to this queue so you should not see any Pods running. Go to nodea to generate 20 messages and whats Pods being created to deal with load.
 
 ```bash
-kubectl exec -ti nodea-0 -n dapr-demo -- python /home/user/sendMessagesToServiceBus.py
+kubectl exec -ti nodea-0 -n dapr -- python /home/user/sendMessagesToServiceBus.py
 ```
 
 DAPR provides Blob Storage output binding for nodea. Check it out.
 
 ```bash
-kubectl exec -ti nodea-0 -n dapr-demo -- bash /home/user/blobout.sh myOutFile.json
+kubectl exec -ti nodea-0 -n dapr -- bash /home/user/blobout.sh myOutFile.json
 ```
 
 DAPR Secrets API is configured to point to Azure Key Vault. Use DAPR API to read secrets.
 
 ```bash
-kubectl exec -ti nodea-0 -n dapr-demo -- bash /home/user/getsecret.sh
+kubectl exec -ti nodea-0 -n dapr -- bash /home/user/getsecret.sh
 ```
 
 Service cart comes with /add API call of type POST. You can use DAPR sidecar to call other services.
 
 ```bash
-kubectl exec -ti nodea-0 -n dapr-demo -- bash /home/user/add.sh
+kubectl exec -ti nodea-0 -n dapr -- bash /home/user/add.sh
 ```
 
 Grafana demo install has some Dashboards defined connected to Prometheus. Login is tomas/Azure12345678.

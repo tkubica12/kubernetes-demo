@@ -330,7 +330,8 @@ jobs:
           --set appnodes.image.repository=${registry_name}.azurecr.io/daprdemo \
           --set appnodes.image.tag=$(cat version) \
           --set keyVault.name=$(terraform output keyvault_name) \
-          --set keyVault.readerClientId=$(terraform output secretsReader_clientId)
+          --set keyVault.readerClientId=$(terraform output secretsReader_clientId) \
+          --set appin_key=$(terraform output appin_dapr_key)
 
     - name: Deploy canary demos
       working-directory: ./demo
