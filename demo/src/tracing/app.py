@@ -2,6 +2,7 @@ from opencensus.trace.tracer import Tracer
 from opencensus.trace.samplers import AlwaysOnSampler
 from opencensus.ext.ocagent import trace_exporter
 from opencensus.ext.flask.flask_middleware import FlaskMiddleware
+from opencensus.trace.propagation.trace_context_http_header_format import TraceContextPropagator
 import time
 import random
 import socket
@@ -16,7 +17,7 @@ exporter=trace_exporter.TraceExporter(
 tracer = Tracer(sampler=AlwaysOnSampler(), exporter=exporter)
 
 app = flask.Flask(__name__)
-middleware = FlaskMiddleware(app, exporter=exporter, sampler=AlwaysOnSampler(), blacklist_paths=['_ah/health'])
+middleware = FlaskMiddleware(app, exporter=exporter, sampler=AlwaysOnSampler(), propagator=TraceContextPropagator(), blacklist_paths=['_ah/health'])
 
 @app.route('/')
 def init():
