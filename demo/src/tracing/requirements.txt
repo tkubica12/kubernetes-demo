@@ -1,4 +1,5 @@
 opencensus
 opencensus-ext-ocagent
 opencensus-ext-flask
+opencensus-ext-requests
 flask

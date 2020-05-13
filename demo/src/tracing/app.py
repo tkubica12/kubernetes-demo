@@ -3,6 +3,7 @@ from opencensus.trace.samplers import AlwaysOnSampler
 from opencensus.ext.ocagent import trace_exporter
 from opencensus.ext.flask.flask_middleware import FlaskMiddleware
 from opencensus.trace.propagation.b3_format import B3FormatPropagator
+from opencensus.trace import config_integration
 import time
 import random
 import socket
@@ -14,7 +15,11 @@ exporter=trace_exporter.TraceExporter(
         service_name=os.getenv('SERVICE_NAME'),
         endpoint=os.getenv('COLLECTOR'))
 
-tracer = Tracer(sampler=AlwaysOnSampler(), exporter=exporter)
+tracer = Tracer(sampler=AlwaysOnSampler(), exporter=exporter, propagator=B3FormatPropagator())
+
+integration = ['requests']
+
+config_integration.trace_integrations(integration)
 
 app = flask.Flask(__name__)
 middleware = FlaskMiddleware(app, exporter=exporter, sampler=AlwaysOnSampler(), propagator=B3FormatPropagator(), blacklist_paths=['_ah/health'])
