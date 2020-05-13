@@ -34,6 +34,7 @@ metadata:
   name: linkerd-demo
   annotations:
     linkerd.io/inject: enabled
+    config.linkerd.io/trace-collector: "linkerd-localforwarder.linkerd-demo.svc.cluster.local:55678"
 ---
 apiVersion: v1
 kind: Namespace

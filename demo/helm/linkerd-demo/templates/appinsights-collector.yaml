@@ -1,0 +1,42 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: linkerd-localforwarder
+  labels:
+    app: linkerd-localforwarder
+spec:
+  selector:
+    app: linkerd-localforwarder
+  ports:
+  - protocol: TCP
+    port: 55678
+    targetPort: 55678
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: linkerd-localforwarder
+  labels:
+    app: linkerd-localforwarder
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: linkerd-localforwarder
+  template:
+    metadata:
+      labels:
+        app: linkerd-localforwarder
+    spec:
+      containers:
+      - name: linkerd-localforwarder
+        image: docker.io/daprio/dapr-localforwarder:latest
+        ports:
+        - containerPort: 55678
+        imagePullPolicy: Always
+        env:
+          - name: APPINSIGHTS_INSTRUMENTATIONKEY
+            value: {{ .Values.appin_key }}
+          - name: APPINSIGHTS_LIVEMETRICSSTREAMAUTHENTICATIONAPIKEY
+            value: null

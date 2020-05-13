@@ -1,0 +1,35 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: oc-app2
+  labels:
+    app: oc-app2
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: oc-app2
+    spec:
+      containers:
+        - name: oc-app2
+          image: "{{ .Values.repository }}:{{ .Values.tag | toString }}"
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SERVICE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: "metadata.labels['app']"
+            - name: COLLECTOR
+              value: {{ .Values.collector }}
+            - name: REMOTE_ENDPOINT
+              value: "http://oc-app1:8080/data"
+          resources:
+            requests:
+                cpu: 10m
+                memory: 16M
+            limits:
+                cpu: 100M
+                memory: 128M
+       

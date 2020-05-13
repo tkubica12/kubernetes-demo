@@ -1,0 +1,14 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: oc-app1
+  labels:
+    app: oc-app1
+spec:
+  selector:
+    app: oc-app1
+  ports:
+  - protocol: TCP
+    name: http
+    port: 8080
+    targetPort: 8080

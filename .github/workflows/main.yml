@@ -239,6 +239,7 @@ jobs:
         az acr repository show -n $registry --image myappnode:$version && echo Image exists || az acr build -r $registry --image myappnode:$version ./src/myappnode
         az acr repository show -n $registry --image todogen:$version && echo Image exists || az acr build -r $registry --image todogen:$version ./src/todoGen
         az acr repository show -n $registry --image daprdemo:$version && echo Image exists || az acr build -r $registry --image daprdemo:$version ./src/daprdemo
+        az acr repository show -n $registry --image tracing:$version && echo Image exists || az acr build -r $registry --image tracing:$version ./src/tracing
 
     - name: Deploy todo application
       working-directory: ./demo
@@ -295,9 +296,44 @@ jobs:
       working-directory: ./demo
       env:
         KUBECONFIG: "./kube_config"
+        ARM_SUBSCRIPTION_ID: ${{ secrets.subscription_id }}
+        ARM_CLIENT_ID: ${{ secrets.client_id }}
+        ARM_CLIENT_SECRET: ${{ secrets.client_secret }}
+        ARM_TENANT_ID: ${{ secrets.tenant_id }}
       run: |
         # kubectl delete ingress --all -n linkerd-demo
-        helm upgrade -i linkerd-demo ./helm/linkerd-demo -n linkerd-demo
+        helm upgrade -i linkerd-demo ./helm/linkerd-demo -n linkerd-demo \
+          --set appin_key=$(terraform output appin_linkerd_key)
+
+    - name: Deploy distributed tracing demo
+      working-directory: ./demo
+      env:
+        KUBECONFIG: "./kube_config"
+        ARM_SUBSCRIPTION_ID: ${{ secrets.subscription_id }}
+        ARM_CLIENT_ID: ${{ secrets.client_id }}
+        ARM_CLIENT_SECRET: ${{ secrets.client_secret }}
+        ARM_TENANT_ID: ${{ secrets.tenant_id }}
+      run: |
+        registry_name=$(terraform output registry_name)
+        helm upgrade -i tracing ./helm/tracing -n default \
+          --set repository=${registry_name}.azurecr.io/tracing \
+          --set tag=$(cat version) \
+          --set collector=localforwarder-default:50002
+
+    - name: Deploy distributed tracing demo with Linkerd
+      working-directory: ./demo
+      env:
+        KUBECONFIG: "./kube_config"
+        ARM_SUBSCRIPTION_ID: ${{ secrets.subscription_id }}
+        ARM_CLIENT_ID: ${{ secrets.client_id }}
+        ARM_CLIENT_SECRET: ${{ secrets.client_secret }}
+        ARM_TENANT_ID: ${{ secrets.tenant_id }}
+      run: |
+        registry_name=$(terraform output registry_name)
+        helm upgrade -i tracing-linkerd ./helm/tracing -n linkerd-demo \
+          --set repository=${registry_name}.azurecr.io/tracing \
+          --set tag=$(cat version) \
+          --set collector=linkerd-localforwarder:55678
 
     - name: Deploy Flagger
       working-directory: ./demo

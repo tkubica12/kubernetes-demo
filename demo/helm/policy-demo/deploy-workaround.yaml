@@ -1,0 +1,16 @@
+apiVersion: "aadpodidentity.k8s.io/v1"
+kind: AzureIdentity
+metadata:
+  name: policy-identity
+spec:
+  type: 0
+  resourceID: e6b6e126-3439-4f16-b829-963814e9b219
+  clientID: c5b7482f-da41-46ba-b809-aa510dad6446
+---
+apiVersion: "aadpodidentity.k8s.io/v1"
+kind: AzureIdentityBinding
+metadata:
+  name: policy-identity-binding
+spec:
+  azureIdentity: policy-identity
+  selector: policy-identity

@@ -110,6 +110,14 @@ output "appin_dapr_id" {
   value = azurerm_application_insights.dapr.app_id
 }
 
+output "appin_linkerd_key" {
+  value = azurerm_application_insights.linkerd.instrumentation_key
+}
+
+output "appin_linkerd_id" {
+  value = azurerm_application_insights.linkerd.app_id
+}
+
 output "ingressContributor_client_id" {
   value = azurerm_user_assigned_identity.ingress.client_id
 }

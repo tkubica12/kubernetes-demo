@@ -74,7 +74,7 @@ Planned
   - with Linker
   - with Istio
 - Linkerd telemetry to Application Insights
-- OpenTelemetry app demo
+- OpenTelemetry (OpenCensus) app demo
 
 # Demonstrations
 
