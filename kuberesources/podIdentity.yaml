@@ -3,7 +3,7 @@ apiVersion: v1
 metadata:
   name: mybox
   labels:
-    aadpodidbinding: identity1
+    aadpodidbinding: secrets-reader
 spec:
   containers:
     - name: mybox
