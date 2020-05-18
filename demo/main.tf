@@ -808,7 +808,8 @@ locals {
       "kv",
       "dapr",
       "dapr-demo",
-      "windows"
+      "windows",
+      "intro"
       ]
   }
 }
@@ -876,7 +877,8 @@ resource "azurerm_policy_assignment" "kube-resource-limits" {
       "kv",
       "dapr",
       "dapr-demo",
-      "windows"
+      "windows",
+      "intro"
       ]
   }
 }
@@ -913,7 +915,8 @@ resource "azurerm_policy_assignment" "kube-mandatory-labels" {
       "kv",
       "dapr",
       "dapr-demo",
-      "windows"
+      "windows",
+      "intro"
       ]
   }
 }
@@ -948,7 +951,8 @@ resource "azurerm_policy_assignment" "kube-only-acr" {
       "kv",
       "dapr",
       "dapr-demo",
-      "windows"
+      "windows",
+      "intro"
       ]
   }
 }

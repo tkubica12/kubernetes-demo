@@ -34,6 +34,7 @@ az acr build -r mojeskvelekontejnery --image appka:v2 .
 Use GUI to create WebApp with custom container.
 
 ## AKS basics
+Add AKS identity to ACR with AcrPull role.
 
 Basic Pod operations
 
@@ -46,7 +47,7 @@ kubectl get pods -w
 kubectl describe pod appka
 kubectl port-forward pod/appka 54321:8080
 kubectl logs appka
-kubectl delete pod todo
+kubectl delete pod appka
 ```
 
 Deployment controller
