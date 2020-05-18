@@ -93,6 +93,8 @@ Ingress - expose via L7 balancer and WAF in Azure
 kubectl apply -f ingressApp.yaml
 ```
 
+Windows nodes - IIS app at iis.cloud.tomaskubica.in
+
 ## Management
 Look at Application Insights map and tracing.
 
