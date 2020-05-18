@@ -115,4 +115,12 @@ Look at Secrets, Config Map
 
 ### DAPR + KEDA
 
+```bash
+# In one window generate messages via DAPR sidecar to Service Bus
+kubectl exec -ti nodea-0 -n dapr -- python /home/user/sendMessagesToServiceBus.py
+
+# In second window watch containers being created and using DAPR to injest messages
+kubectl get pods -n dapr -w
+```
+
 ### Flagger for canary releasing

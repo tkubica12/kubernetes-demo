@@ -2,7 +2,6 @@ apiVersion: keda.k8s.io/v1alpha1
 kind: TriggerAuthentication
 metadata:
   name: azure-servicebus-auth
-  namespace: dapr-demo
 spec:
   podIdentity:
     provider: azure
@@ -11,7 +10,6 @@ apiVersion: keda.k8s.io/v1alpha1
 kind: ScaledObject
 metadata:
   name: azure-servicebus-queue-scaledobject
-  namespace: dapr-demo
 spec:
   scaleTargetRef:
     deploymentName: bindingservicebus
