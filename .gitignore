@@ -45,3 +45,5 @@ kuberesources/identity1.yaml
 /demo/.secrets
 /demo/.terraform
 demo/errored.tfstate
+demo/intro/PROD/*
+demo/intro/TEST/*
