@@ -33,4 +33,85 @@ az acr build -r mojeskvelekontejnery --image appka:v2 .
 
 Use GUI to create WebApp with custom container.
 
-s
+## AKS basics
+
+Basic Pod operations
+
+```bash
+cd kube
+kubectl create namespace intro
+kubens intro
+kubectl apply -f podApp.yaml
+kubectl get pods -w
+kubectl describe pod appka
+kubectl port-forward pod/appka 54321:8080
+kubectl logs appka
+kubectl delete pod todo
+```
+
+Deployment controller
+
+```bash
+kubectl apply -f deployAppV1.yaml
+kubectl get deploy,rs,pods
+kubectl delete pod appka-xxxx
+kubectl get pods --show-labels  
+kubectl get pods -l app=appka
+kubectl get pods -L app
+kubectl get rs
+kubectl describe rs appka-xxx
+kubectl edit pod appka-xxx   # change label to something else
+kubectl get pods --show-labels
+```
+
+Service (L4 balancing and DNS discovery)
+
+```bash
+kubectl apply -f podUbuntu.yaml
+kubectl apply -f serviceApp.yaml
+kubectl get service appka
+
+# Internal test
+kubectl exec -ti ubuntu -- /bin/bash
+curl appka
+
+# External test
+$extPublicIP = $(kubectl get service appka -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+while true; do curl $extPublicIP; echo; done
+```
+
+Rolling upgrade
+
+```bash
+kubectl apply -f deployAppV2.yaml
+```
+
+Ingress - expose via L7 balancer and WAF in Azure
+
+```bash
+kubectl apply -f ingressApp.yaml
+```
+
+## Management
+Look at Application Insights map and tracing.
+
+AKS monitoring. 
+
+Cluster operations.
+
+Azure Policy and security.
+
+
+## Infrastructure as Code
+Check Terraform template to deploy AKS, database, Service Bus, idetities and other components
+
+## Basic demo with state
+Check todo applicaiton in default namespace.
+
+Look at Secrets, Config Map
+
+## Building on top of Kubernetes
+
+### DAPR + KEDA
+
+### Flagger for canary releasing
