@@ -14,7 +14,7 @@ variable "tenant_app_id" {}
 
 # Configure the Azure and AAD provider
 provider "azurerm" {
-  version = "=2.9.0"
+  version = "=2.10.0"
   features {}
 }
 
@@ -512,7 +512,7 @@ resource "azurerm_cosmosdb_account" "demo" {
   enable_automatic_failover = false
 
   consistency_policy {
-    consistency_level       = "Session"
+    consistency_level = "Session"
   }
 
   geo_location {
@@ -525,7 +525,6 @@ resource "azurerm_cosmosdb_sql_database" "demo" {
   name                = "daprdb"
   resource_group_name = azurerm_cosmosdb_account.demo.resource_group_name
   account_name        = azurerm_cosmosdb_account.demo.name
-  throughput          = 400
 }
 
 resource "azurerm_cosmosdb_sql_container" "demo" {
@@ -534,6 +533,7 @@ resource "azurerm_cosmosdb_sql_container" "demo" {
   account_name        = azurerm_cosmosdb_account.demo.name
   database_name       = azurerm_cosmosdb_sql_database.demo.name
   partition_key_path  = "/id"
+  throughput          = 400
 }
 
 # Service bus
@@ -757,14 +757,14 @@ resource "azurerm_role_assignment" "kubelet-resourcesrg-vmcontributor" {
   scope                = data.azurerm_resource_group.aksresources-rg.id
   role_definition_name = "Virtual Machine Contributor"
   principal_id         = azurerm_kubernetes_cluster.demo.kubelet_identity[0].object_id
-  depends_on   = [azurerm_kubernetes_cluster.demo]
+  depends_on           = [azurerm_kubernetes_cluster.demo]
 }
 
 resource "azurerm_role_assignment" "kubelet-resourcesrg-identityoperator" {
   scope                = data.azurerm_resource_group.aksresources-rg.id
   role_definition_name = "Managed Identity Operator"
   principal_id         = azurerm_kubernetes_cluster.demo.kubelet_identity[0].object_id
-  depends_on   = [azurerm_kubernetes_cluster.demo]
+  depends_on           = [azurerm_kubernetes_cluster.demo]
 }
 
 ## Application Gateway ingress identity to access Application Gateway
@@ -785,7 +785,7 @@ resource "azurerm_role_assignment" "keda-servicebus" {
 data "azurerm_user_assigned_identity" "azurepolicy" {
   name                = "azurepolicy-aks-${var.env}-${random_string.prefix.result}"
   resource_group_name = data.azurerm_resource_group.aksresources-rg.name
-  depends_on   = [azurerm_kubernetes_cluster.demo]
+  depends_on          = [azurerm_kubernetes_cluster.demo]
 }
 
 # Azure Policy
