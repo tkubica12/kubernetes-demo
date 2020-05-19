@@ -795,6 +795,7 @@ locals {
   "excludedNamespaces": {
     "value": [ 
       "kube-system",
+      "aadpodidentity",
       "default",
       "linkerd",
       "linkerd-demo",
@@ -864,6 +865,7 @@ resource "azurerm_policy_assignment" "kube-resource-limits" {
   "excludedNamespaces": {
     "value": [ 
       "kube-system",
+      "aadpodidentity",
       "default",
       "linkerd",
       "linkerd-demo",
@@ -902,6 +904,7 @@ resource "azurerm_policy_assignment" "kube-mandatory-labels" {
   "excludedNamespaces": {
     "value": [ 
       "kube-system",
+      "aadpodidentity",
       "default",
       "linkerd",
       "linkerd-demo",
@@ -938,6 +941,7 @@ resource "azurerm_policy_assignment" "kube-only-acr" {
   "excludedNamespaces": {
     "value": [ 
       "kube-system",
+      "aadpodidentity",
       "default",
       "linkerd",
       "linkerd-demo",
