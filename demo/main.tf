@@ -369,16 +369,16 @@ resource "azurerm_kubernetes_cluster" "demo" {
   }
 }
 
-resource "azurerm_devspace_controller" "demo" {
-  name                = "acctestdsc1"
-  location            = azurerm_resource_group.demo.location
-  resource_group_name = azurerm_resource_group.demo.name
+# resource "azurerm_devspace_controller" "demo" {
+#   name                = "acctestdsc1"
+#   location            = azurerm_resource_group.demo.location
+#   resource_group_name = azurerm_resource_group.demo.name
 
-  sku_name = "S1"
+#   sku_name = "S1"
 
-  target_container_host_resource_id        = "${azurerm_kubernetes_cluster.demo.id}"
-  target_container_host_credentials_base64 = "${base64encode(azurerm_kubernetes_cluster.demo.kube_admin_config_raw)}"
-}
+#   target_container_host_resource_id        = "${azurerm_kubernetes_cluster.demo.id}"
+#   target_container_host_credentials_base64 = "${base64encode(azurerm_kubernetes_cluster.demo.kube_admin_config_raw)}"
+# }
 
 resource "azurerm_kubernetes_cluster_node_pool" "demo" {
   name                  = "wokna"
@@ -795,6 +795,8 @@ locals {
   "excludedNamespaces": {
     "value": [ 
       "kube-system",
+      "azds",
+      "gatekeeper-system",
       "aadpodidentity",
       "default",
       "linkerd",
@@ -865,6 +867,8 @@ resource "azurerm_policy_assignment" "kube-resource-limits" {
   "excludedNamespaces": {
     "value": [ 
       "kube-system",
+      "azds",
+      "gatekeeper-system",
       "aadpodidentity",
       "default",
       "linkerd",
@@ -904,6 +908,8 @@ resource "azurerm_policy_assignment" "kube-mandatory-labels" {
   "excludedNamespaces": {
     "value": [ 
       "kube-system",
+      "azds",
+      "gatekeeper-system",
       "aadpodidentity",
       "default",
       "linkerd",
@@ -941,6 +947,8 @@ resource "azurerm_policy_assignment" "kube-only-acr" {
   "excludedNamespaces": {
     "value": [ 
       "kube-system",
+      "azds",
+      "gatekeeper-system",
       "aadpodidentity",
       "default",
       "linkerd",
