@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grpc-client-withsm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grpc-client-withsm
+  template:
+    metadata:
+      annotations:
+        linkerd.io/inject: enabled
+      labels:
+        app: grpc-client-withsm
+    spec:
+      containers:
+      - name: client
+        image: tkubica/grpc:client
+        imagePullPolicy: Always
+        env:
+        - name: SERVER_WITH_PORT
+          value: "grpc-server-withsm:50001"
+        - name: PYTHONUNBUFFERED
+          value: "1"
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16M
+          limits:
+            cpu: 100m
+            memory: 128M

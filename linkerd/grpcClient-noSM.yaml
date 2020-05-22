@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grpc-client-nosm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grpc-client-nosm
+  template:
+    metadata:
+      labels:
+        app: grpc-client-nosm
+    spec:
+      containers:
+      - name: client
+        image: tkubica/grpc:client
+        imagePullPolicy: Always
+        # command: ["bash"]
+        # args: ["-c", "tail -f /dev/null"]
+        env:
+        - name: SERVER_WITH_PORT
+          value: "grpc-server-nosm:50001"
+        - name: PYTHONUNBUFFERED
+          value: "1"
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16M
+          limits:
+            cpu: 100m
+            memory: 128M

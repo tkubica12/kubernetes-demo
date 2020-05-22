@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grpc-server-withsm
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: grpc-server-withsm
+  template:
+    metadata:
+      annotations:
+        linkerd.io/inject: enabled
+      labels:
+        app: grpc-server-withsm
+    spec:
+      containers:
+      - name: server
+        image: tkubica/grpc:server
+        env:
+        - name: PORT
+          value: "50001"
+        - name: PYTHONUNBUFFERED
+          value: "1
+        ports:
+        - containerPort: 50001
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16M
+          limits:
+            cpu: 100m
+            memory: 128M
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: grpc-server-withsm
+  labels:
+    app: grpc-server-withsm
+spec:
+  selector:
+    app: grpc-server-withsm
+  ports:
+  - protocol: TCP
+    name: http
+    port: 50001
+    targetPort: 50001

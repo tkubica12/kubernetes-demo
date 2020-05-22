@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grpc-server-nosm
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: grpc-server-nosm
+  template:
+    metadata:
+      labels:
+        app: grpc-server-nosm
+    spec:
+      containers:
+      - name: server
+        image: tkubica/grpc:server
+        env:
+        - name: PORT
+          value: "50001"
+        - name: PYTHONUNBUFFERED
+          value: "1
+        ports:
+        - containerPort: 50001
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16M
+          limits:
+            cpu: 100m
+            memory: 128M
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: grpc-server-nosm
+  labels:
+    app: grpc-server-nosm
+spec:
+  selector:
+    app: grpc-server-nosm
+  ports:
+  - protocol: TCP
+    name: http
+    port: 50001
+    targetPort: 50001

@@ -72,6 +72,25 @@ What about serving v2 only for user with specific cookie? Linkerd and SMI curren
 # Load balancing
 Linkerd uses exponentially weighted moving average algorithm to load-balance traffic and support scenarios with HTTP/2 and gRPC where standard balancing in Kubernetes is not very effective.
 
+Deploy gRPC server and client with and without Linkerd. Check logs - without Linkerd traffic is not balanced, because client is using HTTP/2 communication so on L4 there is nothing to loadbalance on.
+
+```bash
+kubectl apply -f grpcClient-noSM.yaml
+kubectl apply -f grpcClient-withSM.yaml
+kubectl apply -f grpcServer-noSM.yaml
+kubectl apply -f grpcServer-withSM.yaml
+
+kubectl logs -l app=grpc-client-nosm  # Should not be balanced
+kubectl logs -l app=grpc-client-withsm -c client   # Should be balanced
+
+# Clean up
+
+kubectl delete -f grpcClient-noSM.yaml
+kubectl delete -f grpcClient-withSM.yaml
+kubectl delete -f grpcServer-noSM.yaml
+kubectl delete -f grpcServer-withSM.yaml
+```
+
 #  mTLS between services and using Linkerd tap for troubleshooting
 Linkerd enables creation of tap to listen for packets for troubleshooting. All communications between services are TLS encrypted (mTLS) that are part of Service Mesh. note that communications outside of service mesh szstem are note encrypted.
 
