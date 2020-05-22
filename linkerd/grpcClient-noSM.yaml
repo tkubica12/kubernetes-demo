@@ -15,9 +15,6 @@ spec:
       containers:
       - name: client
         image: tkubica/grpc:client
-        imagePullPolicy: Always
-        # command: ["bash"]
-        # args: ["-c", "tail -f /dev/null"]
         env:
         - name: SERVER_WITH_PORT
           value: "grpc-server-nosm:50001"

@@ -242,6 +242,13 @@ Canary - there are v1 and v2 deployments and services (myweb-service-v1 and mywe
 kubectl exec client-0 -c container -n linkerd-demo -- bash -c 'for x in {0..30}; do curl -s myweb-service; echo; done'
 ```
 
+Linkerd may help balancing gRPC communication. As HTTP/2 leads to long-lived sessions and multiplexing of paralel requests within single session therefore limiting entropy on L4 making balancing uneffective, Linkerd acting as gRPC proxy can fix this.
+
+```bash
+kubectl logs -l app=grpc-client-nosm -n linkerd-demo # Should not be balanced
+kubectl logs -l app=grpc-client-withsm -c client -n linkerd-demo   # Should be balanced
+```
+
 ## Automated canary releasing with Flagger
 Flagger supports automated canary releasing with NGINX Ingress, Linkerd Service Mesh, Istio Service Mesh and others.
 

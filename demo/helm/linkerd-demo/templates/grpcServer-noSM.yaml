@@ -1,18 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: grpc-server-withsm
+  name: grpc-server-nosm
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: grpc-server-withsm
+      app: grpc-server-nosm
   template:
     metadata:
       annotations:
-        linkerd.io/inject: enabled
+        linkerd.io/inject: disabled
       labels:
-        app: grpc-server-withsm
+        app: grpc-server-nosm
     spec:
       containers:
       - name: server
@@ -35,12 +35,12 @@ spec:
 kind: Service
 apiVersion: v1
 metadata:
-  name: grpc-server-withsm
+  name: grpc-server-nosm
   labels:
-    app: grpc-server-withsm
+    app: grpc-server-nosm
 spec:
   selector:
-    app: grpc-server-withsm
+    app: grpc-server-nosm
   ports:
   - protocol: TCP
     name: http

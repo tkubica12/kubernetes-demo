@@ -1,25 +1,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: grpc-client-withsm
+  name: grpc-client-nosm
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: grpc-client-withsm
+      app: grpc-client-nosm
   template:
     metadata:
       annotations:
-        linkerd.io/inject: enabled
+        linkerd.io/inject: disabled
       labels:
-        app: grpc-client-withsm
+        app: grpc-client-nosm
     spec:
       containers:
       - name: client
         image: tkubica/grpc:client
         env:
         - name: SERVER_WITH_PORT
-          value: "grpc-server-withsm:50001"
+          value: "grpc-server-nosm:50001"
         - name: PYTHONUNBUFFERED
           value: "1"
         resources:
