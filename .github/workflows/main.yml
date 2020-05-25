@@ -93,6 +93,8 @@ jobs:
         ARM_CLIENT_ID: ${{ secrets.client_id }}
         ARM_CLIENT_SECRET: ${{ secrets.client_secret }}
         ARM_TENANT_ID: ${{ secrets.tenant_id }}
+        INGRESS_CRT: ${{ secrets.ingress_crt_b64 }}
+        INGRESS_KEY: ${{ secrets.ingress_key_b64 }}
       run: |
         helm upgrade -i baseconfig ./helm/cluster \
           --set upn=admin@tomaskubicaoffice.onmicrosoft.com \
@@ -104,9 +106,9 @@ jobs:
           --set keda.clientId=$(terraform output keda_clientId) \
           --set azurepolicy.resourceId=$(terraform output azurepolicy_resourceId) \
           --set azurepolicy.clientId=$(terraform output azurepolicy_clientId) \
-          --set linkerdhost=linkerd.i.cloud.tomaskubica.in
-        # Policy workaround (preview does not correctly include pod identity)
-        # kubectl patch deployment azure-policy -n kube-system --type strategic --patch '{"spec": {"template": {"metadata": {"labels": {"aadpodidbinding": "azurepolicy"}}}}}'
+          --set linkerdhost=linkerd.i.cloud.tomaskubica.in \
+          --set ingressCrt=${INGRESS_CRT} \
+          --set ingressKey=${INGRESS_KEY}
 
     - name: Appliction Insights codeless injector
       working-directory: ./demo

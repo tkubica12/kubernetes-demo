@@ -1,0 +1,69 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: tomaskubicain
+  namespace: default
+type: kubernetes.io/tls
+data:
+  tls.crt: {{ .Values.ingressCrt }}
+  tls.key: {{ .Values.ingressKey }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: tomaskubicain
+  namespace: grafana
+type: kubernetes.io/tls
+data:
+  tls.crt: {{ .Values.ingressCrt }}
+  tls.key: {{ .Values.ingressKey }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: tomaskubicain
+  namespace: ingress
+type: kubernetes.io/tls
+data:
+  tls.crt: {{ .Values.ingressCrt }}
+  tls.key: {{ .Values.ingressKey }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: tomaskubicain
+  namespace: linkerd-demo
+type: kubernetes.io/tls
+data:
+  tls.crt: {{ .Values.ingressCrt }}
+  tls.key: {{ .Values.ingressKey }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: tomaskubicain
+  namespace: linkerd
+type: kubernetes.io/tls
+data:
+  tls.crt: {{ .Values.ingressCrt }}
+  tls.key: {{ .Values.ingressKey }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: tomaskubicain
+  namespace: prometheus
+type: kubernetes.io/tls
+data:
+  tls.crt: {{ .Values.ingressCrt }}
+  tls.key: {{ .Values.ingressKey }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: tomaskubicain
+  namespace: windows
+type: kubernetes.io/tls
+data:
+  tls.crt: {{ .Values.ingressCrt }}
+  tls.key: {{ .Values.ingressKey }}
