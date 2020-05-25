@@ -322,10 +322,10 @@ resource "azurerm_kubernetes_cluster" "demo" {
 
   default_node_pool {
     name                = "default"
-    vm_size             = "Standard_B2ms"
+    vm_size             = "Standard_A2m_v2"
     enable_auto_scaling = true
     max_count           = 6
-    min_count           = 3
+    min_count           = 2
     availability_zones  = [1, 2, 3]
     vnet_subnet_id      = azurerm_subnet.aks.id
     max_pods            = 100
@@ -383,7 +383,7 @@ resource "azurerm_kubernetes_cluster" "demo" {
 resource "azurerm_kubernetes_cluster_node_pool" "demo" {
   name                  = "wokna"
   kubernetes_cluster_id = azurerm_kubernetes_cluster.demo.id
-  vm_size               = "Standard_D2s_v3"
+  vm_size               = "Standard_B2ms"
   node_count            = 1
   availability_zones    = [1, 2, 3]
   os_type               = "Windows"
