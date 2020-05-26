@@ -10,6 +10,11 @@
   - [DAPR and KEDA](#dapr-and-keda)
   - [Windows nodes](#windows-nodes)
   - [Linkerd Service Mesh](#linkerd-service-mesh)
+    - [Dashboard and visibility](#dashboard-and-visibility)
+    - [Retry](#retry)
+    - [Traffic split](#traffic-split)
+    - [gRPC balancing](#grpc-balancing)
+    - [mTLS](#mtls)
   - [Automated canary releasing with Flagger](#automated-canary-releasing-with-flagger)
     - [Flagger using NGINX Ingress and custom application metric](#flagger-using-nginx-ingress-and-custom-application-metric)
       - [Canary](#canary)
@@ -221,8 +226,13 @@ Todo application is deployed in linkerd-demo namespace and can be accessed at [h
 
 Traffic generator is deployed so we can see some traffic in monitoring.
 
+### Dashboard and visibility
 Checkout Linkerd dashboard (including Grafana) at [http://linkerd.i.cloud.tomaskubica.in](http://linkerd.i.cloud.tomaskubica.in)
 Login is tomas/Azure12345678.
+
+Checkout Application Insights for OpenCensus instrumented application and how Linkerd enhanced this data.
+
+### Retry
 
 Test retry policy. Access service with no retry policy (failRate means % of requests that will cause crash). You will likely see failed responses.
 
@@ -236,17 +246,28 @@ Try accessing service with retry policy. Even if container fails Linkerd should 
 kubectl exec client-0 -c container -n linkerd-demo -- curl -vs -m 30 retry-service?failRate=50
 ```
 
+### Traffic split
 Canary - there are v1 and v2 deployments and services (myweb-service-v1 and myweb-service-v2). Also there is production service myweb-service with TrafficSplit configured for 90% of traffic going to v1. Test it.
 
 ```bash
 kubectl exec client-0 -c container -n linkerd-demo -- bash -c 'for x in {0..30}; do curl -s myweb-service; echo; done'
 ```
 
+Note this can be also used to inject errors for purpose of ressiiency testing (simply create "faulty" Pod returning whatever you want and use traffic split to send 5% of requests to it).
+
+### gRPC balancing
 Linkerd may help balancing gRPC communication. As HTTP/2 leads to long-lived sessions and multiplexing of paralel requests within single session therefore limiting entropy on L4 making balancing uneffective, Linkerd acting as gRPC proxy can fix this.
 
 ```bash
 kubectl logs -l app=grpc-client-nosm -n linkerd-demo # Should not be balanced
 kubectl logs -l app=grpc-client-withsm -c client -n linkerd-demo   # Should be balanced
+```
+
+### mTLS
+
+```bash
+linkerd -n linkerd-demo edges deployment
+linkerd -n linkerd-demo tap deploy | grep tls=true
 ```
 
 ## Automated canary releasing with Flagger

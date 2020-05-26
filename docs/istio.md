@@ -14,11 +14,12 @@
 First download istioctl.
 
 ```bash
+export istio_version=1.6.0
 cd ./istio
-wget https://github.com/istio/istio/releases/download/1.4.0/istioctl-1.4.0-linux.tar.gz
-tar -xvf istioctl-1.4.0-linux.tar.gz
+wget https://github.com/istio/istio/releases/download/$istio_version/istioctl-$istio_version-linux-amd64.tar.gz
+tar -xvf istioctl-$istio_version-linux-amd64.tar.gz
 sudo mv ./istioctl /usr/local/bin/
-rm -rf istioctl-1.4.0-linux.tar.gz
+rm -rf istioctl-$istio_version-linux-amd64.tar.gz
 ```
 
 Deploy Secrets to configure Grafana and Kiali username/password. File in this repo containers user/Azure12345678.
@@ -29,10 +30,10 @@ kubectl apply -f grafanaSecret.yaml
 kubectl apply -f kialiSecret.yaml
 ```
 
-Deploy Istio using basic settings provided here in istioConfig.yaml.
+Deploy Istio using demo profile settings.
 
 ```bash
-istioctl manifest apply -f istioConfig.yaml
+istioctl install --set profile=demo
 ```
 
 # Accessing GUI

@@ -18,7 +18,7 @@ spec:
       - name: client
         image: tkubica/grpc:client
         command: ["bash"]
-        args: ["-c", "echo 192.168.1.28 grpc.i.cloud.tomaskubica.in >> /etc/hosts; ping -c 1 grpc.i.cloud.tomaskubica.in; python greeter_client.py"]
+        args: ["-c", "echo 192.168.1.28 grpc.i.cloud.tomaskubica.in >> /etc/hosts; curl -v -k --http2 https://grpc.i.cloud.tomaskubica.in:443; tail -f /dev/null; python greeter_client.py"]
         env:
         - name: SERVER_WITH_PORT
           value: "grpc.i.cloud.tomaskubica.in:443"
