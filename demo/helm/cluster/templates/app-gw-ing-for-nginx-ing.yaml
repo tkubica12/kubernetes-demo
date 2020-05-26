@@ -3,6 +3,7 @@ kind: Ingress
 metadata:
   annotations:
     kubernetes.io/ingress.class: azure/application-gateway
+    appgw.ingress.kubernetes.io/ssl-redirect: "true"
   name: ingress-to-nginx
   namespace: ingress
 spec:
@@ -28,3 +29,9 @@ spec:
           serviceName: ingress-nginx-nginx-ingress-controller
           servicePort: 80
         path: /
+  tls:
+    - hosts:
+      - linkerd.i.cloud.tomaskubica.in
+      - canary.nginx.i.cloud.tomaskubica.in
+      - ab.nginx.i.cloud.tomaskubica.in
+      secretName: tomaskubicain

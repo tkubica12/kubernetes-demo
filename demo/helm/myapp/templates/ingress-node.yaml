@@ -23,8 +23,8 @@ spec:
             backend:
               serviceName: {{ $serviceName }}-node
               servicePort: {{ $servicePort }}
-  {{- if .Values.appnode.ingress.tls }}
   tls:
-{{ toYaml .Values.appnode.ingress.tls | indent 4 }}
-  {{- end -}}
+    - hosts:
+      - {{ .Values.apphost }}
+      secretName: {{ .Values.tlsSecretName }}
 {{- end -}}

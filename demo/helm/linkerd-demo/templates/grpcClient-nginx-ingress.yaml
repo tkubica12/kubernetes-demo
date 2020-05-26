@@ -18,10 +18,10 @@ spec:
       - name: client
         image: tkubica/grpc:client
         command: ["bash"]
-        args: ["-c", "echo 192.168.3.180 grpc.i.cloud.tomaskubica.in >> /etc/hosts; ping -c 1 grpc.i.cloud.tomaskubica.in; python greeter_client.py"]
+        args: ["-c", "echo 192.168.1.28 grpc.i.cloud.tomaskubica.in >> /etc/hosts; ping -c 1 grpc.i.cloud.tomaskubica.in; python greeter_client.py"]
         env:
         - name: SERVER_WITH_PORT
-          value: "grpc.i.cloud.tomaskubica.in:50001"
+          value: "grpc.i.cloud.tomaskubica.in:443"
         - name: PYTHONUNBUFFERED
           value: "1"
         resources:

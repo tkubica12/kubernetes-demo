@@ -264,6 +264,7 @@ jobs:
           --set appgen.image.repository=${registry_name}.azurecr.io/todogen \
           --set appgen.image.tag=$(cat version) \
           --set apphost=cloud.tomaskubica.in \
+          --set tlsSecretName=tomaskubicain \
           --set keyvault.name=$(terraform output keyvault_name) \
           --set keyvault.tenant=$(terraform output keyvault_tenantid) \
           --set keyvault.key=$(terraform output keyvault_psql_keyname) \
@@ -289,6 +290,7 @@ jobs:
           --set appgen.image.repository=${registry_name}.azurecr.io/todogen \
           --set appgen.image.tag=$(cat version) \
           --set apphost=linkerd.cloud.tomaskubica.in \
+          --set tlsSecretName=tomaskubicain \
           --set keyvault.name=$(terraform output keyvault_name) \
           --set keyvault.tenant=$(terraform output keyvault_tenantid) \
           --set keyvault.key=$(terraform output keyvault_psql_keyname) \

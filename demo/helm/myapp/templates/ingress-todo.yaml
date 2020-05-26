@@ -23,8 +23,8 @@ spec:
             backend:
               serviceName: {{ $serviceName }}-todo
               servicePort: {{ $servicePort }}
-  {{- if .Values.apptodo.ingress.tls }}
   tls:
-{{ toYaml .Values.apptodo.ingress.tls | indent 4 }}
-  {{- end -}}
+    - hosts:
+      - {{ .Values.apphost }}
+      secretName: {{ .Values.tlsSecretName }}
 {{- end -}}

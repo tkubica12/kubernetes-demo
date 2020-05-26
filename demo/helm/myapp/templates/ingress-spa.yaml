@@ -24,8 +24,8 @@ spec:
             backend:
               serviceName: {{ $serviceName }}-spa
               servicePort: {{ $servicePort }}
-  {{- if .Values.appspa.ingress.tls }}
   tls:
-{{ toYaml .Values.appspa.ingress.tls | indent 4 }}
-  {{- end -}}
+    - hosts:
+      - {{ .Values.apphost }}
+      secretName: {{ .Values.tlsSecretName }}
 {{- end -}}

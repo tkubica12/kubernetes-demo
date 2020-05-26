@@ -1,3 +1,5 @@
+apphost: cloud.tomaskubica.cz
+
 # SPA app
 appspa:
   replicaCount: 2
@@ -15,7 +17,11 @@ appspa:
     myservicepath: /
     annotations:
       kubernetes.io/ingress.class: azure/application-gateway
+      appgw.ingress.kubernetes.io/ssl-redirect: "true"
     tls:
+      - hosts:
+        - cloud.tomaskubica.cz
+        secretName: tls-secret
   resources: 
     limits:
       cpu: 250m
@@ -41,6 +47,7 @@ apptodo:
     myservicepath: "/api/todo*"
     annotations:
       kubernetes.io/ingress.class: azure/application-gateway
+      appgw.ingress.kubernetes.io/ssl-redirect: "true"
     tls:
   resources: 
     limits:
@@ -67,6 +74,7 @@ appnode:
     myservicepath: "/api/node*"
     annotations:
       kubernetes.io/ingress.class: azure/application-gateway
+      appgw.ingress.kubernetes.io/ssl-redirect: "true"
     tls:
   resources: 
     limits:
