@@ -107,6 +107,7 @@ jobs:
           --set azurepolicy.resourceId=$(terraform output azurepolicy_resourceId) \
           --set azurepolicy.clientId=$(terraform output azurepolicy_clientId) \
           --set linkerdhost=linkerd.i.cloud.tomaskubica.in \
+          --set istioBaseUrl=istio.cloud.tomaskubica.in \
           --set ingressCrt=${INGRESS_CRT} \
           --set ingressKey=${INGRESS_KEY}
 
@@ -201,6 +202,17 @@ jobs:
         mv ./linkerd2-cli-$LINKERD_VERSION-linux ./linkerd
         chmod +x ./linkerd
         ./linkerd check && echo Linkerd OK || ./linkerd install | kubectl apply -f -
+
+    - name: Deploy Istio service mesh
+      working-directory: ./demo
+      env:
+        KUBECONFIG: "./kube_config"
+      run: |
+        export istio_version=1.6.0
+        wget https://github.com/istio/istio/releases/download/$istio_version/istioctl-$istio_version-linux-amd64.tar.gz
+        tar -xvf istioctl-$istio_version-linux-amd64.tar.gz
+        chmod +x ./istioctl
+        istioctl install --set profile=demo
 
     - name: Deploy Grafana+Prometheus
       working-directory: ./demo

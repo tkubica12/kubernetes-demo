@@ -1,0 +1,20 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: grafana-istio-ingress
+  namespace: istio-system
+  annotations:
+    kubernetes.io/ingress.class: azure/application-gateway
+    appgw.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  rules:
+  - host: grafana.{{ .Values.istioBaseUrl }}
+    http:
+      paths:
+      - backend:
+          serviceName: grafana
+          servicePort: 3000
+  tls:
+    - hosts:
+      - grafana.{{ .Values.istioBaseUrl }}
+      secretName: tomaskubicain

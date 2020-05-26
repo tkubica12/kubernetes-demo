@@ -1,0 +1,20 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: jaeger-istio-ingress
+  namespace: istio-system
+  annotations:
+    kubernetes.io/ingress.class: azure/application-gateway
+    appgw.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  rules:
+  - host: jaeger.{{ .Values.istioBaseUrl }}
+    http:
+      paths:
+      - backend:
+          serviceName: tracing
+          servicePort: 80
+  tls:
+    - hosts:
+      - jaeger.{{ .Values.istioBaseUrl }}
+      secretName: tomaskubicain
