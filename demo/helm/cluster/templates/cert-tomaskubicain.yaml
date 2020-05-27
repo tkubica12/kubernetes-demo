@@ -77,3 +77,13 @@ type: kubernetes.io/tls
 data:
   tls.crt: {{ .Values.ingressCrt }}
   tls.key: {{ .Values.ingressKey }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: tomaskubicain
+  namespace: istio-demo
+type: kubernetes.io/tls
+data:
+  tls.crt: {{ .Values.ingressCrt }}
+  tls.key: {{ .Values.ingressKey }}

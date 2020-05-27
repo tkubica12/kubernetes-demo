@@ -3,6 +3,7 @@ kind: Ingress
 metadata:
   annotations:
     kubernetes.io/ingress.class: azure/application-gateway
+    appgw.ingress.kubernetes.io/ssl-redirect: "true"
   name: myiis-ingress
 spec:
   rules:
@@ -13,3 +14,7 @@ spec:
             backend:
               serviceName: myiis-service
               servicePort: 80
+  tls:
+    - hosts:
+      - {{ .Values.apphost }}
+      secretName: tomaskubicain
