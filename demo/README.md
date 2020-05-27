@@ -17,6 +17,7 @@
     - [mTLS](#mtls)
   - [Istio Service Mesh](#istio-service-mesh)
     - [Circuit breaker and retry](#circuit-breaker-and-retry)
+  - [Traffic split](#traffic-split-1)
   - [Automated canary releasing with Flagger](#automated-canary-releasing-with-flagger)
     - [Flagger using NGINX Ingress and custom application metric](#flagger-using-nginx-ingress-and-custom-application-metric)
       - [Canary](#canary)
@@ -304,6 +305,15 @@ kubectl logs -l app=retry-breaker -c retry-backend-breaker -f
 
 kubectl exec -it client-0 -c container -- bash
  curl -vs -m 30 "retry-service-breaker?failRate=90&mode=busy"
+```
+## Traffic split
+Similar to Linkerd Istio can use percentage to route traffic to different service versions or inject faults.
+
+Istio also offers header-based routing eg. for A/B testing.
+
+```bash
+kubectl exec client-0 -c container -- curl -s myweb-service
+kubectl exec client-0 -c container -- curl -s --cookie "usertype=tester" myweb-service
 ```
 
 ## Automated canary releasing with Flagger
