@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: retry-backend-breaker
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: retry-breaker
+  template:
+    metadata:
+      labels:
+        app: retry-breaker
+    spec:
+      containers:
+      - name: retry-backend-breaker
+        image: tkubica/retry-backend
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16M
+          limits:
+            cpu: 100M
+            memory: 128M
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: retry-service-breaker
+spec:
+  selector:
+    app: retry-breaker
+  ports:
+  - protocol: TCP
+    name: http
+    port: 80
+    targetPort: 80
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: retry-vs-breaker
+spec:
+  hosts:
+  - retry-service-breaker
+  http:
+  - route:
+    - destination:
+        host: retry-service-breaker
+    timeout: 30s
+    retries:
+      attempts: 30
+      perTryTimeout: 1s
+      retryOn: gateway-error,reset,5xx
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: retry-service-breaker
+spec:
+  host: retry-service-breaker
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 1
+      http:
+        http1MaxPendingRequests: 1
+        maxRequestsPerConnection: 1
+    outlierDetection:
+      consecutiveErrors: 2
+      interval: 10s
+      baseEjectionTime: 1m
+      maxEjectionPercent: 100

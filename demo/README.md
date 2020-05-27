@@ -15,6 +15,8 @@
     - [Traffic split](#traffic-split)
     - [gRPC balancing](#grpc-balancing)
     - [mTLS](#mtls)
+  - [Istio Service Mesh](#istio-service-mesh)
+    - [Circuit breaker and retry](#circuit-breaker-and-retry)
   - [Automated canary releasing with Flagger](#automated-canary-releasing-with-flagger)
     - [Flagger using NGINX Ingress and custom application metric](#flagger-using-nginx-ingress-and-custom-application-metric)
       - [Canary](#canary)
@@ -268,6 +270,40 @@ kubectl logs -l app=grpc-client-withsm -c client -n linkerd-demo   # Should be b
 ```bash
 linkerd -n linkerd-demo edges deployment
 linkerd -n linkerd-demo tap deploy | grep tls=true
+```
+## Istio Service Mesh
+In this demo I currenlty focus on features not supported by Linkerd. Note that all Linkerd functionality is in some form available in Istio also. Also note decision is not only about features as some architecture decisions between two project are very different. Linkerd focus on maximum efficiency as still more lightweight and performing, but missing some feature (althogh with aggresive roadmap in this space). Istio is not governed by CNCF and is much more feature rich, yet more complex and with more overhead (although recent steps to move away from too distributed architecture to more monolithic approach shows a lot of improvements).
+
+### Circuit breaker and retry
+When target service starts failing:
+- clients retries are increasing load on already troubled service making it harder for it to recover and get up to speed
+- users experience long latencies and even failed operations after waiting
+
+In some cases it is better to declare service unavailable in order to:
+- get service some breathing room to recover
+- inform users feature is not available rather than having them experience waiting and failures
+
+First let's see service with Istio retry.
+
+Attempt request to service with 90% probability of returning 503 error.
+
+```bash
+# Open log stream in different window
+kubectl logs -l app=retry -c retry-backend -f
+
+kubectl exec client-0 -c container -- curl -vs -m 30 "retry-service?failRate=90&mode=busy"
+```
+
+In logs we should see multiple failed attempts as Istio retries until we get 200 response.
+
+Now let's try service with circuit breaker configured. Try to access it multiple times and at some point it will just quickly respond with 503 (and no new logs will be visible at target as Istio does not send traffic). Wait for a minute and try again, when circuit is switched again.
+
+```bash
+# Open log stream in different window
+kubectl logs -l app=retry-breaker -c retry-backend-breaker -f
+
+kubectl exec -it client-0 -c container -- bash
+ curl -vs -m 30 "retry-service-breaker?failRate=90&mode=busy"
 ```
 
 ## Automated canary releasing with Flagger
