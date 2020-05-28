@@ -18,6 +18,9 @@
   - [Istio Service Mesh](#istio-service-mesh)
     - [Circuit breaker and retry](#circuit-breaker-and-retry)
   - [Traffic split](#traffic-split-1)
+  - [Controlling egress traffic](#controlling-egress-traffic)
+  - [Controlling ingress traffic](#controlling-ingress-traffic)
+  - [Observability](#observability)
   - [Automated canary releasing with Flagger](#automated-canary-releasing-with-flagger)
     - [Flagger using NGINX Ingress and custom application metric](#flagger-using-nginx-ingress-and-custom-application-metric)
       - [Canary](#canary)
@@ -314,6 +317,35 @@ Istio also offers header-based routing eg. for A/B testing.
 ```bash
 kubectl exec client-0 -c container -- curl -s myweb-service
 kubectl exec client-0 -c container -- curl -s --cookie "usertype=tester" myweb-service
+```
+
+## Controlling egress traffic
+You can use Kubernetes Network Policy to filter egress traffic based on L4 rules. With Istio  you can manage this based on FQDNs and also apply additional Istio policies such as retry or circuit breaker. Optionaly egress traffic can be handled from pod sidecar directly or centralized via egress gateway (eg. to get control of source IP).
+
+Demo cluster is configured to not allow access to external services not explicitly defined. From following two only httpbin.org is configured.
+
+```bash
+kubectl exec client-0 -c container -- curl -sv https://www.tomaskubica.cz
+kubectl exec client-0 -c container -- curl -sv http://www.tomaskubica.cz
+kubectl exec client-0 -c container -- curl -sv http://httpbin.org/ip
+```
+
+TBD
+
+## Controlling ingress traffic
+Traditionaly you would use Kubernetes Ingress to handle this. Using Istio Gateway gives advantage of using advanced routing, traffic split and other capabilities of Istio on entrance to cluster in consistent way.
+
+TBD
+
+## Observability
+
+https://kiali.istio.cloud.tomaskubica.cz
+https://jaeger.istio.cloud.tomaskubica.cz
+https://grafana.istio.cloud.tomaskubica.cz
+https://prometheus.istio.cloud.tomaskubica.cz
+
+```bash
+istioctl dashboard envoy client-0
 ```
 
 ## Automated canary releasing with Flagger

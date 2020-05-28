@@ -172,6 +172,9 @@ Let's now define ServiceEntry for your Istio Service Mesh to allow access to htt
 kubectl create -f serviceEntry.yaml
 kubectl exec $clientPod -c client -- curl -vs httpbin.org/ip
 ```
+Note that now external service is known to Istio and you can apply things like Virtual Service to add features like retry or circuit breaker.
+
+Also note you can filter egress traffic with Kubernetes Network Policy without need for service mesh, but only for L4 rules nd with no advanced policies. Istio allows for FQDN based rules.
 
 ## Managing access to services in Istio from outside with Gateway
 As all traffic between services might be encrypted outside users cannot access services directly. In order to expose service such as web frontend to users outside of cluster we will use Istio Gateway. This is in principle similar to Kubernetes Ingress, but Istio provides specific implementation for entering services managed by Istio Service Mesh.

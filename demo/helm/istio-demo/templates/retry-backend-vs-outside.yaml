@@ -1,0 +1,70 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: retry-backend-outside
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: retry-outside
+  template:
+    metadata:
+      labels:
+        app: retry-outside
+    spec:
+      containers:
+      - name: retry-backend-outside
+        image: tkubica/retry-backend
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16M
+          limits:
+            cpu: 100M
+            memory: 128M
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: retry-service-outside
+  namespace: default
+spec:
+  selector:
+    app: retry-outside
+  ports:
+  - protocol: TCP
+    name: http
+    port: 80
+    targetPort: 80
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: retry-vs-outside
+spec:
+  hosts:
+  - retry-service-outside.default.svc.cluster.local
+  http:
+  - route:
+    - destination:
+        host: retry-service
+    timeout: 30s
+    retries:
+      attempts: 30
+      perTryTimeout: 1s
+      retryOn: gateway-error,reset,5xx
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: httpbin-ext
+spec:
+  hosts:
+  - retry-service-outside.default.svc.cluster.local
+  ports:
+  - number: 80
+    name: http
+    protocol: HTTP
