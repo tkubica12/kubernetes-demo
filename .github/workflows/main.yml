@@ -212,7 +212,7 @@ jobs:
         wget https://github.com/istio/istio/releases/download/$istio_version/istioctl-$istio_version-linux-amd64.tar.gz
         tar -xvf istioctl-$istio_version-linux-amd64.tar.gz
         chmod +x ./istioctl
-        ./istioctl install --set profile=demo
+        ./istioctl install --set profile=demo --set values.meshConfig.outboundTrafficPolicy="REGISTRY_ONLY"
 
     - name: Deploy Grafana+Prometheus
       working-directory: ./demo

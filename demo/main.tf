@@ -322,7 +322,7 @@ resource "azurerm_kubernetes_cluster" "demo" {
 
   default_node_pool {
     name                = "default"
-    vm_size             = "Standard_A2m_v2"
+    vm_size             = "Standard_B4ms"
     enable_auto_scaling = true
     max_count           = 6
     min_count           = 2
@@ -383,7 +383,7 @@ resource "azurerm_kubernetes_cluster" "demo" {
 resource "azurerm_kubernetes_cluster_node_pool" "demo" {
   name                  = "wokna"
   kubernetes_cluster_id = azurerm_kubernetes_cluster.demo.id
-  vm_size               = "Standard_B2ms"
+  vm_size               = "Standard_B2s"
   node_count            = 1
   availability_zones    = [1, 2, 3]
   os_type               = "Windows"
