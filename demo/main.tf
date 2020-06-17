@@ -54,6 +54,13 @@ resource "azurerm_log_analytics_workspace" "demo" {
   sku                 = "PerGB2018"
 }
 
+resource "azurerm_log_analytics_workspace" "audit" {
+  name                = "auditlogs-${var.env}-${random_string.prefix.result}"
+  location            = azurerm_resource_group.demo.location
+  resource_group_name = azurerm_resource_group.demo.name
+  sku                 = "Free"
+}
+
 resource "azurerm_application_insights" "demo" {
   name                = "appin-${var.env}-${random_string.prefix.result}"
   location            = azurerm_resource_group.demo.location
@@ -78,7 +85,7 @@ resource "azurerm_application_insights" "linkerd" {
 resource "azurerm_monitor_diagnostic_setting" "aks-diag" {
   name                       = "aks-diag"
   target_resource_id         = azurerm_kubernetes_cluster.demo.id
-  log_analytics_workspace_id = azurerm_log_analytics_workspace.demo.id
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.audit.id
 
   log {
     category = "kube-apiserver"
@@ -119,7 +126,7 @@ resource "azurerm_monitor_diagnostic_setting" "aks-diag" {
 resource "azurerm_monitor_diagnostic_setting" "psql-diag" {
   name                       = "psql-diag"
   target_resource_id         = azurerm_postgresql_server.demo.id
-  log_analytics_workspace_id = azurerm_log_analytics_workspace.demo.id
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.audit.id
 
   log {
     category = "PostgreSQLLogs"
@@ -132,7 +139,7 @@ resource "azurerm_monitor_diagnostic_setting" "psql-diag" {
 resource "azurerm_monitor_diagnostic_setting" "keyvault-diag" {
   name                       = "keyvault-diag"
   target_resource_id         = azurerm_key_vault.demo.id
-  log_analytics_workspace_id = azurerm_log_analytics_workspace.demo.id
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.audit.id
 
   log {
     category = "AuditEvent"
@@ -145,7 +152,7 @@ resource "azurerm_monitor_diagnostic_setting" "keyvault-diag" {
 resource "azurerm_monitor_diagnostic_setting" "servicebus-diag" {
   name                       = "servicebus-diag"
   target_resource_id         = azurerm_servicebus_namespace.demo.id
-  log_analytics_workspace_id = azurerm_log_analytics_workspace.demo.id
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.audit.id
 
   log {
     category = "OperationalLogs"
@@ -158,7 +165,7 @@ resource "azurerm_monitor_diagnostic_setting" "servicebus-diag" {
 resource "azurerm_monitor_diagnostic_setting" "appgw-diag" {
   name                       = "appgw-diag"
   target_resource_id         = azurerm_application_gateway.appgw.id
-  log_analytics_workspace_id = azurerm_log_analytics_workspace.demo.id
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.audit.id
 
   log {
     category = "ApplicationGatewayAccessLog"
