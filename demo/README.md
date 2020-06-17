@@ -66,17 +66,19 @@ Currently covered
 - AAD Pod Identity
 - Key Vault FlexVolume
 - Linkerd
+- Linkerd telemetry to Application Insights
 - Flagger
   - NGINX ingress
 - Monitoring -> diagnostic logs
 - Azure Monitor for Containers (non-AKS cluster monitoring)
-
+- Istio
+- OpenTelemetry (OpenCensus) app demo
+  
 Planned
-- DAPR OAuth middleware
+- DAPR API authentication
 - Virtual Nodes (after vnet limitations are resolved)
 - RUDR and/or Crossplane
 - Azure Policy with Gatekeeper v3
-- Istio
 - Osiris
 - PSQL managed identity access
 - Hybrid -> Azure Arc for Kubernetes
@@ -84,8 +86,6 @@ Planned
 - Flagger
   - with Linker
   - with Istio
-- Linkerd telemetry to Application Insights
-- OpenTelemetry (OpenCensus) app demo
 
 # Demonstrations
 
