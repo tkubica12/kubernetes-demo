@@ -5,6 +5,7 @@ echo        -> service principal secret
 echo        -> tenant id
 echo        -> log workspace secret
 echo        -> log workspace id
+echo        -> resource group name
 echo
 
 # sudo -i
@@ -33,7 +34,7 @@ az extension add --name k8sconfiguration
 az login --service-principal -u $1 -p $2 --tenant $3
 
 # Onboard cluster to Arc
-az connectedk8s connect --name tomas-k3s --resource-group arc
+az connectedk8s connect --name tomas-k3s --resource-group $6
 export clusterId=$(az connectedk8s show --name tomas-k3s --resource-group arc --query id -o tsv)
 
 # Install app
