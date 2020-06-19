@@ -449,13 +449,13 @@ resource "azurerm_virtual_machine_extension" "k3s" {
 
   settings = <<SETTINGS
     {
-        "fileUris": ["https://raw.githubusercontent.com/tkubica12/kubernetes-demo/master/demo/scripts/azuremonitor-k3s-install.sh"]
+        "fileUris": ["https://raw.githubusercontent.com/tkubica12/kubernetes-demo/master/demo/scripts/arc-k3s-install.sh"]
     }
 SETTINGS
 
   protected_settings = <<PROTECTEDSETTINGS
     {
-        "commandToExecute": "./azuremonitor-k3s-install.sh ${azurerm_log_analytics_workspace.demo.workspace_id} ${azurerm_log_analytics_workspace.demo.primary_shared_key}"
+        "commandToExecute": "./arc-k3s-install.sh ${client_id} ${client_secret} ${tenant_id} ${azurerm_log_analytics_workspace.demo.workspace_id} ${azurerm_log_analytics_workspace.demo.primary_shared_key}"
     }
 PROTECTEDSETTINGS
 
