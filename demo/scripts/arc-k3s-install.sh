@@ -35,7 +35,7 @@ az login --service-principal -u $1 -p $2 --tenant $3
 
 # Onboard cluster to Arc
 az connectedk8s connect --name tomas-k3s --resource-group $6
-export clusterId=$(az connectedk8s show --name tomas-k3s --resource-group arc --query id -o tsv)
+export clusterId=$(az connectedk8s show --name tomas-k3s --resource-group $6 --query id -o tsv)
 
 # Install app
 helm repo add bitnami https://charts.bitnami.com/bitnami
