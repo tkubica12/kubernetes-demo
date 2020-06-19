@@ -357,7 +357,7 @@ jobs:
         ARM_TENANT_ID: ${{ secrets.tenant_id }}
       run: |
         # kubectl delete ingress --all -n istio-demo
-        helm upgrade -i linkerd-demo ./helm/istio-demo -n istio-demo
+        helm upgrade -i istio-demo ./helm/istio-demo -n istio-demo
 
     - name: Deploy distributed tracing demo
       working-directory: ./demo
