@@ -5,6 +5,7 @@ echo        -> service principal secret
 echo        -> tenant id
 echo        -> log workspace secret
 echo        -> log workspace id
+echo        -> log workspace resource id
 echo        -> resource group name
 echo
 
@@ -34,15 +35,16 @@ az extension add --name k8sconfiguration
 az login --service-principal -u $1 -p $2 --tenant $3
 
 # Onboard cluster to Arc
-az connectedk8s connect --name tomas-k3s --resource-group $6
-export clusterId=$(az connectedk8s show --name tomas-k3s --resource-group $6 --query id -o tsv)
-
-# Install app
-helm repo add bitnami https://charts.bitnami.com/bitnami
-helm repo update
-helm upgrade -i my-release bitnami/wordpress
+az connectedk8s connect --name tomas-k3s --resource-group $7 --tags logAnalyticsWorkspaceResourceId=$6
+export clusterId=$(az connectedk8s show --name tomas-k3s --resource-group $7 --query id -o tsv)
 
 # Install Azure Monitor for Containers
 helm repo add incubator https://kubernetes-charts-incubator.storage.googleapis.com/
 helm repo update
 helm upgrade -i azuremonitor incubator/azuremonitor-containers --set omsagent.secret.wsid=$4,omsagent.secret.key=$5,omsagent.env.clusterId=$clusterId 
+
+
+# # Install app
+# helm repo add bitnami https://charts.bitnami.com/bitnami
+# helm repo update
+# helm upgrade -i my-release bitnami/wordpress
