@@ -1,0 +1,26 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: opentelemetry-tfgen
+  labels:
+    app: opentelemetry-tfgen
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: opentelemetry-tfgen
+    spec:
+      containers:
+        - name: opentelemetry-tfgen
+          image: tkubica/mybox
+          command: ["bash"]
+          args: ["-c", "while true; do curl -s opentelemetry-app1:8080; sleep $(( $RANDOM % 60 )); curl -s opentelemetry-app2:8080; sleep $(( $RANDOM % 60 )); done"]
+          resources:
+            requests:
+                cpu: 10m
+                memory: 16M
+            limits:
+                cpu: 100M
+                memory: 128M
+       

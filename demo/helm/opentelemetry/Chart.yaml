@@ -1,0 +1,4 @@
+apiVersion: v1
+description: Open Telemetry app demo
+name: opentelemetry
+version: 0.1.0

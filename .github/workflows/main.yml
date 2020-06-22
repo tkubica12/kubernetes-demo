@@ -254,6 +254,7 @@ jobs:
         az acr repository show -n $registry --image todogen:$version && echo Image exists || az acr build -r $registry --image todogen:$version ./src/todoGen
         az acr repository show -n $registry --image daprdemo:$version && echo Image exists || az acr build -r $registry --image daprdemo:$version ./src/daprdemo
         az acr repository show -n $registry --image tracing:$version && echo Image exists || az acr build -r $registry --image tracing:$version ./src/tracing
+        az acr repository show -n $registry --image opentelemetry:$version && echo Image exists || az acr build -r $registry --image opentelemetry:$version ./src/opentelemetry
 
     - name: Deploy todo application
       working-directory: ./demo
@@ -369,10 +370,10 @@ jobs:
         ARM_TENANT_ID: ${{ secrets.tenant_id }}
       run: |
         registry_name=$(terraform output registry_name)
-        helm upgrade -i tracing ./helm/tracing -n default \
-          --set repository=${registry_name}.azurecr.io/tracing \
+        helm upgrade -i tracing ./helm/opentelemetry -n default \
+          --set repository=${registry_name}.azurecr.io/opentelemetry \
           --set tag=$(cat version) \
-          --set collector=localforwarder-default:50002
+          --set appin_key=$(terraform output appin_opentelemetry_key)
 
     - name: Deploy distributed tracing demo with Linkerd
       working-directory: ./demo

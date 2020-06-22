@@ -118,6 +118,14 @@ output "appin_linkerd_id" {
   value = azurerm_application_insights.linkerd.app_id
 }
 
+output "appin_opentelemetry_key" {
+  value = azurerm_application_insights.opentelemetry.instrumentation_key
+}
+
+output "appin_opentelemetry_id" {
+  value = azurerm_application_insights.opentelemetry.app_id
+}
+
 output "ingressContributor_client_id" {
   value = azurerm_user_assigned_identity.ingress.client_id
 }

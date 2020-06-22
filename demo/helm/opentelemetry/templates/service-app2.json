@@ -1,0 +1,14 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: opentelemetry-app2
+  labels:
+    app: opentelemetry-app2
+spec:
+  selector:
+    app: opentelemetry-app2
+  ports:
+  - protopentelemetryol: TCP
+    name: http
+    port: 8080
+    targetPort: 8080

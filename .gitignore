@@ -47,3 +47,4 @@ kuberesources/identity1.yaml
 demo/errored.tfstate
 demo/intro/PROD/*
 demo/intro/TEST/*
+__pycache__/
