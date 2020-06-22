@@ -8,7 +8,7 @@ spec:
   selector:
     app: opentelemetry-app1
   ports:
-  - protopentelemetryol: TCP
+  - protocol: TCP
     name: http
     port: 8080
     targetPort: 8080

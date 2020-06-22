@@ -13,9 +13,18 @@ spec:
     spec:
       containers:
         - name: opentelemetry-tfgen
-          image: tkubica/mybox
-          command: ["bash"]
-          args: ["-c", "while true; do curl -s opentelemetry-app1:8080; sleep $(( $RANDOM % 60 )); curl -s opentelemetry-app2:8080; sleep $(( $RANDOM % 60 )); done"]
+          image: "{{ .Values.repository }}:{{ .Values.tag | toString }}"
+          env:
+            - name: APP_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: "metadata.labels['app']"
+            - name: APPINSIGHTS_INSTRUMENTATION_KEY
+              value: {{ .Values.appin_key }}
+            - name: REMOTE_ENDPOINT1
+              value: "http://opentelemetry-app1:8080"
+            - name: REMOTE_ENDPOINT2
+              value: "http://opentelemetry-app2:8080"
           resources:
             requests:
                 cpu: 10m
