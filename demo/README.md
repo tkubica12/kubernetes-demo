@@ -6,6 +6,7 @@
     - [Telemetry](#telemetry)
     - [Logs](#logs)
     - [Azure Monitor for Containers](#azure-monitor-for-containers)
+    - [Distributed tracing](#distributed-tracing)
   - [Todo application](#todo-application)
   - [DAPR and KEDA](#dapr-and-keda)
   - [Windows nodes](#windows-nodes)
@@ -72,7 +73,7 @@ Currently covered
 - Monitoring -> diagnostic logs
 - Azure Monitor for Containers (non-AKS cluster monitoring)
 - Istio
-- OpenTelemetry (OpenCensus) app demo
+- OpenTelemetry app demo
   
 Planned
 - DAPR API authentication
@@ -170,6 +171,13 @@ There is Kubernetes cluster deployed in VM K3s configured with Azure Monitor for
 ![](images/monitorext1.png)
 
 ![](images/monitorext2.png)
+
+### Distributed tracing
+Various demo apps are sending tracing data to Azure Monitor (Application Insights) instances:
+- appin-opentelemetry-demo - Python app with OpenTelemetry SDK directly reporting to Azure Monitor
+- appin-linkerd-demo - Python app with OpenCensus SDK enhanced by traces from Linkerd service mesh all connected via Collector
+- appin-demo - Java-based app with no instrumentation in code using codeless attach
+- appin-dapr-demo - traces from DAPR
 
 ## Todo application
 Access todo application at [http://cloud.tomaskubica.in](http://cloud.tomaskubica.in) (Ingress via Application Gateway)

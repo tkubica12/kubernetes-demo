@@ -373,6 +373,7 @@ jobs:
         registry_name=$(terraform output registry_name)
         helm upgrade -i tracing ./helm/opentelemetry -n default \
           --set repository=${registry_name}.azurecr.io/opentelemetry \
+          --set tfgenRepository=${registry_name}.azurecr.io/opentelemetry-tfgen \
           --set tag=$(cat version) \
           --set appin_key=$(terraform output appin_opentelemetry_key)
 

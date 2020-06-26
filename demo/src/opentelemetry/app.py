@@ -44,8 +44,8 @@ meter = metrics.get_meter(__name__)
 PushController(meter, metrics_exporter, 10)
 
 tomas_counter = meter.create_metric(
-    name="tomas_counter",
-    description="number of events",
+    name="mydemo_counter",
+    description="mydemo namespace",
     unit="1",
     value_type=int,
     metric_type=Counter,

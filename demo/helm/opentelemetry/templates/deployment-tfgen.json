@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
         - name: opentelemetry-tfgen
-          image: "{{ .Values.repository }}:{{ .Values.tag | toString }}"
+          image: "{{ .Values.tfgenRepository }}:{{ .Values.tag | toString }}"
           env:
             - name: APP_NAME
               valueFrom:

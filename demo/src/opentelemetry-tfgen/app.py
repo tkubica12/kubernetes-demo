@@ -36,7 +36,7 @@ PushController(meter, metrics_exporter, 10)
 
 tfgen_counter = meter.create_metric(
     name="tfgen_counter",
-    description="number of events",
+    description="mydemo namespace",
     unit="1",
     value_type=int,
     metric_type=Counter,
