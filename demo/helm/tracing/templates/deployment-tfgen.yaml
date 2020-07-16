@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: oc-tfgen
@@ -6,6 +6,9 @@ metadata:
     app: oc-tfgen
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: oc-tfgen
   template:
     metadata:
       labels:

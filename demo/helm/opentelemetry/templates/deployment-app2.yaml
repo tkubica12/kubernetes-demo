@@ -1,19 +1,24 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: opentelemetry-tfgen
+  name: opentelemetry-app2
   labels:
-    app: opentelemetry-tfgen
+    app: opentelemetry-app2
 spec:
-  replicas: 1
+  replicas: 2
+  selector:
+    matchLabels:
+      app: opentelemetry-app2
   template:
     metadata:
       labels:
-        app: opentelemetry-tfgen
+        app: opentelemetry-app2
     spec:
       containers:
-        - name: opentelemetry-tfgen
-          image: "{{ .Values.tfgenRepository }}:{{ .Values.tag | toString }}"
+        - name: opentelemetry-app2
+          image: "{{ .Values.repository }}:{{ .Values.tag | toString }}"
+          ports:
+            - containerPort: 8080
           env:
             - name: APP_NAME
               valueFrom:
@@ -21,10 +26,8 @@ spec:
                   fieldPath: "metadata.labels['app']"
             - name: APPINSIGHTS_INSTRUMENTATION_KEY
               value: {{ .Values.appin_key }}
-            - name: REMOTE_ENDPOINT1
-              value: "http://opentelemetry-app1:8080"
-            - name: REMOTE_ENDPOINT2
-              value: "http://opentelemetry-app2:8080"
+            - name: REMOTE_ENDPOINT
+              value: "http://opentelemetry-app1:8080/data"
           resources:
             requests:
                 cpu: 10m
