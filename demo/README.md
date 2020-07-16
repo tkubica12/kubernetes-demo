@@ -312,10 +312,10 @@ Now let's try service with circuit breaker configured. Try to access it multiple
 
 ```bash
 # Open log stream in different window
-kubectl logs -l app=retry-breaker -c retry-backend-breaker -f
+kubectl logs -l app=retry-breaker -n istio-demo -c retry-backend-breaker -f
 
-kubectl exec -it client-0 -c container -- bash
- curl -vs -m 30 "retry-service-breaker?failRate=90&mode=busy"
+kubectl exec -it client-0 -c container -n istio-demo -- bash 
+   curl -vs -m 30 "retry-service-breaker?failRate=90&mode=busy"
 ```
 ## Traffic split
 Similar to Linkerd Istio can use percentage to route traffic to different service versions or inject faults.
@@ -323,8 +323,8 @@ Similar to Linkerd Istio can use percentage to route traffic to different servic
 Istio also offers header-based routing eg. for A/B testing.
 
 ```bash
-kubectl exec client-0 -c container -- curl -s myweb-service
-kubectl exec client-0 -c container -- curl -s --cookie "usertype=tester" myweb-service
+kubectl exec client-0 -c container -n istio-demo -- curl -s myweb-service 
+kubectl exec client-0 -c container -n istio-demo -- curl -s --cookie "usertype=tester" myweb-service
 ```
 
 ## Controlling egress traffic
@@ -333,9 +333,9 @@ You can use Kubernetes Network Policy to filter egress traffic based on L4 rules
 Demo cluster is configured to not allow access to external services not explicitly defined. From following two only httpbin.org is configured.
 
 ```bash
-kubectl exec client-0 -c container -- curl -sv https://www.tomaskubica.cz
-kubectl exec client-0 -c container -- curl -sv http://www.tomaskubica.cz
-kubectl exec client-0 -c container -- curl -sv http://httpbin.org/ip
+kubectl exec client-0 -c container -n istio-demo -- curl -sv https://www.tomaskubica.cz
+kubectl exec client-0 -c container -n istio-demo -- curl -sv http://www.tomaskubica.cz
+kubectl exec client-0 -c container -n istio-demo -- curl -sv http://httpbin.org/ip
 ```
 
 TBD
