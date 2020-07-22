@@ -6,6 +6,7 @@ from opentelemetry.sdk.metrics import Counter, MeterProvider
 from opentelemetry.sdk.metrics.export.controller import PushController
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchExportSpanProcessor
+from opentelemetry.ext.system_metrics import SystemMetrics
 from opentelemetry.ext.flask import FlaskInstrumentor
 from opentelemetry.ext.requests import RequestsInstrumentor
 import time
@@ -54,6 +55,8 @@ tomas_counter = meter.create_metric(
     metric_type=Counter,
 )
 
+SystemMetrics(metrics_exporter)
+
 # Define cloud role
 def callback_function(envelope):
     envelope.tags['ai.cloud.role'] = os.getenv('APP_NAME')
@@ -72,7 +75,7 @@ def init():
 @app.route('/data')
 def data():
     sleep_time = random.random()
-    logger.warning("Sleep time generated was " + sleep_time)
+    logger.warning("Sleep time generated was " + str(sleep_time))
     time.sleep(sleep_time)
     with tracer.start_as_current_span(name='ProcessDataFunction'):
         time.sleep(random.random())
