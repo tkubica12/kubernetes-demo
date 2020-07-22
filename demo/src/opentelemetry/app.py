@@ -1,5 +1,6 @@
 from azure_monitor import AzureMonitorSpanExporter
 from azure_monitor import AzureMonitorMetricsExporter
+from azure_monitor.sdk.auto_collection import AutoCollection
 from opentelemetry import trace
 from opentelemetry import metrics
 from opentelemetry.sdk.metrics import Counter, MeterProvider
@@ -45,6 +46,8 @@ metrics_exporter = AzureMonitorMetricsExporter(
 )
 metrics.set_meter_provider(MeterProvider())
 meter = metrics.get_meter(__name__)
+# metrics.get_meter_provider().start_pipeline(meter, metrics_exporter, 5)
+
 PushController(meter, metrics_exporter, 10)
 
 tomas_counter = meter.create_metric(
@@ -56,6 +59,9 @@ tomas_counter = meter.create_metric(
 )
 
 SystemMetrics(metrics_exporter)
+
+testing_label_set = {"environment": "testing"}
+# auto_collection = AutoCollection(meter=meter, labels=testing_label_set)
 
 # Define cloud role
 def callback_function(envelope):
