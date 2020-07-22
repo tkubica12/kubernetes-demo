@@ -14,10 +14,13 @@ import socket
 import os
 import flask
 import requests
+import logging
 # from azure_monitor.sdk.auto_collection import (
 #     AutoCollection,
 #     AzureMetricsSpanProcessor,
 # )
+
+logger = logging.getLogger(__name__)
 
 # Setup distributed tracing
 trace.set_tracer_provider(TracerProvider())
@@ -68,13 +71,16 @@ def init():
 
 @app.route('/data')
 def data():
-    time.sleep(random.random())
+    sleep_time = random.random()
+    logger.warning("Sleep time generated was " + sleep_time)
+    time.sleep(sleep_time)
     with tracer.start_as_current_span(name='ProcessDataFunction'):
         time.sleep(random.random())
     return 'OK'
 
 @app.route('/counter')
 def test():
+    logger.warning("We are going to increment counter")
     tomas_counter.add(1, {"environment": "testing"})
     return 'OK'
 
