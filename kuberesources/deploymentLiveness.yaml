@@ -4,6 +4,9 @@ metadata:
   name: lf
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: lf
   template:
     metadata:
       labels:

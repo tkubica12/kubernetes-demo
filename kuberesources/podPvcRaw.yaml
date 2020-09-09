@@ -1,0 +1,15 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: nginx-raw
+spec:
+  containers:
+    - image: nginx
+      name: nginx
+      volumeDevices:
+        - name: azuredisk
+          devicePath: /dev/xvda
+  volumes:
+    - name: azuredisk
+      persistentVolumeClaim:
+        claimName: pvc-azuredisk-raw

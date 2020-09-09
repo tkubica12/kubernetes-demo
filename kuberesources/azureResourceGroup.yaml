@@ -1,0 +1,7 @@
+apiVersion: azure.microsoft.com/v1beta1
+kind: ResourceGroup
+metadata:
+  name: mojerg
+spec:
+  # name: mojerg
+  location: westeurope

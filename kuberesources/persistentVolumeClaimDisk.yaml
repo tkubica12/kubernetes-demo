@@ -1,11 +1,11 @@
-kind: PersistentVolumeClaim
 apiVersion: v1
+kind: PersistentVolumeClaim
 metadata:
-  name: myvolume-disk-claim
+  name: pvc-azuredisk
 spec:
-  storageClassName: default
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 32Gi
+      storage: 1Gi
+  storageClassName: managed-csi-standard-ssd

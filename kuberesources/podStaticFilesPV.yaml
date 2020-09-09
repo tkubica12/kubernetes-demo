@@ -1,0 +1,50 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-azurefileexisting
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  mountOptions:
+    - mfsymlinks
+  csi:
+    driver: file.csi.azure.com
+    readOnly: false
+    volumeHandle: mujshare
+    volumeAttributes:
+      shareName: mujshare
+    nodeStageSecretRef:
+      name: storage-secret
+      namespace: default
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: pvc-azurefileexisting
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi
+  volumeName: pv-azurefileexisting
+  storageClassName: ""
+---
+kind: Pod
+apiVersion: v1
+metadata:
+  name: nginx2
+spec:
+  containers:
+    - image: nginx
+      name: nginx
+      volumeMounts:
+        - name: azurefile
+          mountPath: "/usr/share/nginx/html"
+  volumes:
+    - name: azurefile
+      persistentVolumeClaim:
+        claimName: pvc-azurefileexisting

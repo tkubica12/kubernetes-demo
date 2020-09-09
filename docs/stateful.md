@@ -47,10 +47,28 @@ Azure Files (implemented via SMB as a service)
 * No limitations in number of Volumes that could be attached
 * Fast attach
 
+Azure NetApp Files via NFS
+* Very good performance
+* Shared access supported
+
+# In-tree vs. CSI drivers
+AKS currently comes with native support for Azure Disks and Azure Files. In future versions (1.21) community plans to make newer out-of-tree CSI implementations default. In our demo we will use CSI.
+
 ## Using Azure Disks as Persistent Volume
-Our AKS cluster has Azure Disk persistence volume drivers available by default. We can see two storage classes - default (Standard HDD) and managed-premium (Premium SSD).
+First install CSI for Azure Disk.
+
+If using managed identity make sure AKS can create disks in target resource group.
+```bash
+rg=$(az aks show -n kubedisk -g kubedisk --query nodeResourceGroup -o tsv)
+identity=$(az aks show -n kubedisk -g kubedisk --query identityProfile.kubeletidentity.objectId -o tsv)
+az role assignment create --role Contributor --assignee-object-id $identity --resource-group $rg
+```
+
+Install CSI.
 
 ```
+curl -skSL https://raw.githubusercontent.com/kubernetes-sigs/azuredisk-csi-driver/v0.8.0/deploy/install-driver.sh | bash -s v0.8.0 snapshot --
+kubectl apply -f storageClassAzureDiskCSI.yaml
 kubectl get storageclasses
 ```
 
@@ -64,28 +82,32 @@ kubectl get pv
 
 Make sure volume is visible in Azure. You find it in MC... resource group with name similar to kubernetes-dynamic-pvc-823fe291-85c3-11e8-a134-462d743040a1
 
+Azure Disk is created in some Availability Zone in not predictable fashion. When using availability zones it is better not to create disk immediately, but rather wait for first consumer. Sheduler will create Pod and based on its zone disk will be created in right one. This allows together with using node affinity to make sure workload is distributed between zones.
+
+Change storage class to use late binding.
+
+```bash
+kubectl delete -f persistentVolumeClaimDisk.yaml
+kubectl delete -f storageClassAzureDiskCSI.yaml
+kubectl apply -f storageClassAzureDiskCSI-latebinding.yaml
+```
+
 We can create Pod, attach it our Volume and write some data.
 
 ```
 kubectl apply -f podPvcDisk.yaml
+kubectl apply -f persistentVolumeClaimDisk.yaml
 kubectl exec pod-pvc-disk -- bash -c 'echo My data > /mnt/azure/file.txt'
 kubectl exec pod-pvc-disk -- cat /mnt/azure/file.txt
 ```
 
 ## Using Azure Files as Persistent Volume
-
-First we need to create storage account in Azure. Make sure service principal used when creating AKS cluster has access to it (RBAC). If you have let this generated automatically then it is scoped to MC... resource group so we will deploy our storage account there (or add service principal to any storage account in your subscription).
-
-```
-az storage account create -n tomaskubefiles \
-    -g MC_aksgroup_akscluster_westeurope \
-    --sku Standard_LRS 
-```
-
-Azure Files storage class is not deployed by default in AKS, so let's do it now. Make sure you modify this yaml to reflect your storage account name. Also since our cluster is RBAC enabled we need to create role binding for persistent-volume-binding.
+Let's deploy CSI for Azure Files.
 
 ```
-kubectl apply -f storageClassFiles.yaml
+curl -skSL https://raw.githubusercontent.com/kubernetes-sigs/azurefile-csi-driver/v0.8.0/deploy/install-driver.sh | bash -s v0.8.0 snapshot --
+
+kubectl apply -f storageClassFilesCSI.yaml
 ```
 
 We will deploy PVC with managed-files storage class.
@@ -93,31 +115,90 @@ We will deploy PVC with managed-files storage class.
 kubectl apply -f persistentVolumeClaimFiles.yaml
 ```
 
-We should see new share available in our storage account
-```
-export AZURE_STORAGE_KEY=$(az storage account keys list \
-    -g MC_aksgroup_akscluster_westeurope \
-    -n tomaskubefiles \
-    --query [0].value \
-    -o tsv )
+We should see new storage account and share available in Azure resource group.
 
-az storage share list --account-name tomaskubefiles
-```
 
-We should see share with name similar to this: kubernetes-dynamic-pvc-1d504a0b-85c8-11e8-a134-462d743040a1
+Let's run Pod that uses Files as Persistent Volume. You can port-forward to access page with content being written and updated every second on volume.
 
-Let's run two Pod that uses Files as shared Persistent Volume. We can test writing in one and reading in seconds Pod.
 ```
 kubectl apply -f podPvcFiles.yaml
-kubectl exec pvc-files1 -- bash -c 'echo My data > /mnt/azure/file.txt'
-kubectl exec pvc-files2 -- cat /mnt/azure/file.txt
 ```
 
-Nevertheless let's show how permissions are not stored with Azure Files implementation.
+Often rather than automatically creating file shares you want to have share managed outside and just point Pods to it. To achieve that we will not use storageClass, but rather directly create PV and PVC.
+
+First create storage account, share and upload some content.
+
+```bash
+az storage account create -n mojerucneudelanastorage -g MC_kubefiles_kubefiles_westeurope
+az storage share create -n mujshare --account-name mojerucneudelanastorage --account-key \
+  $(az storage account keys list -n mojerucneudelanastorage -g MC_kubefiles_kubefiles_westeurope --query [0].value -o tsv)
+echo Ahojky! > index.html
+az storage file upload -s mujshare --source ./index.html --account-name mojerucneudelanastorage --account-key \
+  $(az storage account keys list -n mojerucneudelanastorage -g MC_kubefiles_kubefiles_westeurope --query [0].value -o tsv)
+rm index.html
 ```
-kubectl exec pvc-files1 -- chmod 500 /mnt/azure/file.txt
-kubectl exec pvc-files1 -- ls -l /mnt/azure
+
+Deploy PV, PVC and Pod.
+
+```bash
+kubectl apply -f podStaticFilesPV.yaml
 ```
+
+## Taking snapshots
+CSI drivers allow for taking snapshots by calling azure to snapshot disk or files.
+
+Let's start simply with Azure Files and create snapshot.
+
+```bash
+kubectl apply -f snapshotClassFiles.yaml
+kubectl apply -f snapshotFiles.yaml
+```
+
+With Azure Disk implementation we can create snapshot, clone from existing disk or snapshot and resize volume.
+
+Create disk snapshot.
+
+```bash
+kubectl apply -f snapshotClassDisk.yaml
+kubectl apply -f snapshotDisk.yaml
+```
+
+Let's now create new volume from this snapshot and run Pod using it.
+
+```bash
+kubectl apply -f diskFromSnapshot.yaml
+```
+
+We can also clone disk directly from existing one.
+
+
+```bash
+kubectl apply -f diskClone.yaml
+```
+
+## Disk as raw device
+Azure Disk is mapped to container as file system and CSI driver supports major systems such as ext4 (default), ext3, ext2 or xfs. Should you need something very specific or even completely raw device, it is supported.
+
+
+```bash
+kubectl apply -f persistentVolumeClaimRaw.yaml
+kubectl apply -f podPvcRaw.yaml
+```
+
+Connect to container and check device. We can use low level commands to work with it or create our own file system.
+
+```
+kubectl exec -ti nginx-raw -- bash
+
+root@nginx-raw:/# ls /dev/x*
+/dev/xvda
+
+root@nginx-raw:/# dd if=/dev/zero of=/dev/xvda bs=1024k count=100
+100+0 records in
+100+0 records out
+104857600 bytes (105 MB, 100 MiB) copied, 0.0743379 s, 1.4 GB/s
+```
+
 
 ## Clean up
 ```

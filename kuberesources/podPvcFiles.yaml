@@ -1,35 +1,19 @@
 kind: Pod
 apiVersion: v1
 metadata:
-  name: pvc-files1
+  name: nginx
 spec:
   containers:
-    - name: ubuntu
-      image: tutum/curl
-      command: ["tail"]
-      args: ["-f", "/dev/null"]
+    - image: nginx
+      name: nginx
+      command:
+        - "/bin/sh"
+        - "-c"
+        - nginx & while true; do echo $(date) >> /usr/share/nginx/html/index.html; sleep 1; done
       volumeMounts:
-      - mountPath: "/mnt/azure"
-        name: volume
+        - name: azurefile
+          mountPath: "/usr/share/nginx/html"
   volumes:
-    - name: volume
+    - name: azurefile
       persistentVolumeClaim:
-        claimName: myvolume-files-claim
----
-kind: Pod
-apiVersion: v1
-metadata:
-  name: pvc-files2
-spec:
-  containers:
-    - name: ubuntu
-      image: tutum/curl
-      command: ["tail"]
-      args: ["-f", "/dev/null"]
-      volumeMounts:
-      - mountPath: "/mnt/azure"
-        name: volume
-  volumes:
-    - name: volume
-      persistentVolumeClaim:
-        claimName: myvolume-files-claim
+        claimName: pvc-azurefile
