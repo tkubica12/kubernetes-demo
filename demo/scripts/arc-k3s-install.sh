@@ -39,12 +39,15 @@ az connectedk8s connect --name tomas-k3s --resource-group $7 --tags logAnalytics
 export clusterId=$(az connectedk8s show --name tomas-k3s --resource-group $7 --query id -o tsv)
 
 # Install Azure Monitor for Containers
-helm repo add incubator https://kubernetes-charts-incubator.storage.googleapis.com/
+curl -o enable-monitoring.sh -L https://aka.ms/enable-monitoring-bash-script
+bash enable-monitoring.sh --resource-id $clusterId --client-id $1 --client-secret $2  --tenant-id $3 --kube-context $kubeContext  --workspace-id $4
+
+# Install Azure Policy
+helm repo add azure-policy https://raw.githubusercontent.com/Azure/azure-policy/master/extensions/policy-addon-kubernetes/helm-charts
 helm repo update
-helm upgrade -i azuremonitor incubator/azuremonitor-containers --set omsagent.secret.wsid=$4,omsagent.secret.key=$5,omsagent.env.clusterId=$clusterId 
+helm upgrade -i azure-policy-addon azure-policy/azure-policy-addon-arc-clusters \
+    --set azurepolicy.env.resourceid=$clusterId  \
+    --set azurepolicy.env.clientid=$1 \
+    --set azurepolicy.env.clientsecret=$2 \
+    --set azurepolicy.env.tenantid=$3
 
-
-# # Install app
-# helm repo add bitnami https://charts.bitnami.com/bitnami
-# helm repo update
-# helm upgrade -i my-release bitnami/wordpress
