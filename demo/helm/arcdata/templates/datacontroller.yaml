@@ -31,7 +31,7 @@ spec:
       connectionMode: Indirect
       location: westeurope
       resourceGroup: arc-resources
-      subscription: {{ .Values.subcriptionId }}
+      subscription: {{ .Values.subscriptionId }}
     controller:
       displayName: arc
       enableBilling: "True"
