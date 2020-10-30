@@ -210,15 +210,17 @@ kubectl delete -f persistentVolumeClaimFiles.yaml
 
 # Stateful applications with StatefulSets
 Having persistent volumes is important part of managing stateful applications, but there are more things to take care of. Kubernetes Deployment has few limitations when using with statefull apps:
-* Deployment creates ports in parallel. Stateful apps sometimess need to start sequentially - spin up first node, make it initialize and become master and after that spin up second node, connect it to master and make it assume agent/slave/minion role
-* Pods with deployments do not have predictable names and those are not persistent. When Pods is rescheduled to different Node it does not keep its configurations such as name
-* When Pod is using Persistent Volume and fails new pod gets created with new Volume rather than take over of existing one
+* Deployment creates Pods in parallel. Stateful apps often need to start sequentially - spin up first node, make it initialize and become master and after that spin up second node, connect it to master and make it assume agent/slave/minion role. Also when Pod is in terminating state, Deployment starts creating new one immediately, but that might create two running services accessing the same data - StatefulSet always wait till Pod is terminated.
+* Pods with deployments do not have predictable names and those are not persistent. When Pods is rescheduled to different Node it does not keep its configurations such as name.
+* Deployments are creating Pod replicas with each attaching the same shared Volume. This is fine for content of web farm, but not for replicated services such as databases.
 * During scale-down operation Pods are killed with no order guarantees so it can easily kill Pod that has been created first who became master and cause new master elections that can bring downtime
 
 StatefulSets are designed to behave differently and solve those challanges.
 
 ## StatefulSets
 First let's explore behavior of StatefulSet on simple example and later add Volumes and real stateful application like database.
+
+### StatefulSet basics
 
 We will run very simple StatefulSet with init container. Observe that Pods are started one by one (only after one Pod goes into full Running state next one is started) and also pod names are predictable (stateful-0, stateful-1 and so on).
 
@@ -241,7 +243,25 @@ kubectl apply -f podUbuntu.yaml
 kubectl exec ubuntu -- bash -c 'apt update && apt install dnsutils -y && dig stateful.default.svc.cluster.local'
 ```
 
-## Create StatefulSet with Volume template for Postgresql
+### StatefulSet with zone availability and persistent volume template
+We will now create StatefulSet with two replicas. We will use podAntiAffinity to make sure replicas are running in different availability zones. StatefulSet will use volume template so each replica will get its own disk in respective zone.
+
+```
+kubectl apply -f statefulSetNginx.yaml
+```
+
+Make sure both Pods are running and use port-forward to check NGINX is alive and serving content from Volume and adding entries to it.
+
+Let's now simulate cluster upgrade by draining (safely removing) node on which one of our Pods run.
+
+```bash
+kubectl drain aks-nodepool1-30410574-vmss000002 --ignore-daemonsets --delete-local-data 
+```
+
+If you have more nodes in the same zone, Pod will be terminated and started elsewhere. If you do not have node in the same zone Pod cannot start as disk is bounded to specific zone only and cannot be automatically transfered.
+
+
+### StatefulSet with PostgreSQL singleton ?
 Now we will deploy something more useful - let's create single instance of PostgreSQL database. This will be pretty easy and when we loose the Pod for instance due to agent failure Kubernetes will reshedule it and point to the same storage. This is not really HA solution, but gives at least basic automated recovery. Deploying actual HA cluster is complex as it requires separate monitoring solution to initiate fail over and proxy client to point to the right node - you can check Stolon project for more details. In HA scenarios I would strongly recommend to go with Azure Database for PostgreSQL (and other managed databases such as SQL, MySQL or CosmosDB with SQL, MongoDB or Cassandra APIs). Nevertheles for simple scenarios or testing we might be fine with just one instance using StatefulSet.
 
 We are going to deploy PostgreSQL instance with StatefulSet. First we will create Secret with DB password and then deploy our yaml template.
@@ -268,7 +288,6 @@ CREATE TABLE mytable (
 INSERT INTO mytable(name) VALUES ('Tomas Kubica');
 SELECT * FROM mytable;
 \q
-```
 
 Destroy Pod, make sure StatefulSet recovers and data are still there
 ```

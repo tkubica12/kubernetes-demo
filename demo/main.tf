@@ -14,7 +14,7 @@ variable "tenant_app_id" {}
 
 # Configure the Azure and AAD provider
 provider "azurerm" {
-  version = "=2.14.0"
+  version = "=2.33.0"
   features {}
 }
 
@@ -216,21 +216,21 @@ resource "azurerm_subnet" "appgw" {
   name                 = "appgw"
   resource_group_name  = azurerm_resource_group.demo.name
   virtual_network_name = azurerm_virtual_network.demo.name
-  address_prefix       = "10.0.0.0/24"
+  address_prefixes     = ["10.0.0.0/24"]
 }
 
 resource "azurerm_subnet" "nginx" {
   name                 = "nginx"
   resource_group_name  = azurerm_resource_group.demo.name
   virtual_network_name = azurerm_virtual_network.demo.name
-  address_prefix       = "10.0.1.0/24"
+  address_prefixes     = ["10.0.1.0/24"]
 }
 
 resource "azurerm_subnet" "k3s" {
   name                 = "k3s"
   resource_group_name  = azurerm_resource_group.demo.name
   virtual_network_name = azurerm_virtual_network.demo.name
-  address_prefix       = "10.0.2.0/24"
+  address_prefixes     = ["10.0.2.0/24"]
 }
 
 # resource "azurerm_subnet" "aci" {
@@ -351,7 +351,7 @@ resource "azurerm_kubernetes_cluster" "demo" {
 
   network_profile {
     network_plugin     = "azure"
-    network_policy     = "calico"
+    network_policy     = "azure"
     load_balancer_sku  = "standard"
     dns_service_ip     = "192.168.0.10"
     service_cidr       = "192.168.0.0/22"
@@ -361,10 +361,7 @@ resource "azurerm_kubernetes_cluster" "demo" {
   role_based_access_control {
     enabled = true
     azure_active_directory {
-      client_app_id     = var.client_app_id
-      server_app_id     = var.server_app_id
-      server_app_secret = var.server_app_secret
-      tenant_id         = var.tenant_app_id
+      managed = true
     }
   }
 
@@ -402,6 +399,16 @@ resource "azurerm_kubernetes_cluster_node_pool" "demo" {
   availability_zones    = [1, 2, 3]
   os_type               = "Windows"
   node_taints           = ["os=windows:NoSchedule"]
+  vnet_subnet_id        = azurerm_subnet.aks.id
+}
+
+resource "azurerm_kubernetes_cluster_node_pool" "acrdata" {
+  name                  = "datapool"
+  kubernetes_cluster_id = azurerm_kubernetes_cluster.demo.id
+  vm_size               = "Standard_D4a_v4"
+  node_count            = 4
+  availability_zones    = [1]
+  node_labels           = {"purpose": "arcdata"}
   vnet_subnet_id        = azurerm_subnet.aks.id
 }
 
@@ -765,6 +772,7 @@ resource "azurerm_role_assignment" "kubelet-mainrg-identityoperator" {
 
 data "azurerm_resource_group" "aksresources-rg" {
   name = azurerm_kubernetes_cluster.demo.node_resource_group
+  depends_on           = [azurerm_kubernetes_cluster.demo]
 }
 
 resource "azurerm_role_assignment" "kubelet-resourcesrg-vmcontributor" {
@@ -826,7 +834,10 @@ locals {
       "dapr",
       "dapr-demo",
       "windows",
-      "intro"
+      "intro",
+      "arcdata",
+      "sql",
+      "psql"
       ]
   }
 }
@@ -898,7 +909,10 @@ resource "azurerm_policy_assignment" "kube-resource-limits" {
       "dapr",
       "dapr-demo",
       "windows",
-      "intro"
+      "intro",
+      "arcdata",
+      "sql",
+      "psql"
       ]
   }
 }
@@ -939,7 +953,10 @@ resource "azurerm_policy_assignment" "kube-mandatory-labels" {
       "dapr",
       "dapr-demo",
       "windows",
-      "intro"
+      "intro",
+      "arcdata",
+      "sql",
+      "psql"
       ]
   }
 }
@@ -978,7 +995,10 @@ resource "azurerm_policy_assignment" "kube-only-acr" {
       "dapr",
       "dapr-demo",
       "windows",
-      "intro"
+      "intro",
+      "arcdata",
+      "sql",
+      "psql"
       ]
   }
 }

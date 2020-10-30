@@ -1,12 +1,9 @@
-apiVersion: apps/v1
+apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
   name: myiis-deployment
 spec:
   replicas: 1
-  selector:
-    matchLabels:
-      app: myiis
   template:
     metadata:
       labels:

@@ -1,7 +1,6 @@
 flask
-opentelemetry-sdk == 0.10b0
-opentelemetry-ext-wsgi == 0.10b0
-opentelemetry-azure-monitor == 0.4b0
-opentelemetry-ext-flask == 0.10b0
-opentelemetry-ext-requests == 0.10b0
-opentelemetry-ext-system-metrics == 0.10b0
+opentelemetry-sdk == 0.7b1
+opentelemetry-ext-wsgi == 0.7b1
+opentelemetry-azure-monitor == 0.3b1
+opentelemetry-ext-flask == 0.7b1
+opentelemetry-ext-requests == 0.7b1

@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: nginx-statefulset
+  labels:
+    app: nginx
+spec:
+  serviceName: nginx-statefulset
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - nginx
+            topologyKey: failure-domain.beta.kubernetes.io/zone
+      containers:
+        - image: nginx
+          name: nginx-azuredisk
+          command:
+            - "/bin/sh"
+            - "-c"
+            - nginx & while true; do echo $(date) >> /usr/share/nginx/html/index.html; sleep 1; done
+          volumeMounts:
+            - name: azuredisk
+              mountPath: "/usr/share/nginx/html"
+          ports:
+            - containerPort: 80
+          resources:
+              requests:
+                cpu: 100m
+                memory: 16M
+              limits:
+                cpu: 500m
+                memory: 64M
+  volumeClaimTemplates:
+    - metadata:
+        name: azuredisk
+        annotations:
+          volume.beta.kubernetes.io/storage-class: managed-csi-standard-ssd
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi

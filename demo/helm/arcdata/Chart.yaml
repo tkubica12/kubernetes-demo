@@ -1,0 +1,4 @@
+apiVersion: v1
+description: Deploy data controller and databases
+name: arcdata
+version: 0.1.0

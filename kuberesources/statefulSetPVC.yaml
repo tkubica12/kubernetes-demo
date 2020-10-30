@@ -48,7 +48,7 @@ spec:
   - metadata:
       name: postgresql-volume-claim
     spec:
-      storageClassName: default
+      storageClassName: azurefile-premium-zrs-csi
       accessModes:
         - ReadWriteOnce
       resources:
