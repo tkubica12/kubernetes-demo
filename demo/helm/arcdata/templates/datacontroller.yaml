@@ -30,7 +30,7 @@ spec:
     azure:
       connectionMode: Indirect
       location: westeurope
-      resourceGroup: arc-resources
+      resourceGroup: {{ .Values.resourceGroupName }}
       subscription: {{ .Values.subscriptionId }}
     controller:
       displayName: arc
