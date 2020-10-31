@@ -164,7 +164,7 @@ jobs:
       run: |
         kubectl apply -f https://raw.githubusercontent.com/microsoft/azure_arc/master/arc_data_services/deploy/yaml/custom-resource-definitions.yaml
         kubectl apply -n arcdata -f https://raw.githubusercontent.com/microsoft/azure_arc/master/arc_data_services/deploy/yaml/bootstrapper.yaml
-        helm upgrade -i arcdata -n arcdata ./helm/arcdata -set subscriptionId=$ARM_SUBSCRIPTION_ID
+        helm upgrade -i arcdata -n arcdata ./helm/arcdata --set subscriptionId=$ARM_SUBSCRIPTION_ID
 
     - name: Deploy Ingress controller for NGINX
       working-directory: ./demo
