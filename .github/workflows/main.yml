@@ -163,8 +163,8 @@ jobs:
         ARM_TENANT_ID: ${{ secrets.tenant_id }}
       run: |
         kubectl apply -f https://raw.githubusercontent.com/microsoft/azure_arc/master/arc_data_services/deploy/yaml/custom-resource-definitions.yaml
-        kubectl apply -n arcdata -f https://raw.githubusercontent.com/microsoft/azure_arc/master/arc_data_services/deploy/yaml/bootstrapper.yaml
-        helm upgrade -i arcdata -n arcdata ./helm/arcdata \
+        kubectl apply -n arc -f https://raw.githubusercontent.com/microsoft/azure_arc/master/arc_data_services/deploy/yaml/bootstrapper.yaml
+        helm upgrade -i arc -n arcdata ./helm/arcdata \
           --set subscriptionId=$ARM_SUBSCRIPTION_ID \
           --set resourceGroupName=$(terraform output resource_group)
 
