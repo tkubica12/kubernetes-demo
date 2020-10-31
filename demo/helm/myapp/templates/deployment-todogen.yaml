@@ -1,9 +1,13 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ template "fullname" . }}-gen
 spec:
   replicas: {{ .Values.appgen.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ template "name" . }}-gen
+      release: {{ .Release.Name }}
   template:
     metadata:
       labels:

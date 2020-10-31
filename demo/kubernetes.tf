@@ -14,9 +14,9 @@ resource "azurerm_kubernetes_cluster" "demo" {
     name                = "default"
     vm_size             = "Standard_B4ms"
     enable_auto_scaling = true
-    max_count           = 12
+    max_count           = 15
     min_count           = 2
-    node_count          = 6
+    node_count          = 9
     availability_zones  = [1, 2, 3]
     vnet_subnet_id      = azurerm_subnet.aks.id
     max_pods            = 100
