@@ -35,7 +35,7 @@ az extension add --name k8sconfiguration
 az login --service-principal -u $1 -p $2 --tenant $3
 
 # Onboard cluster to Arc
-az connectedk8s connect --name tomas-k3s --resource-group $7 --tags logAnalyticsWorkspaceResourceId=$6
+az connectedk8s connect --name tomas-k3s --resource-group $7 --tags logAnalyticsWorkspaceResourceId=$6 --location westeurope
 export clusterId=$(az connectedk8s show --name tomas-k3s --resource-group $7 --query id -o tsv)
 
 # Install Azure Monitor for Containers
