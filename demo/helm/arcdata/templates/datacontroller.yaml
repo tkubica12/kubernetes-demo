@@ -40,9 +40,9 @@ spec:
   storage:
     data:
       accessMode: ReadWriteOnce
-      className: default
+      className: arc-storage-class
       size: 15Gi
     logs:
       accessMode: ReadWriteOnce
-      className: default
+      className: arc-storage-class
       size: 10Gi

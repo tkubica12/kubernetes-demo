@@ -16,8 +16,8 @@ resource "azurerm_kubernetes_cluster" "demo" {
     enable_auto_scaling = true
     max_count           = 15
     min_count           = 2
-    node_count          = 9
-    availability_zones  = [1, 2, 3]
+    node_count          = 5
+    availability_zones  = [1]
     vnet_subnet_id      = azurerm_subnet.aks.id
     max_pods            = 100
   }
@@ -38,7 +38,7 @@ resource "azurerm_kubernetes_cluster" "demo" {
   role_based_access_control {
     enabled = true
     azure_active_directory {
-      managed = true
+      managed                = true
       admin_group_object_ids = [var.admin_group_id]
     }
   }
@@ -81,12 +81,13 @@ resource "azurerm_kubernetes_cluster_node_pool" "demo" {
 }
 
 resource "azurerm_kubernetes_cluster_node_pool" "acrdata" {
-  name                  = "datapool"
+  name                  = "hapool"
   kubernetes_cluster_id = azurerm_kubernetes_cluster.demo.id
-  vm_size               = "Standard_D4a_v4"
-  node_count            = 4
-  availability_zones    = [1]
-  node_labels           = { "purpose" : "arcdata" }
+  vm_size               = "Standard_B2s"
+  node_count            = 3
+  availability_zones    = [1, 2, 3]
+  node_labels           = {"ha" : "zones" }
+  node_taints           = ["ha=zones:NoSchedule"]
   vnet_subnet_id        = azurerm_subnet.aks.id
 }
 

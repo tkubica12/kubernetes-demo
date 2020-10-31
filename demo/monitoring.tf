@@ -13,6 +13,13 @@ resource "azurerm_log_analytics_workspace" "audit" {
   sku                 = "Free"
 }
 
+resource "azurerm_log_analytics_workspace" "arc" {
+  name                = "arc-${var.env}-${random_string.prefix.result}"
+  location            = azurerm_resource_group.demo.location
+  resource_group_name = azurerm_resource_group.demo.name
+  sku                 = "PerGB2018"
+}
+
 resource "azurerm_application_insights" "demo" {
   name                = "appin-${var.env}-${random_string.prefix.result}"
   location            = azurerm_resource_group.demo.location
