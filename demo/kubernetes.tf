@@ -96,5 +96,5 @@ resource "azurerm_container_registry" "demo" {
   location                 = azurerm_resource_group.demo.location
   sku                      = "Premium"
   admin_enabled            = false
-  georeplication_locations = ["North Europe"]
+  georeplication_locations = ["West Europe"]
 }
