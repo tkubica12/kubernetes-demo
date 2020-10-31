@@ -207,7 +207,7 @@ jobs:
       env:
         KUBECONFIG: "./kube_config"
       run: |
-        export LINKERD_VERSION=stable-2.7.1
+        export LINKERD_VERSION=stable-2.8.1
         curl -sLO "https://github.com/linkerd/linkerd2/releases/download/$LINKERD_VERSION/linkerd2-cli-$LINKERD_VERSION-linux"
         mv ./linkerd2-cli-$LINKERD_VERSION-linux ./linkerd
         chmod +x ./linkerd
@@ -218,7 +218,7 @@ jobs:
       env:
         KUBECONFIG: "./kube_config"
       run: |
-        export istio_version=1.6.0
+        export istio_version=1.7.4
         wget https://github.com/istio/istio/releases/download/$istio_version/istioctl-$istio_version-linux-amd64.tar.gz
         tar -xvf istioctl-$istio_version-linux-amd64.tar.gz
         chmod +x ./istioctl
