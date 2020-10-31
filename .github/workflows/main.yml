@@ -40,6 +40,7 @@ jobs:
         TF_VAR_server_app_id: ${{ secrets.server_app_id }}
         TF_VAR_server_app_secret: ${{ secrets.server_app_secret }}
         TF_VAR_tenant_app_id: ${{ secrets.tenant_app_id }}
+        TF_VAR_admin_group_id: ${{ secrets.admin_group_id }}
       run: terraform apply -auto-approve
 
     - name: Store Kubernetes config

@@ -11,6 +11,7 @@ variable "client_app_id" {}
 variable "server_app_id" {}
 variable "server_app_secret" {}
 variable "tenant_app_id" {}
+variable "admin_group_id" {}
 
 # Configure the Azure and AAD provider
 provider "azurerm" {
