@@ -40,7 +40,7 @@ export clusterId=$(az connectedk8s show --name tomas-k3s --resource-group $7 --q
 
 # Install Azure Monitor for Containers
 curl -o enable-monitoring.sh -L https://aka.ms/enable-monitoring-bash-script
-bash enable-monitoring.sh --resource-id $clusterId --client-id $1 --client-secret $2  --tenant-id $3 --workspace-id $4 #--kube-context $kubeContext 
+bash enable-monitoring.sh --resource-id $clusterId --client-id $1 --client-secret $2  --tenant-id $3 --workspace-id $6 #--kube-context $kubeContext 
 
 # Install Azure Policy
 helm repo add azure-policy https://raw.githubusercontent.com/Azure/azure-policy/master/extensions/policy-addon-kubernetes/helm-charts
