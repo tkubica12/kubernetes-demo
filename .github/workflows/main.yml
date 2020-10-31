@@ -161,8 +161,8 @@ jobs:
         ARM_CLIENT_SECRET: ${{ secrets.client_secret }}
         ARM_TENANT_ID: ${{ secrets.tenant_id }}
       run: |
-        kubectl create -f https://raw.githubusercontent.com/microsoft/azure_arc/master/arc_data_services/deploy/yaml/custom-resource-definitions.yaml
-        kubectl create -n arcdata -f https://raw.githubusercontent.com/microsoft/azure_arc/master/arc_data_services/deploy/yaml/bootstrapper.yaml
+        kubectl apply -f https://raw.githubusercontent.com/microsoft/azure_arc/master/arc_data_services/deploy/yaml/custom-resource-definitions.yaml
+        kubectl apply -n arcdata -f https://raw.githubusercontent.com/microsoft/azure_arc/master/arc_data_services/deploy/yaml/bootstrapper.yaml
         helm upgrade -i arcdata -n arcdata ./helm/arcdata -set subscriptionId=$ARM_SUBSCRIPTION_ID
 
     - name: Deploy Ingress controller for NGINX
