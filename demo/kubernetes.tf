@@ -5,13 +5,18 @@ resource "azurerm_kubernetes_cluster" "demo" {
   resource_group_name = azurerm_resource_group.demo.name
   dns_prefix          = "aks-${var.env}-${random_string.prefix.result}"
   node_resource_group = "${azurerm_resource_group.demo.name}-aksresources"
-
+  lifecycle {
+    ignore_changes = [
+      default_node_pool[0].node_count
+    ]
+  }
   default_node_pool {
     name                = "default"
     vm_size             = "Standard_B4ms"
     enable_auto_scaling = true
-    max_count           = 6
+    max_count           = 12
     min_count           = 2
+    node_count          = 6
     availability_zones  = [1, 2, 3]
     vnet_subnet_id      = azurerm_subnet.aks.id
     max_pods            = 100
@@ -80,7 +85,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "acrdata" {
   vm_size               = "Standard_D4a_v4"
   node_count            = 4
   availability_zones    = [1]
-  node_labels           = {"purpose": "arcdata"}
+  node_labels           = { "purpose" : "arcdata" }
   vnet_subnet_id        = azurerm_subnet.aks.id
 }
 

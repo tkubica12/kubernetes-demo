@@ -1,22 +1,17 @@
 # PostgreSQL
 resource "azurerm_postgresql_server" "demo" {
-  name                = "psql-${var.env}-${random_string.prefix.result}"
-  location            = azurerm_resource_group.demo.location
-  resource_group_name = azurerm_resource_group.demo.name
-
-  sku_name = "GP_Gen5_2"
-
-  storage_profile {
-    storage_mb            = 5120
-    backup_retention_days = 7
-    auto_grow             = "Enabled"
-    geo_redundant_backup  = "Disabled"
-  }
-
+  name                         = "psql-${var.env}-${random_string.prefix.result}"
+  location                     = azurerm_resource_group.demo.location
+  resource_group_name          = azurerm_resource_group.demo.name
+  sku_name                     = "GP_Gen5_2"
+  storage_mb                   = 5120
+  backup_retention_days        = 7
+  auto_grow_enabled            = true
+  geo_redundant_backup_enabled = true
   administrator_login          = "tomas"
   administrator_login_password = var.psql_password
   version                      = "11"
-  ssl_enforcement              = "Enabled"
+  ssl_enforcement_enabled      = true
 }
 
 resource "azurerm_postgresql_database" "demo" {
