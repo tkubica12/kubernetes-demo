@@ -164,7 +164,7 @@ jobs:
       run: |
         kubectl apply -f https://raw.githubusercontent.com/microsoft/azure_arc/master/arc_data_services/deploy/yaml/custom-resource-definitions.yaml
         kubectl apply -n arc -f https://raw.githubusercontent.com/microsoft/azure_arc/master/arc_data_services/deploy/yaml/bootstrapper.yaml
-        helm upgrade -i arc -n arcdata ./helm/arcdata \
+        helm upgrade -i arc -n arc ./helm/arcdata \
           --set subscriptionId=$ARM_SUBSCRIPTION_ID \
           --set resourceGroupName=$(terraform output resource_group)
 

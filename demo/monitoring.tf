@@ -15,7 +15,7 @@ resource "azurerm_log_analytics_workspace" "audit" {
 
 resource "azurerm_log_analytics_workspace" "arc" {
   name                = "arc-${var.env}-${random_string.prefix.result}"
-  location            = azurerm_resource_group.demo.location
+  location            = "westeurope"
   resource_group_name = azurerm_resource_group.demo.name
   sku                 = "PerGB2018"
 }

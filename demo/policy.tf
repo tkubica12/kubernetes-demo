@@ -23,7 +23,7 @@ locals {
       "dapr-demo",
       "windows",
       "intro",
-      "arcdata",
+      "arc",
       "sql",
       "psql"
       ]
@@ -98,7 +98,7 @@ resource "azurerm_policy_assignment" "kube-resource-limits" {
       "dapr-demo",
       "windows",
       "intro",
-      "arcdata",
+      "arc",
       "sql",
       "psql"
       ]
@@ -142,7 +142,7 @@ resource "azurerm_policy_assignment" "kube-mandatory-labels" {
       "dapr-demo",
       "windows",
       "intro",
-      "arcdata",
+      "arc",
       "sql",
       "psql"
       ]
@@ -184,7 +184,7 @@ resource "azurerm_policy_assignment" "kube-only-acr" {
       "dapr-demo",
       "windows",
       "intro",
-      "arcdata",
+      "arc",
       "sql",
       "psql"
       ]
