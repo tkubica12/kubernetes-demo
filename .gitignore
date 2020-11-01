@@ -48,3 +48,4 @@ demo/errored.tfstate
 demo/intro/PROD/*
 demo/intro/TEST/*
 __pycache__/
+pythonenv3.8
