@@ -103,12 +103,12 @@ resource "azurerm_application_gateway" "appgw" {
     frontend_ip_configuration_name = "my-frontend-ip-configuration"
     frontend_port_name             = "web"
     protocol                       = "Http"
-    host_name                      = "linkerd.nginx.cloud.tomaskubica.in"
+    host_name                      = "linkerd.nginx.cloud.tomaskubica.net"
   }
 
   probe {
     name                = "nginx-default"
-    host                = "linkerd.nginx.cloud.tomaskubica.in"
+    host                = "linkerd.nginx.cloud.tomaskubica.net"
     interval            = 5
     protocol            = "Http"
     path                = "/"

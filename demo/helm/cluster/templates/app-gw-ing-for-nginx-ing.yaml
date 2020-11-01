@@ -8,21 +8,21 @@ metadata:
   namespace: ingress
 spec:
   rules:
-  - host: linkerd.i.cloud.tomaskubica.in
+  - host: linkerd.i.cloud.tomaskubica.net
     http:
       paths:
       - backend:
           serviceName: ingress-nginx-nginx-ingress-controller
           servicePort: 80
         path: /
-  - host: canary.nginx.i.cloud.tomaskubica.in
+  - host: canary.nginx.i.cloud.tomaskubica.net
     http:
       paths:
       - backend:
           serviceName: ingress-nginx-nginx-ingress-controller
           servicePort: 80
         path: /
-  - host: ab.nginx.i.cloud.tomaskubica.in
+  - host: ab.nginx.i.cloud.tomaskubica.net
     http:
       paths:
       - backend:
@@ -31,7 +31,7 @@ spec:
         path: /
   tls:
     - hosts:
-      - linkerd.i.cloud.tomaskubica.in
-      - canary.nginx.i.cloud.tomaskubica.in
-      - ab.nginx.i.cloud.tomaskubica.in
+      - linkerd.i.cloud.tomaskubica.net
+      - canary.nginx.i.cloud.tomaskubica.net
+      - ab.nginx.i.cloud.tomaskubica.net
       secretName: tomaskubicain

@@ -3,5 +3,5 @@ server:
     annotations:
       kubernetes.io/ingress.class: azure/application-gateway
     hosts:
-      - prometheus.cloud.tomaskubica.in
+      - prometheus.cloud.tomaskubica.net
     enabled: true

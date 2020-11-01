@@ -4,4 +4,4 @@ metadata:
   name: ignorenginx
   namespace: ingress
 spec:
-  hostname: "linkerd.nginx.cloud.tomaskubica.in"
+  hostname: "linkerd.nginx.cloud.tomaskubica.net"
