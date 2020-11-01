@@ -40,7 +40,7 @@ This demo uses GitHub Actions to orchestrate deployment of infrastructure, appli
 2. AKS and its components (AAD Pod Identity, Application Gateway Ingress controller, Key Vault FlexVolume) are configured for ManagedIdentity (no Service Principal)
 3. Helm is used to deploy base AKS cluster components such as Ingress controller for App Gw, DAPR, KEDA, Grafana, Prometheus
 4. Azure Container Registry is used to build and package applications
-5. DNS record cloud.tomaskubica.in and *.cloud.tomaskubica.in is preconfigured with CNAME pointing to App Gw public IP - only thing that is done outside of Actions. **You need to change this to fit your environment**
+5. DNS record cloud.tomaskubica.net and *.cloud.tomaskubica.net is preconfigured with CNAME pointing to App Gw public IP - only thing that is done outside of Actions. **You need to change this to fit your environment**
 
 # Included compontents
 Currently covered
@@ -99,7 +99,7 @@ Todo application in default namespace is not instrumented with application insig
 Application dapr-demo is instrumented for distributed tracing via DAPR OpenTelemetry export to Application Insights.
 
 ### Telemetry
-Application does not include Prometheus telemetry, but myappspa is built on nginx container and sidecar adapter has been used to expose NGINX telemetry as Prometheus telemetry. This is gathered to non/persistent Prometheus instance [http://prometheus.cloud.tomaskubica.in](http://prometheus.cloud.tomaskubica.in). Eg. see telemetry with this PromQL:
+Application does not include Prometheus telemetry, but myappspa is built on nginx container and sidecar adapter has been used to expose NGINX telemetry as Prometheus telemetry. This is gathered to non/persistent Prometheus instance [http://prometheus.cloud.tomaskubica.net](http://prometheus.cloud.tomaskubica.net). Eg. see telemetry with this PromQL:
 
 ```
 nginx_http_requests_total { app="myapp-spa" }
@@ -119,7 +119,7 @@ InsightsMetrics
 
 Azure Monitor allows for rich visualizations (Workbooks), deep realtime analytics and machine learning, Alerting capabilities including complex workflows with Logic Apps or analyzing data in Azure Sentinel (SIEM).
 
-Visualizations can be also done in Grafana for both backends - Prometheus and Azure Monitor. Open Grafana at [http://grafana.cloud.tomaskubica.in](http://grafana.cloud.tomaskubica.in) (login is tomas/Azure12345678) and see:
+Visualizations can be also done in Grafana for both backends - Prometheus and Azure Monitor. Open Grafana at [http://grafana.cloud.tomaskubica.net](http://grafana.cloud.tomaskubica.net) (login is tomas/Azure12345678) and see:
 - AKS cluster dashboard (based on data from Azure Monitor)
 - Prometheus telemetry for myappspa (based on data from Prometheus backend)
 - Prometheus telemetry for myappspa (based on data from Azure Monitor)
@@ -180,7 +180,7 @@ Various demo apps are sending tracing data to Azure Monitor (Application Insight
 - appin-dapr-demo - traces from DAPR
 
 ## Todo application
-Access todo application at [http://cloud.tomaskubica.in](http://cloud.tomaskubica.in) (Ingress via Application Gateway)
+Access todo application at [http://cloud.tomaskubica.net](http://cloud.tomaskubica.net) (Ingress via Application Gateway)
 
 Check monitoring - Application Insights, codeless attach, Prometheus, Grafana, Azure Monitor.
 
@@ -228,20 +228,20 @@ kubectl exec -ti nodea-0 -n dapr -- bash /home/user/add.sh
 ```
 
 Grafana demo install has some Dashboards defined connected to Prometheus. Login is tomas/Azure12345678.
-Find it at [http://grafana.cloud.tomaskubica.in](http://grafana.cloud.tomaskubica.in)
+Find it at [http://grafana.cloud.tomaskubica.net](http://grafana.cloud.tomaskubica.net)
 
 Telemetry and logs are also gathered to Azure Monitor.
 
 ## Windows nodes
-Basic IIS instance is accessible at iis.cloud.tomaskubica.in and runs in windows namespace.
+Basic IIS instance is accessible at iis.cloud.tomaskubica.net and runs in windows namespace.
 
 ## Linkerd Service Mesh
-Todo application is deployed in linkerd-demo namespace and can be accessed at [http://linkerd.cloud.tomaskubica.in](http://linkerd.cloud.tomaskubica.in)
+Todo application is deployed in linkerd-demo namespace and can be accessed at [http://linkerd.cloud.tomaskubica.net](http://linkerd.cloud.tomaskubica.net)
 
 Traffic generator is deployed so we can see some traffic in monitoring.
 
 ### Dashboard and visibility
-Checkout Linkerd dashboard (including Grafana) at [http://linkerd.i.cloud.tomaskubica.in](http://linkerd.i.cloud.tomaskubica.in)
+Checkout Linkerd dashboard (including Grafana) at [http://linkerd.i.cloud.tomaskubica.net](http://linkerd.i.cloud.tomaskubica.net)
 Login is tomas/Azure12345678.
 
 Checkout Application Insights for OpenCensus instrumented application and how Linkerd enhanced this data.
@@ -364,7 +364,7 @@ Flagger supports automated canary releasing with NGINX Ingress, Linkerd Service 
 - Easy to use, very lightweight (no sidecars)
 - Does not solve backend service-to-service canary via internal path (must go via Ingress)
 
-Application is exposed at [http://canary.nginx.i.cloud.tomaskubica.in](http://canary.nginx.i.cloud.tomaskubica.in). You should see v1 message and blue background and load-balanced response from multiple instances. Keep window open so traffic is generated.
+Application is exposed at [http://canary.nginx.i.cloud.tomaskubica.net](http://canary.nginx.i.cloud.tomaskubica.net). You should see v1 message and blue background and load-balanced response from multiple instances. Keep window open so traffic is generated.
 
 Should you need to restart this scenario, you can do this:
 
@@ -383,7 +383,7 @@ kubectl describe canary canary-nginx -n canary
 In separate window start generating traffic. 
 
 ```bash
-while true; do curl http://canary.nginx.i.cloud.tomaskubica.in/version; done
+while true; do curl http://canary.nginx.i.cloud.tomaskubica.net/version; done
 ```
 
 Deploy new version, watch Flagger orchestrating process. Application exposes latency metrics which are evaluated by Flagger. Since latency is bellow 500ms we should see Flagger progressing and finaly moving all users to new version.
@@ -398,7 +398,7 @@ kubectl describe canary canary-nginx -n canary
 We will now try next version, but this time simulate long latency. In new window run this:
 
 ```bash
-while true; do curl http://canary.nginx.i.cloud.tomaskubica.in/delay/3; done
+while true; do curl http://canary.nginx.i.cloud.tomaskubica.net/delay/3; done
 ```
 
 Roll new version. Because some calls get routed to delay function metrics for canary version are likely to go worse over time and Flagger should halt advancement and rollback.
@@ -422,13 +422,13 @@ kubectl describe canary ab-nginx -n canary
 In separate window start generating traffic. 
 
 ```bash
-while true; do curl http://ab.nginx.i.cloud.tomaskubica.in/version; done
+while true; do curl http://ab.nginx.i.cloud.tomaskubica.net/version; done
 ```
 
 Deploy new version, watch Flagger orchestrating process. In another window start curl using beta tester header to reach new version when deployed.
 
 ```bash
-while true; do curl -H 'X-Canary: insider' http://ab.nginx.i.cloud.tomaskubica.in/version; done
+while true; do curl -H 'X-Canary: insider' http://ab.nginx.i.cloud.tomaskubica.net/version; done
 ```
 
 Application exposes latency metrics which are evaluated by Flagger. Since latency is bellow 500ms we should see Flagger progressing and finaly moving all users to new version.
@@ -442,7 +442,7 @@ kubectl describe canary ab-nginx -n canary
 We will now try next version, but this time simulate long latency. In new window run this:
 
 ```bash
-while true; do curl -H 'X-Canary: insider' http://ab.nginx.i.cloud.tomaskubica.in/delay/3; done
+while true; do curl -H 'X-Canary: insider' http://ab.nginx.i.cloud.tomaskubica.net/delay/3; done
 ```
 
 Roll new version. Because some calls get routed to delay function metrics for canary version are likely to go worse over time and Flagger should halt advancement and rollback.

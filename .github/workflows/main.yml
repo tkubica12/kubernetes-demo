@@ -104,8 +104,8 @@ jobs:
           --set keda.clientId=$(terraform output keda_clientId) \
           --set azurepolicy.resourceId=$(terraform output azurepolicy_resourceId) \
           --set azurepolicy.clientId=$(terraform output azurepolicy_clientId) \
-          --set linkerdhost=linkerd.i.cloud.tomaskubica.in \
-          --set istioBaseUrl=istio.cloud.tomaskubica.in \
+          --set linkerdhost=linkerd.i.cloud.tomaskubica.net \
+          --set istioBaseUrl=istio.cloud.tomaskubica.net \
           --set ingressCrt=${INGRESS_CRT} \
           --set ingressKey=${INGRESS_KEY}
 
@@ -290,7 +290,7 @@ jobs:
           --set appnode.image.tag=$(cat version) \
           --set appgen.image.repository=${registry_name}.azurecr.io/todogen \
           --set appgen.image.tag=$(cat version) \
-          --set apphost=cloud.tomaskubica.in \
+          --set apphost=cloud.tomaskubica.net \
           --set tlsSecretName=tomaskubicain \
           --set keyvault.name=$(terraform output keyvault_name) \
           --set keyvault.tenant=$(terraform output keyvault_tenantid) \
@@ -316,7 +316,7 @@ jobs:
           --set appnode.image.tag=$(cat version) \
           --set appgen.image.repository=${registry_name}.azurecr.io/todogen \
           --set appgen.image.tag=$(cat version) \
-          --set apphost=linkerd.cloud.tomaskubica.in \
+          --set apphost=linkerd.cloud.tomaskubica.net \
           --set tlsSecretName=tomaskubicain \
           --set keyvault.name=$(terraform output keyvault_name) \
           --set keyvault.tenant=$(terraform output keyvault_tenantid) \
@@ -342,7 +342,7 @@ jobs:
           --set appnode.image.tag=$(cat version) \
           --set appgen.image.repository=${registry_name}.azurecr.io/todogen \
           --set appgen.image.tag=$(cat version) \
-          --set apphost=todo.istio.cloud.tomaskubica.in \
+          --set apphost=todo.istio.cloud.tomaskubica.net \
           --set tlsSecretName=tomaskubicain \
           --set keyvault.name=$(terraform output keyvault_name) \
           --set keyvault.tenant=$(terraform output keyvault_tenantid) \
@@ -388,7 +388,8 @@ jobs:
           --set repository=${registry_name}.azurecr.io/opentelemetry \
           --set tfgenRepository=${registry_name}.azurecr.io/opentelemetry-tfgen \
           --set tag=$(cat version) \
-          --set appin_key=$(terraform output appin_opentelemetry_key)
+          --set appin_key=$(terraform output appin_opentelemetry_key) \
+          --set mysql_password=Azure12345678
 
     - name: Deploy distributed tracing demo with Linkerd
       working-directory: ./demo
@@ -464,4 +465,4 @@ jobs:
       env:
         KUBECONFIG: "./kube_config"
       run: |
-        helm upgrade -i -n windows iis ./helm/windows --set apphost=iis.cloud.tomaskubica.in
+        helm upgrade -i -n windows iis ./helm/windows --set apphost=iis.cloud.tomaskubica.net

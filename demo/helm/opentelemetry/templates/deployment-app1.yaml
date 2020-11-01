@@ -15,19 +15,49 @@ spec:
         app: opentelemetry-app1
     spec:
       containers:
-        - name: opentelemetry-app1
+        - name: opentelemetry-app
           image: "{{ .Values.repository }}:{{ .Values.tag | toString }}"
           ports:
             - containerPort: 8080
           env:
+            - name: MYSQL_HOST
+              value: mysql
+            - name: MYSQL_PASSWORD
+              value: {{ .Values.mysql_password }}
+            - name: MYSQL_USERNAME
+              value: root
+            - name: APP_VERSION
+              value: "1.0.0"
             - name: APP_NAME
               valueFrom:
                 fieldRef:
                   fieldPath: "metadata.labels['app']"
-            - name: APPINSIGHTS_INSTRUMENTATION_KEY
+            - name: APPINSIGHTS_INSTRUMENTATIONKEY
               value: {{ .Values.appin_key }}
             - name: REMOTE_ENDPOINT
               value: "http://opentelemetry-app2:8080/data"
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: CPU_LIMIT
+              valueFrom:
+                resourceFieldRef:
+                  containerName: opentelemetry-app
+                  resource: limits.cpu
+            - name: MEMORY_LIMIT
+              valueFrom:
+                resourceFieldRef:
+                  containerName: opentelemetry-app
+                  resource: limits.memory
           resources:
             requests:
                 cpu: 10m
@@ -35,4 +65,10 @@ spec:
             limits:
                 cpu: 100M
                 memory: 128M
-       
+      volumes:
+      - name: podinfo
+        downwardAPI:
+          items:
+            - path: "labels"
+              fieldRef:
+                fieldPath: metadata.labels
