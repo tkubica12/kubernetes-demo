@@ -5,4 +5,4 @@ metadata:
   namespace: default
 type: kubernetes.io/dockerconfigjson
 data:
-  .dockerconfigjson: {{ .Values.face-registry-b64 | quote }}
+  .dockerconfigjson: {{ .Values.face.registry | quote }}

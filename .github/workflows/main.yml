@@ -111,9 +111,9 @@ jobs:
           --set istioBaseUrl=istio.cloud.tomaskubica.net \
           --set ingressCrt=${INGRESS_CRT} \
           --set ingressKey=${INGRESS_KEY} \
-          --set face-registry-b64=${FACE_REGISTRY} \
-          --set face_api_endpoint=${FACE_API_ENDPOINT} \
-          --set face_api_key=${FACE_API_KEY}
+          --set face.registry=${FACE_REGISTRY} \
+          --set face.endpoint=${FACE_API_ENDPOINT} \
+          --set face.key=${FACE_API_KEY}
 
     # - name: Appliction Insights codeless injector
     #   working-directory: ./demo
