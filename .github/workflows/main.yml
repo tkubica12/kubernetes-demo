@@ -209,7 +209,8 @@ jobs:
           --set armAuth.type=aadPodIdentity \
           --set armAuth.identityResourceID=$(terraform output ingressContributor_resource_id) \
           --set armAuth.identityClientID=$(terraform output ingressContributor_client_id) \
-          --set rbac.enabled=true
+          --set rbac.enabled=true \
+          --set reconcilePeriodSeconds=60
 
     - name: Deploy Linkerd service mesh
       working-directory: ./demo
