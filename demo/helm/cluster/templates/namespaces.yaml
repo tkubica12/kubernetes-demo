@@ -82,3 +82,8 @@ apiVersion: v1
 kind: Namespace
 metadata:
   name: arc
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: openservicemesh
