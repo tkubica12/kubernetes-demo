@@ -1,0 +1,3579 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: swagger
+  labels:
+    name: swagger
+data:
+  swagger: |
+    swagger: '2.0'
+    info:
+      title: Azure Stack AI demos
+      version: '1.0'
+    host: {{ .Values.baseurl }}
+    basePath: /api
+    schemes:
+      - http
+    paths:
+      '/customvision/image':
+        post:
+          tags:
+          - CustomVision
+          description: Custom Vision - find oslik and ovecka
+          operationId: 5eb37d24548b571998fde5f3
+          summary: Custom Vision
+          parameters:
+            - name: imageData
+              in: formData
+              description: 'Binary image data. Supported formats are JPEG, GIF, PNG, and BMP. Supports images up to 4MB.'
+              required: true
+              type: file
+          consumes:
+            - multipart/form-data
+          produces:
+            - application/json
+            - application/xml
+            - text/xml
+          responses:
+            '200':
+              description: OK
+            '500':
+              description: Error response
+      "/face/v1.0/detect":
+        post:
+          tags:
+          - Face
+          summary: Detects human faces in an image and returns face rectangles and optionally
+            face IDs, landmarks, and attributes. Landmarks indicate the positioning of
+            facial properties such as nose, eyebrows, and lips, and attributes is a visual
+            estimation of age, gender, head pose, smile, etc.
+          description: "<para>The image can be a JPEG, PNG, GIF (the first frame), or
+            BMP. It can be uploaded either directly as an image, as form data, or using
+            the {ImageRequest} object. The allowed image file size is between 1KB and
+            4MB and a face is detectable when its size is between 36x36 and 4096x4096
+            pixels.</para>\r\n<para>If detecting very small but clear faces, enlarging
+            the input image may yield a better result. Up to 64 faces can be returned
+            for a single image. Faces are ranked by face rectangle size from large to
+            small.</para>\r\n<para>The face detector prefers frontal and near-frontal
+            faces. There are scenarios where faces may not be detected, for example if
+            they have exceptionally large face angles (head-pose), are being occluded,
+            or the image orientation is wrong.</para>"
+          operationId: FaceV1.0DetectPost
+          consumes:
+          - multipart/form-data
+          produces:
+          - application/json
+          - text/json
+          parameters:
+          - name: returnFaceId
+            in: query
+            description: A boolean value indicating whether to return face IDs of the
+              detected faces or not. Note that currently the Face ID will not be the same
+              for the same face. The default value is true.
+            required: false
+            type: boolean
+            default: true
+          - name: returnFaceLandmarks
+            in: query
+            description: A boolean value indicating whether to return face landmarks of
+              the detected faces or not. The default value is false.
+            required: false
+            type: boolean
+            default: false
+          - name: returnFaceAttributes
+            in: query
+            description: "Specifying one or more face attributes to analyze in a comma-separated
+              string. Supported face attributes include age, gender, headPose, smile,
+              facialHair,\r\n            glasses, emotion, hair, makeup, occlusion, accessories,
+              blur, exposure and noise. An example is {returnFaceAttributes=age,gender}.
+              A value of * means all attributes.\r\n            Note that face attribute
+              analysis has an additional computational and time cost."
+            required: false
+            type: string
+            default: ''
+          - name: recognitionModel
+            in: query
+            description: "Name of recognition model. Recognition model is used when the
+              face features are extracted and associated with detected faceIds, (Large)FaceList
+              or (Large)PersonGroup.\r\n            A recognition model name can be provided
+              when performing Face - Detect or (Large)FaceList - Create or (Large)PersonGroup
+              - Create. The default value is 'recognition_01', if latest model needed,
+              please explicitly specify the model you need."
+            required: false
+            type: string
+            default: ''
+          - name: returnRecognitionModel
+            in: query
+            description: A boolean value indicating whether to return face recognition
+              model or not. The default value is false.
+            required: false
+            type: boolean
+            default: false
+          - name: form
+            in: formData
+            description: Upload image as form data.
+            required: false
+            type: file
+          responses:
+            '200':
+              description: Success
+              schema:
+                uniqueItems: false
+                type: array
+                items:
+                  "$ref": "#/definitions/DetectedFace"
+              examples:
+                application/json:
+                - faceId: c5c24a82-6845-4031-9d5d-978df9175426
+                  faceRectangle:
+                    top: 54
+                    left: 394
+                    width: 78
+                    height: 78
+                  faceLandmarks:
+                    pupilLeft:
+                      x: 412.7
+                      y: 78.4
+                    pupilRight:
+                      x: 446.8
+                      y: 74.2
+                    noseTip:
+                      x: 437.7
+                      y: 92.4
+                    mouthLeft:
+                      x: 417.8
+                      y: 114.4
+                    mouthRight:
+                      x: 0
+                      y: 0
+                    eyebrowLeftOuter:
+                      x: 397.9
+                      y: 78.5
+                    eyebrowLeftInner:
+                      x: 425.4
+                      y: 70.5
+                    eyeLeftOuter:
+                      x: 406.7
+                      y: 80.6
+                    eyeLeftTop:
+                      x: 412.2
+                      y: 76.2
+                    eyeLeftBottom:
+                      x: 413
+                      y: 80.1
+                    eyeLeftInner:
+                      x: 418.9
+                      y: 78
+                    eyebrowRightInner:
+                      x: 4.8
+                      y: 69.7
+                    eyebrowRightOuter:
+                      x: 5.5
+                      y: 68.5
+                    eyeRightInner:
+                      x: 441.5
+                      y: 75
+                    eyeRightTop:
+                      x: 446.4
+                      y: 71.7
+                    eyeRightBottom:
+                      x: 447
+                      y: 75.3
+                    eyeRightOuter:
+                      x: 451.7
+                      y: 73.4
+                    noseRootLeft:
+                      x: 428
+                      y: 77.1
+                    noseRootRight:
+                      x: 435.8
+                      y: 75.6
+                    noseLeftAlarTop:
+                      x: 428.3
+                      y: 89.7
+                    noseRightAlarTop:
+                      x: 442.2
+                      y: 87
+                    noseLeftAlarOutTip:
+                      x: 424.3
+                      y: 96.4
+                    noseRightAlarOutTip:
+                      x: 446.6
+                      y: 92.5
+                    upperLipTop:
+                      x: 437.6
+                      y: 105.9
+                    upperLipBottom:
+                      x: 437.6
+                      y: 108.2
+                    underLipTop:
+                      x: 436.8
+                      y: 111.4
+                    underLipBottom:
+                      x: 437.3
+                      y: 114.5
+                  faceAttributes:
+                    smile: 88
+                    headPose:
+                      pitch: 0
+                      roll: 2.1
+                      yaw: 3
+                    gender: male
+                    age: 71
+                    facialHair:
+                      moustache: 0.8
+                      beard: 0.1
+                      sideburns: 0.02
+                    emotion:
+                      anger: 0.575
+                      contempt: 0
+                      disgust: 0.006
+                      fear: 0.008
+                      happiness: 0.394
+                      neutral: 0.013
+                      sadness: 0
+                      surprise: 0.004
+                    blur:
+                      blurLevel: medium
+                      value: 0.51
+                    exposure:
+                      exposureLevel: goodExposure
+                      value: 0.55
+                    noise:
+                      noiseLevel: low
+                      value: 0.12
+                    makeup:
+                      eyeMakeup: true
+                      lipMakeup: false
+                    accessories:
+                    - type: headwear
+                      confidence: 0.99
+                    - type: glasses
+                      confidence: 1
+                    - type: mask
+                      confidence: 0.87
+                    occlusion:
+                      foreheadOccluded: false
+                      eyeOccluded: false
+                      mouthOccluded: false
+                    hair:
+                      bald: 0
+                      invisible: false
+                      hairColor:
+                      - color: brown
+                        confidence: 1
+                      - color: blond
+                        confidence: 0.88
+                      - color: black
+                        confidence: 0.48
+                      - color: other
+                        confidence: 0.11
+                      - color: gray
+                        confidence: 0.07
+                      - color: red
+                        confidence: 0.03
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+      "/face/v1.0/findsimilars":
+        post:
+          tags:
+          - Face
+          summary: Searches the similar-looking faces from a faceId array or a large face
+            list, given query face's faceId.
+          operationId: FaceV1.0FindsimilarsPost
+          consumes:
+          - application/json-patch+json
+          - application/json
+          - text/json
+          - application/*+json
+          produces:
+          - application/json
+          - text/json
+          parameters:
+          - name: findSimilarRequest
+            in: body
+            required: false
+            schema:
+              "$ref": "#/definitions/FindSimilarRequest"
+          responses:
+            '200':
+              description: Success
+              schema:
+                uniqueItems: false
+                type: array
+                items:
+                  "$ref": "#/definitions/FindSimilarResult"
+              examples:
+                application/json:
+                - persistedFaceId: c5c24a82-6845-4031-9d5d-978df9175426
+                  confidence: 0.82
+                - persistedFaceId: 65d083d4-9447-47d1-af30-b626144bf0fb
+                  confidence: 0.89
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+      "/face/v1.0/group":
+        post:
+          tags:
+          - Face
+          summary: Divide candidate faces into groups based on face similarity.
+          operationId: FaceV1.0GroupPost
+          consumes:
+          - application/json-patch+json
+          - application/json
+          - text/json
+          - application/*+json
+          produces:
+          - application/json
+          - text/json
+          parameters:
+          - name: groupRequest
+            in: body
+            required: false
+            schema:
+              "$ref": "#/definitions/GroupRequest"
+          responses:
+            '200':
+              description: Success
+              schema:
+                "$ref": "#/definitions/GroupResponse"
+              examples:
+                application/json:
+                  groups:
+                  - - c5c24a82-6845-4031-9d5d-978df9175426
+                    - 015839fb-fbd9-4f79-ace9-7675fc2f1dd9
+                    - fce92aed-d578-4d2e-8114-068f8af4492e
+                    - b64d5e15-8257-4af2-b20a-5a750f8940e7
+                  - - 65d083d4-9447-47d1-af30-b626144bf0fb
+                    - 30ea1073-cc9e-4652-b1e3-d08fb7b95315
+                  messyGroup:
+                  - be386ab3-af91-4104-9e6d-4dae4c9fddb7
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+      "/face/v1.0/identify":
+        post:
+          tags:
+          - Face
+          summary: 1-to-many identification to find the closest matches of the specific
+            query person face from a large person group or a person group.
+          operationId: FaceV1.0IdentifyPost
+          consumes:
+          - application/json-patch+json
+          - application/json
+          - text/json
+          - application/*+json
+          produces:
+          - application/json
+          - text/json
+          parameters:
+          - name: identificationRequest
+            in: body
+            required: false
+            schema:
+              "$ref": "#/definitions/IdentificationRequest"
+          responses:
+            '200':
+              description: Success
+              schema:
+                uniqueItems: false
+                type: array
+                items:
+                  "$ref": "#/definitions/IdentificationResult"
+              examples:
+                application/json:
+                - faceId: c5c24a82-6845-4031-9d5d-978df9175426
+                  candidates:
+                  - personId: 25985303-c537-4467-b41d-bdb45cd95ca1
+                    confidence: 0.92
+                - faceId: 65d083d4-9447-47d1-af30-b626144bf0fb
+                  candidates:
+                  - personId: 2ae4935b-9659-44c3-977f-61fac20d0538
+                    confidence: 0.89
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+      "/face/v1.0/verify":
+        post:
+          tags:
+          - Face
+          summary: Verify if two faces belong to the same person, or if a face belongs
+            to a person.
+          operationId: FaceV1.0VerifyPost
+          consumes:
+          - application/json-patch+json
+          - application/json
+          - text/json
+          - application/*+json
+          produces:
+          - application/json
+          - text/json
+          parameters:
+          - name: verificationRequest
+            in: body
+            required: false
+            schema:
+              "$ref": "#/definitions/VerificationRequest"
+          responses:
+            '200':
+              description: Success
+              schema:
+                "$ref": "#/definitions/VerificationResponse"
+              examples:
+                application/json:
+                  confidence: 0.9
+                  isIdentical: true
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+      "/face/v1.0/facelists/{faceListId}":
+        get:
+          tags:
+          - FaceList
+          summary: Retrieve a face list's faceListId, name, userData.
+          operationId: FaceV1.0FacelistsByFaceListIdGet
+          consumes: []
+          produces:
+          - application/json
+          - text/json
+          parameters:
+          - name: faceListId
+            in: path
+            description: The FaceList ID.
+            required: true
+            type: string
+          - name: returnRecognitionModel
+            in: query
+            description: Whether to return recognition model. The default value is false.
+            required: false
+            type: boolean
+            default: false
+          responses:
+            '200':
+              description: Success
+              schema:
+                "$ref": "#/definitions/FaceListResponse"
+              examples:
+                application/json:
+                  faceListId: f92f6f1b-3258-4444-8fa2-c2df505cc7ac
+                  persistedFaces:
+                  - persistedFaceId: b8d802cf-dd8f-4e61-b15c-9e6c5844ccbd
+                    userData: User-provided data attached to the face.
+                  recognitionModel: recognition_02
+                  name: face-list-name
+                  userData: User-provided data attached to the face list.
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+        put:
+          tags:
+          - FaceList
+          summary: Create an empty face list with user-specified faceListId, name and
+            optional userData.
+          operationId: FaceV1.0FacelistsByFaceListIdPut
+          consumes:
+          - application/json-patch+json
+          - application/json
+          - text/json
+          - application/*+json
+          produces: []
+          parameters:
+          - name: faceListId
+            in: path
+            description: The FaceList ID.
+            required: true
+            type: string
+          - name: nameAndUserDataWithRecognitionModel
+            in: body
+            description: FaceList's name, userData and recognition model.
+            required: false
+            schema:
+              "$ref": "#/definitions/NameAndUserDataWithRecognitionModelContract"
+          responses:
+            '200':
+              description: Success
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+        delete:
+          tags:
+          - FaceList
+          summary: Delete a specified face list. The related face images in the face list
+            will be deleted, too.
+          operationId: FaceV1.0FacelistsByFaceListIdDelete
+          consumes: []
+          produces: []
+          parameters:
+          - name: faceListId
+            in: path
+            description: The FaceList ID.
+            required: true
+            type: string
+          responses:
+            '200':
+              description: Success
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+        patch:
+          tags:
+          - FaceList
+          summary: Update information of a face list, including name and userData.
+          operationId: FaceV1.0FacelistsByFaceListIdPatch
+          consumes:
+          - application/json-patch+json
+          - application/json
+          - text/json
+          - application/*+json
+          produces: []
+          parameters:
+          - name: faceListId
+            in: path
+            description: The FaceList ID.
+            required: true
+            type: string
+          - name: nameAndUserData
+            in: body
+            description: The name and userData of the FaceList.
+            required: false
+            schema:
+              "$ref": "#/definitions/NameAndUserDataContract"
+          responses:
+            '200':
+              description: Success
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+      "/face/v1.0/facelists":
+        get:
+          tags:
+          - FaceList
+          summary: List face lists’ information of faceListId, name and userData.
+          description: "<para>To get face information inside faceList use FaceList Face
+            - Get.</para>\r\n<para>Face lists are stored in alphabetical order of FaceListId.</para>\r\n<para>\r\n
+            \           \\\"start\\\" parameter (string, optional) is a user-provided
+            FaceListId value that returned entries have\r\n            larger ids by string
+            comparison.\r\n            </para>\r\n<para>\\\"start\\\" set to empty to
+            indicate return from the first item.</para>\r\n<para>\r\n            \\\"top\\\"
+            parameter (int, optional) specifies the number of entries to return. A maximal
+            of 1000 entries can be\r\n            returned in one call.\r\n            </para>\r\n<para>To
+            fetch more, you can specify \\\"start\\\" with the last returned entry's Id
+            of the current call.</para>"
+          operationId: FaceV1.0FacelistsGet
+          consumes: []
+          produces:
+          - application/json
+          - text/json
+          parameters:
+          - name: start
+            in: query
+            description: "(string, optional) is a user-provided FaceListId value that
+              returned entries have larger ids\r\nby string comparison."
+            required: false
+            type: string
+          - name: top
+            in: query
+            description: "(int, optional) specifies the number of entries to return. A
+              maximal of 1000 entries can be returned\r\nin one call."
+            required: false
+            type: string
+          - name: returnRecognitionModel
+            in: query
+            description: Whether to return recognition model. The default value is false.
+            required: false
+            type: boolean
+            default: false
+          responses:
+            '200':
+              description: Success
+              schema:
+                uniqueItems: false
+                type: array
+                items:
+                  "$ref": "#/definitions/FaceListResponse"
+              examples:
+                application/json:
+                - faceListId: f92f6f1b-3258-4444-8fa2-c2df505cc7ac
+                  recognitionModel: recognition_01
+                  name: face-list-name1
+                  userData: User-provided data attached to the face list.
+                - faceListId: c76f7f13-0ed3-4d00-8a3e-2ad3d78f6c37
+                  recognitionModel: recognition_02
+                  name: face-list-name2
+                  userData: User-provided data attached to the face list.
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+      "/face/v1.0/facelists/{faceListId}/persistedfaces":
+        post:
+          tags:
+          - FaceListFace
+          summary: Add a face to a specified face list, up to 1,000,000 faces.
+          operationId: FaceV1.0FacelistsByFaceListIdPersistedfacesPost
+          consumes:
+          - multipart/form-data
+          produces:
+          - application/json
+          - text/json
+          parameters:
+          - name: faceListId
+            in: path
+            description: The face list ID.
+            required: true
+            type: string
+          - name: userData
+            in: query
+            description: User-specified data about the target face to add for any purpose.
+            required: false
+            type: string
+          - name: targetFace
+            in: query
+            description: A face rectangle to specify the target face to be added to a
+              face list, in the format of "targetFace=left,top,width,height".
+            required: false
+            type: string
+          - name: form
+            in: formData
+            description: Upload image as form data.
+            required: false
+            type: file
+          responses:
+            '200':
+              description: Success
+              schema:
+                "$ref": "#/definitions/PersistedFaceResponse"
+              examples:
+                application/json:
+                  persistedFaceId: 43897a75-8d6f-42cf-885e-74832febb055
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+      "/face/v1.0/facelists/{faceListId}/persistedfaces/{persistedFaceId}":
+        delete:
+          tags:
+          - FaceListFace
+          summary: Delete a face from a face list by specified faceListId and persisitedFaceId.
+          operationId: FaceV1.0FacelistsByFaceListIdPersistedfacesByPersistedFaceIdDelete
+          consumes: []
+          produces: []
+          parameters:
+          - name: faceListId
+            in: path
+            description: The face list ID.
+            required: true
+            type: string
+          - name: persistedFaceId
+            in: path
+            description: The persisted face ID.
+            required: true
+            type: string
+          responses:
+            '200':
+              description: Success
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+      "/face/v1.0/largefacelists/{largeFaceListId}":
+        get:
+          tags:
+          - LargeFaceList
+          summary: Retrieve a large face list's largeFaceListId, name, userData.
+          operationId: FaceV1.0LargefacelistsByLargeFaceListIdGet
+          consumes: []
+          produces:
+          - application/json
+          - text/json
+          parameters:
+          - name: largeFaceListId
+            in: path
+            description: The LargeFaceList ID.
+            required: true
+            type: string
+          - name: returnRecognitionModel
+            in: query
+            description: Whether to return recognition model. The default value is false.
+            required: false
+            type: boolean
+            default: false
+          responses:
+            '200':
+              description: Success
+              schema:
+                "$ref": "#/definitions/LargeFaceListResponse"
+              examples:
+                application/json:
+                  largeFaceListId: f92f6f1b-3258-4444-8fa2-c2df505cc7ac
+                  recognitionModel: recognition_02
+                  name: large-face-list-name
+                  userData: User-provided data attached to the large face list.
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+        put:
+          tags:
+          - LargeFaceList
+          summary: Create an empty large face list with user-specified largeFaceListId,
+            name and an optional userData.
+          operationId: FaceV1.0LargefacelistsByLargeFaceListIdPut
+          consumes:
+          - application/json-patch+json
+          - application/json
+          - text/json
+          - application/*+json
+          produces: []
+          parameters:
+          - name: largeFaceListId
+            in: path
+            description: The LargeFaceList ID.
+            required: true
+            type: string
+          - name: nameAndUserDataWithRecognitionModel
+            in: body
+            description: LargeFaceList's name, userData and recognition model.
+            required: false
+            schema:
+              "$ref": "#/definitions/NameAndUserDataWithRecognitionModelContract"
+          responses:
+            '200':
+              description: Success
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+        delete:
+          tags:
+          - LargeFaceList
+          summary: Delete a specified large face list. The related face images in the
+            large face list will be deleted, too.
+          operationId: FaceV1.0LargefacelistsByLargeFaceListIdDelete
+          consumes: []
+          produces: []
+          parameters:
+          - name: largeFaceListId
+            in: path
+            description: The LargeFaceList ID.
+            required: true
+            type: string
+          responses:
+            '200':
+              description: Success
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+        patch:
+          tags:
+          - LargeFaceList
+          summary: Update information of a large face list, including name and userData.
+          operationId: FaceV1.0LargefacelistsByLargeFaceListIdPatch
+          consumes:
+          - application/json-patch+json
+          - application/json
+          - text/json
+          - application/*+json
+          produces: []
+          parameters:
+          - name: largeFaceListId
+            in: path
+            description: The LargeFaceList ID.
+            required: true
+            type: string
+          - name: nameAndUserData
+            in: body
+            description: The name and userData of the LargeFaceList.
+            required: false
+            schema:
+              "$ref": "#/definitions/NameAndUserDataContract"
+          responses:
+            '200':
+              description: Success
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+      "/face/v1.0/largefacelists/{largeFaceListId}/training":
+        get:
+          tags:
+          - LargeFaceList
+          summary: To check the large face list training status completed or still ongoing.
+          description: "<para>LargeFaceList Training is an asynchronous operation triggered
+            by LargeFaceList - Train API.</para>"
+          operationId: FaceV1.0LargefacelistsByLargeFaceListIdTrainingGet
+          consumes: []
+          produces:
+          - application/json
+          - text/json
+          parameters:
+          - name: largeFaceListId
+            in: path
+            description: The LargeFaceList ID.
+            required: true
+            type: string
+          responses:
+            '200':
+              description: Success
+              schema:
+                "$ref": "#/definitions/TrainingStatus"
+              examples:
+                application/json:
+                  status: succeeded
+                  createdDateTime: '2017-12-21T12:57:27'
+                  lastActionDateTime: '2017-12-21T12:57:30'
+                  lastSuccessfulTrainingDateTime: '2017-12-21T12:57:30'
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+      "/face/v1.0/largefacelists":
+        get:
+          tags:
+          - LargeFaceList
+          summary: List large face lists’ information of largeFaceListId, name and userData.
+          description: "<para>To get face information inside largeFaceList use LargeFaceList
+            Face - Get.</para>\r\n<para>Large face lists are stored in alphabetical order
+            of largeFaceListId.</para>\r\n<para>\r\n            \\\"start\\\" parameter
+            (string, optional) is a user-provided LargeFaceListId value that returned
+            entries have\r\n            larger ids by string comparison.\r\n            </para>\r\n<para>\\\"start\\\"
+            set to empty to indicate return from the first item.</para>\r\n<para>\r\n
+            \           \\\"top\\\" parameter (int, optional) specifies the number of
+            entries to return. A maximal of 1000 entries can be\r\n            returned
+            in one call.\r\n            </para>\r\n<para>To fetch more, you can specify
+            \\\"start\\\" with the last returned entry's Id of the current call.</para>"
+          operationId: FaceV1.0LargefacelistsGet
+          consumes: []
+          produces:
+          - application/json
+          - text/json
+          parameters:
+          - name: start
+            in: query
+            description: "(string, optional) is a user-provided LargeFaceListId value
+              that returned entries have larger ids\r\nby string comparison."
+            required: false
+            type: string
+          - name: top
+            in: query
+            description: "(int, optional) specifies the number of entries to return. A
+              maximal of 1000 entries can be returned\r\nin one call."
+            required: false
+            type: string
+          - name: returnRecognitionModel
+            in: query
+            description: Whether to return recognition model. The default value is false.
+            required: false
+            type: boolean
+            default: false
+          responses:
+            '200':
+              description: Success
+              schema:
+                uniqueItems: false
+                type: array
+                items:
+                  "$ref": "#/definitions/LargeFaceListResponse"
+              examples:
+                application/json:
+                - largeFaceListId: f92f6f1b-3258-4444-8fa2-c2df505cc7ac
+                  recognitionModel: recognition_01
+                  name: large-face-list-name1
+                  userData: User-provided data attached to the large face list.
+                - largeFaceListId: c76f7f13-0ed3-4d00-8a3e-2ad3d78f6c37
+                  recognitionModel: recognition_02
+                  name: large-face-list-name2
+                  userData: User-provided data attached to the large face list.
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+      "/face/v1.0/largefacelists/{largeFaceListId}/train":
+        post:
+          tags:
+          - LargeFaceList
+          summary: Submit a large face list training task.
+          description: "<para>Training is a crucial step that only a trained large face
+            list can be used by Face - Find Similar.</para>\r\n<para>\r\n            The
+            training task is an asynchronous task. Training time depends on the number
+            of face entries in a large face list.\r\n            </para>\r\n<para>\r\n
+            \           It could be in seconds, or up to half an hour for 1,000,000 faces.
+            To check training completion,\r\n            please use LargeFaceList - Get
+            Training Status.\r\n            </para>"
+          operationId: FaceV1.0LargefacelistsByLargeFaceListIdTrainPost
+          consumes: []
+          produces: []
+          parameters:
+          - name: largeFaceListId
+            in: path
+            description: The LargeFaceList ID.
+            required: true
+            type: string
+          responses:
+            '202':
+              description: Success
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+      "/face/v1.0/largefacelists/{largeFaceListId}/persistedfaces":
+        get:
+          tags:
+          - LargeFaceListFace
+          summary: List faces' persistedFaceId and userData in a specified large face
+            list.
+          description: "<para>Faces are stored in alphabetical order of persistedFaceId
+            created in LargeFaceList Face - Add.</para>\r\n<para>\r\n            \\\"start\\\"
+            parameter (string, optional) is a persistedFaceId value that returned entries
+            have\r\n            larger ids by string comparison.\r\n            </para>\r\n<para>\\\"start\\\"
+            set to empty to indicate return from the first item.</para>\r\n<para>\r\n
+            \           \\\"top\\\" parameter (int, optional) specifies the number of
+            entries to return. A maximal of 1000 entries can be\r\n            returned
+            in one call.\r\n            </para>\r\n<para>To fetch more, you can specify
+            \\\"start\\\" with the last returned entry's persistedFaceId of the current
+            call.</para>"
+          operationId: FaceV1.0LargefacelistsByLargeFaceListIdPersistedfacesGet
+          consumes: []
+          produces:
+          - application/json
+          - text/json
+          parameters:
+          - name: largeFaceListId
+            in: path
+            description: The large face list ID.
+            required: true
+            type: string
+          - name: start
+            in: query
+            description: "(string, optional) is a persistedFaceId value that returned
+              entries have larger ids\r\nby string comparison."
+            required: false
+            type: string
+          - name: top
+            in: query
+            description: "(int, optional) specifies the number of entries to return. A
+              maximal of 1000 entries can be returned\r\nin one call."
+            required: false
+            type: string
+          responses:
+            '200':
+              description: Success
+              schema:
+                uniqueItems: false
+                type: array
+                items:
+                  "$ref": "#/definitions/PersistedFaceResponse"
+              examples:
+                application/json:
+                - persistedFaceId: 8a887ac2-53fd-4f55-9024-1ec77eecd08e
+                  userData: User-provided data attached to the large face list face.
+                - persistedFaceId: f92f6f1b-3258-4444-8fa2-c2df505cc7ac
+                  userData: User-provided data attached to the large face list face.
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+        post:
+          tags:
+          - LargeFaceListFace
+          summary: Add a face to a specified large face list, up to 1,000,000 faces.
+          operationId: FaceV1.0LargefacelistsByLargeFaceListIdPersistedfacesPost
+          consumes:
+          - multipart/form-data
+          produces:
+          - application/json
+          - text/json
+          parameters:
+          - name: largeFaceListId
+            in: path
+            description: The large face list ID.
+            required: true
+            type: string
+          - name: userData
+            in: query
+            description: User-specified data about the target face to add for any purpose.
+            required: false
+            type: string
+          - name: targetFace
+            in: query
+            description: A face rectangle to specify the target face to be added to a
+              large face list, in the format of "targetFace=left,top,width,height".
+            required: false
+            type: string
+          - name: form
+            in: formData
+            description: Upload image as form data.
+            required: false
+            type: file
+          responses:
+            '200':
+              description: Success
+              schema:
+                "$ref": "#/definitions/PersistedFaceResponse"
+              examples:
+                application/json:
+                  persistedFaceId: 43897a75-8d6f-42cf-885e-74832febb055
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+      "/face/v1.0/largefacelists/{largeFaceListId}/persistedfaces/{persistedFaceId}":
+        get:
+          tags:
+          - LargeFaceListFace
+          summary: Retrieve persisted face in large face list by largeFaceListId and persistedFaceId.
+          operationId: FaceV1.0LargefacelistsByLargeFaceListIdPersistedfacesByPersistedFaceIdGet
+          consumes: []
+          produces: []
+          parameters:
+          - name: largeFaceListId
+            in: path
+            description: The large face list ID.
+            required: true
+            type: string
+          - name: persistedFaceId
+            in: path
+            description: The persisted face ID.
+            required: true
+            type: string
+          responses:
+            '200':
+              description: Success
+              examples:
+                application/json:
+                  persistedFaceId: 12167f31-c0f6-4d3b-806c-116b4b4b4e4c
+                  userData: User-provided data attached to the large face list face.
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+        delete:
+          tags:
+          - LargeFaceListFace
+          summary: Delete a face from a large face list by specified largeFaceListId and
+            persisitedFaceId.
+          operationId: FaceV1.0LargefacelistsByLargeFaceListIdPersistedfacesByPersistedFaceIdDelete
+          consumes: []
+          produces: []
+          parameters:
+          - name: largeFaceListId
+            in: path
+            description: The large face list ID.
+            required: true
+            type: string
+          - name: persistedFaceId
+            in: path
+            description: The persisted face ID.
+            required: true
+            type: string
+          responses:
+            '200':
+              description: Success
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+        patch:
+          tags:
+          - LargeFaceListFace
+          summary: Update a specified face's userData field in a large face list by its
+            persistedFaceId.
+          operationId: FaceV1.0LargefacelistsByLargeFaceListIdPersistedfacesByPersistedFaceIdPatch
+          consumes:
+          - application/json-patch+json
+          - application/json
+          - text/json
+          - application/*+json
+          produces: []
+          parameters:
+          - name: largeFaceListId
+            in: path
+            description: The large face list ID.
+            required: true
+            type: string
+          - name: persistedFaceId
+            in: path
+            description: The persisted face ID.
+            required: true
+            type: string
+          - name: userDataContract
+            in: body
+            description: The user data contract.
+            required: false
+            schema:
+              "$ref": "#/definitions/UserDataContract"
+          responses:
+            '200':
+              description: Success
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+      "/face/v1.0/largepersongroups/{largePersonGroupId}":
+        get:
+          tags:
+          - LargePersonGroup
+          summary: Retrieve the information of a LargePersonGroup, including its name
+            and userData.
+          description: "<para>\r\n            This API returns LargePersonGroup information
+            only, use LargePersonGroup Person - List instead to retrieve\r\n            person
+            information under the LargePersonGroup.\r\n            </para>"
+          operationId: FaceV1.0LargepersongroupsByLargePersonGroupIdGet
+          consumes: []
+          produces:
+          - application/json
+          - text/json
+          parameters:
+          - name: largePersonGroupId
+            in: path
+            description: The LargePersonGroup ID.
+            required: true
+            type: string
+          - name: returnRecognitionModel
+            in: query
+            description: Whether to return recognition model. The default value is false.
+            required: false
+            type: boolean
+            default: false
+          responses:
+            '200':
+              description: Success
+              schema:
+                "$ref": "#/definitions/LargePersonGroupResponse"
+              examples:
+                application/json:
+                  largePersonGroupId: d408cb4e-2f5f-4b4d-b99e-f0b72870e5b5
+                  recognitionModel: recognition_02
+                  name: large-person-group-name
+                  userData: User-provided data attached to the large person group.
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+        put:
+          tags:
+          - LargePersonGroup
+          summary: Create a new LargePersonGroup with user-specified largePersonGroupId,
+            name, and optional userData.
+          operationId: FaceV1.0LargepersongroupsByLargePersonGroupIdPut
+          consumes:
+          - application/json-patch+json
+          - application/json
+          - text/json
+          - application/*+json
+          produces: []
+          parameters:
+          - name: largePersonGroupId
+            in: path
+            description: The LargePersonGroup ID.
+            required: true
+            type: string
+          - name: nameAndUserDataWithRecognitionModel
+            in: body
+            description: LargePersonGroup's name, userData and recognition model.
+            required: false
+            schema:
+              "$ref": "#/definitions/NameAndUserDataWithRecognitionModelContract"
+          responses:
+            '200':
+              description: Success
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+        delete:
+          tags:
+          - LargePersonGroup
+          summary: "Delete an existing LargePersonGroup with specified largePersonGroupId.
+            Persisted data in this LargePersonGroup will be\r\ndeleted."
+          operationId: FaceV1.0LargepersongroupsByLargePersonGroupIdDelete
+          consumes: []
+          produces: []
+          parameters:
+          - name: largePersonGroupId
+            in: path
+            description: The LargePersonGroup ID.
+            required: true
+            type: string
+          responses:
+            '200':
+              description: Success
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+        patch:
+          tags:
+          - LargePersonGroup
+          summary: "Update an existing LargePersonGroup's name and userData. The properties
+            keep unchanged if they are not in request\r\nbody."
+          operationId: FaceV1.0LargepersongroupsByLargePersonGroupIdPatch
+          consumes:
+          - application/json-patch+json
+          - application/json
+          - text/json
+          - application/*+json
+          produces: []
+          parameters:
+          - name: largePersonGroupId
+            in: path
+            description: The LargePersonGroup ID.
+            required: true
+            type: string
+          - name: nameAndUserData
+            in: body
+            description: The name and userData of the LargePersonGroup.
+            required: false
+            schema:
+              "$ref": "#/definitions/NameAndUserDataContract"
+          responses:
+            '200':
+              description: Success
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+      "/face/v1.0/largepersongroups/{largePersonGroupId}/training":
+        get:
+          tags:
+          - LargePersonGroup
+          summary: To check large person group training status completed or still ongoing.
+          description: "<para>LargePersonGroup Training is an asynchronous operation triggered
+            by LargePersonGroup - Train API.</para>"
+          operationId: FaceV1.0LargepersongroupsByLargePersonGroupIdTrainingGet
+          consumes: []
+          produces:
+          - application/json
+          - text/json
+          parameters:
+          - name: largePersonGroupId
+            in: path
+            description: The LargePersonGroup ID.
+            required: true
+            type: string
+          responses:
+            '200':
+              description: Success
+              schema:
+                "$ref": "#/definitions/TrainingStatus"
+              examples:
+                application/json:
+                  status: succeeded
+                  createdDateTime: '2017-12-21T12:57:27'
+                  lastActionDateTime: '2017-12-21T12:57:30'
+                  lastSuccessfulTrainingDateTime: '2017-12-21T12:57:30'
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+      "/face/v1.0/largepersongroups":
+        get:
+          tags:
+          - LargePersonGroup
+          summary: List LargePersonGroups’ information of LargePersonGroupId, name and
+            userData.
+          description: "<para>To get face information inside LargePersonGroup use LargePersonGroup
+            Face - Get.</para>\r\n<para>LargePersonGroups are stored in alphabetical order
+            of LargePersonGroupId.</para>\r\n<para>\r\n            \\\"start\\\" parameter
+            (string, optional) is a user-provided LargePersonGroupId value that returned
+            entries have\r\n            larger ids by string comparison.\r\n            </para>\r\n<para>\\\"start\\\"
+            set to empty to indicate return from the first item.</para>\r\n<para>\r\n
+            \           \\\"top\\\" parameter (int, optional) specifies the number of
+            entries to return. A maximal of 1000 entries can be\r\n            returned
+            in one call.\r\n            </para>\r\n<para>To fetch more, you can specify
+            \\\"start\\\" with the last returned entry’s Id of the current call.</para>"
+          operationId: FaceV1.0LargepersongroupsGet
+          consumes: []
+          produces:
+          - application/json
+          - text/json
+          parameters:
+          - name: start
+            in: query
+            description: "(string, optional) is a user-provided LargePersonGroupId value
+              that returned entries have larger ids\r\nby string comparison."
+            required: false
+            type: string
+          - name: top
+            in: query
+            description: "(int, optional) specifies the number of entries to return. A
+              maximal of 1000 entries can be returned\r\nin one call."
+            required: false
+            type: string
+          - name: returnRecognitionModel
+            in: query
+            description: Whether to return recognition model. The default value is false.
+            required: false
+            type: boolean
+            default: false
+          responses:
+            '200':
+              description: Success
+              schema:
+                uniqueItems: false
+                type: array
+                items:
+                  "$ref": "#/definitions/LargePersonGroupResponse"
+              examples:
+                application/json:
+                - largePersonGroupId: f92f6f1b-3258-4444-8fa2-c2df505cc7ac
+                  recognitionModel: recognition_01
+                  name: large-person-group-name1
+                  userData: User-provided data attached to the large person group.
+                - largePersonGroupId: c76f7f13-0ed3-4d00-8a3e-2ad3d78f6c37
+                  recognitionModel: recognition_02
+                  name: large-person-group-name2
+                  userData: User-provided data attached to the large person group.
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+      "/face/v1.0/largepersongroups/{largePersonGroupId}/train":
+        post:
+          tags:
+          - LargePersonGroup
+          summary: Submit a LargePersonGroup training task.
+          description: "<para>Training is a crucial step that only a trained LargePersonGroup
+            can be used by Face - Identify.</para>\r\n<para>\r\n            The training
+            task is an asynchronous task. Training time depends on the number of person
+            entries, and their\r\n            faces in a LargePersonGroup.\r\n            </para>\r\n<para>\r\n
+            \           It could be in several seconds, or up to half a hour for 1,000,000
+            persons. To check training completion,\r\n            please use LargePersonGroup
+            - Get Training Status.\r\n            </para>"
+          operationId: FaceV1.0LargepersongroupsByLargePersonGroupIdTrainPost
+          consumes: []
+          produces: []
+          parameters:
+          - name: largePersonGroupId
+            in: path
+            description: The LargePersonGroup ID.
+            required: true
+            type: string
+          responses:
+            '202':
+              description: Success
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+      "/face/v1.0/largepersongroups/{largePersonGroupId}/persons":
+        get:
+          tags:
+          - LargePersonGroupPerson
+          summary: List all persons’ information in the specified large person group,
+            including personId, name, userData and persistedFaceIds of registered person
+            faces.
+          operationId: FaceV1.0LargepersongroupsByLargePersonGroupIdPersonsGet
+          consumes: []
+          produces:
+          - application/json
+          - text/json
+          parameters:
+          - name: largePersonGroupId
+            in: path
+            description: The large person group ID.
+            required: true
+            type: string
+          - name: start
+            in: query
+            description: List persons from the least personId greater than the "start".
+            required: false
+            type: string
+          - name: top
+            in: query
+            description: The number of persons to list, ranging in [1, 1000]. Default
+              is 1000.
+            required: false
+            type: string
+          responses:
+            '200':
+              description: Success
+              schema:
+                uniqueItems: false
+                type: array
+                items:
+                  "$ref": "#/definitions/PersonResponse"
+              examples:
+                application/json:
+                - personId: 25985303-c537-4467-b41d-bdb45cd95ca1
+                  persistedFaceIds:
+                  - 015839fb-fbd9-4f79-ace9-7675fc2f1dd9
+                  - fce92aed-d578-4d2e-8114-068f8af4492e
+                  - b64d5e15-8257-4af2-b20a-5a750f8940e7
+                  name: person-name1
+                  userData: User-provided data attached to the person.
+                - personId: 2ae4935b-9659-44c3-977f-61fac20d0538
+                  persistedFaceIds:
+                  - 30ea1073-cc9e-4652-b1e3-d08fb7b95315
+                  - fbd2a038-dbff-452c-8e79-2ee81b1aa84e
+                  name: person-name2
+                  userData: User-provided data attached to the person.
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+        post:
+          tags:
+          - LargePersonGroupPerson
+          summary: Create a new person in a specified large person group.
+          operationId: FaceV1.0LargepersongroupsByLargePersonGroupIdPersonsPost
+          consumes:
+          - application/json-patch+json
+          - application/json
+          - text/json
+          - application/*+json
+          produces:
+          - application/json
+          - text/json
+          parameters:
+          - name: largePersonGroupId
+            in: path
+            description: The large person group ID.
+            required: true
+            type: string
+          - name: nameAndUserData
+            in: body
+            description: Large person group's name and userData.
+            required: false
+            schema:
+              "$ref": "#/definitions/NameAndUserDataContract"
+          responses:
+            '200':
+              description: Success
+              schema:
+                "$ref": "#/definitions/PersonResponse"
+              examples:
+                application/json:
+                  personId: 25985303-c537-4467-b41d-bdb45cd95ca1
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+      "/face/v1.0/largepersongroups/{largePersonGroupId}/persons/{personId}":
+        get:
+          tags:
+          - LargePersonGroupPerson
+          summary: Retrieve a person's name and userData, and the persisted faceIds representing
+            the registered person face image.
+          operationId: FaceV1.0LargepersongroupsByLargePersonGroupIdPersonsByPersonIdGet
+          consumes: []
+          produces:
+          - application/json
+          - text/json
+          parameters:
+          - name: largePersonGroupId
+            in: path
+            description: The large person group ID.
+            required: true
+            type: string
+          - name: personId
+            in: path
+            description: The person ID.
+            required: true
+            type: string
+          responses:
+            '200':
+              description: Success
+              schema:
+                "$ref": "#/definitions/PersonResponse"
+              examples:
+                application/json:
+                  personId: 25985303-c537-4467-b41d-bdb45cd95ca1
+                  persistedFaceIds:
+                  - 015839fb-fbd9-4f79-ace9-7675fc2f1dd9
+                  - fce92aed-d578-4d2e-8114-068f8af4492e
+                  - b64d5e15-8257-4af2-b20a-5a750f8940e7
+                  name: person-name
+                  userData: User-provided data attached to the person.
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+        delete:
+          tags:
+          - LargePersonGroupPerson
+          summary: Delete an existing person from a large person group. All stored person
+            data, and face images in the person entry will be deleted.
+          operationId: FaceV1.0LargepersongroupsByLargePersonGroupIdPersonsByPersonIdDelete
+          consumes: []
+          produces: []
+          parameters:
+          - name: largePersonGroupId
+            in: path
+            description: The large person group ID.
+            required: true
+            type: string
+          - name: personId
+            in: path
+            description: The person ID.
+            required: true
+            type: string
+          responses:
+            '200':
+              description: Success
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+        patch:
+          tags:
+          - LargePersonGroupPerson
+          summary: Update name or userData of a person.
+          operationId: FaceV1.0LargepersongroupsByLargePersonGroupIdPersonsByPersonIdPatch
+          consumes:
+          - application/json-patch+json
+          - application/json
+          - text/json
+          - application/*+json
+          produces: []
+          parameters:
+          - name: largePersonGroupId
+            in: path
+            description: The large person group ID.
+            required: true
+            type: string
+          - name: personId
+            in: path
+            description: The person ID.
+            required: true
+            type: string
+          - name: nameAndUserData
+            in: body
+            description: Large person group's name and userData.
+            required: false
+            schema:
+              "$ref": "#/definitions/NameAndUserDataContract"
+          responses:
+            '200':
+              description: Success
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+      "/face/v1.0/largepersongroups/{largePersonGroupId}/persons/{personId}/persistedfaces":
+        post:
+          tags:
+          - LargePersonGroupPersonFace
+          summary: Add a face image to a person into a large person group for face identification
+            or verification.
+          operationId: FaceV1.0LargepersongroupsByLargePersonGroupIdPersonsByPersonIdPersistedfacesPost
+          consumes:
+          - multipart/form-data
+          produces:
+          - application/json
+          - text/json
+          parameters:
+          - name: largePersonGroupId
+            in: path
+            description: The large person group ID.
+            required: true
+            type: string
+          - name: personId
+            in: path
+            description: The person ID.
+            required: true
+            type: string
+          - name: userData
+            in: query
+            description: User-specified data about the target face to add for any purpose.
+            required: false
+            type: string
+          - name: targetFace
+            in: query
+            description: A face rectangle to specify the target face to be added to a
+              person, in the format of "targetFace=left,top,width,height".
+            required: false
+            type: string
+          - name: form
+            in: formData
+            description: Upload image as form data.
+            required: false
+            type: file
+          responses:
+            '200':
+              description: Success
+              schema:
+                "$ref": "#/definitions/PersistedFaceResponse"
+              examples:
+                application/json:
+                  persistedFaceId: 43897a75-8d6f-42cf-885e-74832febb055
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+      "/face/v1.0/largepersongroups/{largePersonGroupId}/persons/{personId}/persistedfaces/{persistedFaceId}":
+        get:
+          tags:
+          - LargePersonGroupPersonFace
+          summary: Retrieve person face information. The persisted person face is specified
+            by its largePersonGroupId, personId and persistedFaceId.
+          operationId: FaceV1.0LargepersongroupsByLargePersonGroupIdPersonsByPersonIdPersistedfacesByPersistedFaceIdGet
+          consumes: []
+          produces:
+          - application/json
+          - text/json
+          parameters:
+          - name: largePersonGroupId
+            in: path
+            description: The large person group ID.
+            required: true
+            type: string
+          - name: personId
+            in: path
+            description: The person ID.
+            required: true
+            type: string
+          - name: persistedFaceId
+            in: path
+            description: The persisted face ID.
+            required: true
+            type: string
+          responses:
+            '200':
+              description: Success
+              schema:
+                "$ref": "#/definitions/PersistedFaceResponse"
+              examples:
+                application/json:
+                  persistedFaceId: 015839fb-fbd9-4f79-ace9-7675fc2f1dd9
+                  userData: User-provided data attached to the person face.
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+        delete:
+          tags:
+          - LargePersonGroupPersonFace
+          summary: Delete a face from a person in a large person group.
+          operationId: FaceV1.0LargepersongroupsByLargePersonGroupIdPersonsByPersonIdPersistedfacesByPersistedFaceIdDelete
+          consumes: []
+          produces: []
+          parameters:
+          - name: largePersonGroupId
+            in: path
+            description: The large person group ID.
+            required: true
+            type: string
+          - name: personId
+            in: path
+            description: The person ID.
+            required: true
+            type: string
+          - name: persistedFaceId
+            in: path
+            description: The persisted face ID.
+            required: true
+            type: string
+          responses:
+            '200':
+              description: Success
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+        patch:
+          tags:
+          - LargePersonGroupPersonFace
+          summary: Update a person persisted face's userData field.
+          operationId: FaceV1.0LargepersongroupsByLargePersonGroupIdPersonsByPersonIdPersistedfacesByPersistedFaceIdPatch
+          consumes:
+          - application/json-patch+json
+          - application/json
+          - text/json
+          - application/*+json
+          produces: []
+          parameters:
+          - name: largePersonGroupId
+            in: path
+            description: The large person group ID.
+            required: true
+            type: string
+          - name: personId
+            in: path
+            description: The person ID.
+            required: true
+            type: string
+          - name: persistedFaceId
+            in: path
+            description: The persisted face ID.
+            required: true
+            type: string
+          - name: userDataContract
+            in: body
+            description: The user data.
+            required: false
+            schema:
+              "$ref": "#/definitions/UserDataContract"
+          responses:
+            '200':
+              description: Success
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+      "/face/v1.0/persongroups/{personGroupId}":
+        get:
+          tags:
+          - PersonGroup
+          summary: Retrieve the information of a PersonGroup, including its name and userData.
+          description: "<para>\r\n            This API returns PersonGroup information
+            only, use PersonGroup Person - List instead to retrieve\r\n            person
+            information under the PersonGroup.\r\n            </para>"
+          operationId: FaceV1.0PersongroupsByPersonGroupIdGet
+          consumes: []
+          produces:
+          - application/json
+          - text/json
+          parameters:
+          - name: personGroupId
+            in: path
+            description: The PersonGroup ID.
+            required: true
+            type: string
+          - name: returnRecognitionModel
+            in: query
+            description: Whether to return recognition model. The default value is false.
+            required: false
+            type: boolean
+            default: false
+          responses:
+            '200':
+              description: Success
+              schema:
+                "$ref": "#/definitions/PersonGroupResponse"
+              examples:
+                application/json:
+                  personGroupId: d408cb4e-2f5f-4b4d-b99e-f0b72870e5b5
+                  recognitionModel: recognition_02
+                  name: person-group-name
+                  userData: User-provided data attached to the person group.
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+        put:
+          tags:
+          - PersonGroup
+          summary: Create a new PersonGroup with user-specified personGroupId, name, and
+            optional userData.
+          operationId: FaceV1.0PersongroupsByPersonGroupIdPut
+          consumes:
+          - application/json-patch+json
+          - application/json
+          - text/json
+          - application/*+json
+          produces: []
+          parameters:
+          - name: personGroupId
+            in: path
+            description: The PersonGroup ID.
+            required: true
+            type: string
+          - name: nameAndUserDataWithRecognitionModel
+            in: body
+            description: PersonGroup's name, userData and recognition model.
+            required: false
+            schema:
+              "$ref": "#/definitions/NameAndUserDataWithRecognitionModelContract"
+          responses:
+            '200':
+              description: Success
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+        delete:
+          tags:
+          - PersonGroup
+          summary: "Delete an existing PersonGroup with specified personGroupId. Persisted
+            data in this personGroup will be\r\ndeleted."
+          operationId: FaceV1.0PersongroupsByPersonGroupIdDelete
+          consumes: []
+          produces: []
+          parameters:
+          - name: personGroupId
+            in: path
+            description: The PersonGroup ID.
+            required: true
+            type: string
+          responses:
+            '200':
+              description: Success
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+        patch:
+          tags:
+          - PersonGroup
+          summary: "Update an existing PersonGroup's name and userData. The properties
+            keep unchanged if they are not in request\r\nbody."
+          operationId: FaceV1.0PersongroupsByPersonGroupIdPatch
+          consumes:
+          - application/json-patch+json
+          - application/json
+          - text/json
+          - application/*+json
+          produces: []
+          parameters:
+          - name: personGroupId
+            in: path
+            description: The PersonGroup ID.
+            required: true
+            type: string
+          - name: nameAndUserData
+            in: body
+            description: The name and userData of the PersonGroup.
+            required: false
+            schema:
+              "$ref": "#/definitions/NameAndUserDataContract"
+          responses:
+            '200':
+              description: Success
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+      "/face/v1.0/persongroups/{personGroupId}/training":
+        get:
+          tags:
+          - PersonGroup
+          summary: To check person group training status completed or still ongoing.
+          description: "<para>PersonGroup Training is an asynchronous operation triggered
+            by PersonGroup - Train API.</para>"
+          operationId: FaceV1.0PersongroupsByPersonGroupIdTrainingGet
+          consumes: []
+          produces:
+          - application/json
+          - text/json
+          parameters:
+          - name: personGroupId
+            in: path
+            description: The PersonGroup ID.
+            required: true
+            type: string
+          responses:
+            '200':
+              description: Success
+              schema:
+                "$ref": "#/definitions/TrainingStatus"
+              examples:
+                application/json:
+                  status: succeeded
+                  createdDateTime: '2017-12-21T12:57:27'
+                  lastActionDateTime: '2017-12-21T12:57:30'
+                  lastSuccessfulTrainingDateTime: '2017-12-21T12:57:30'
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+      "/face/v1.0/persongroups":
+        get:
+          tags:
+          - PersonGroup
+          summary: List PersonGroups’ information of personGroupId, name and userData.
+          description: "<para>To get face information inside PersonGroup use PersonGroup
+            Face - Get.</para>\r\n<para>PersonGroups are stored in alphabetical order
+            of PersonGroupId.</para>\r\n<para>\r\n            \\\"start\\\" parameter
+            (string, optional) is a user-provided PersonGroupId value that returned entries
+            have\r\n            larger ids by string comparison.\r\n            </para>\r\n<para>\\\"start\\\"
+            set to empty to indicate return from the first item.</para>\r\n<para>\r\n
+            \           \\\"top\\\" parameter (int, optional) specifies the number of
+            entries to return. A maximal of 1000 entries can be\r\n            returned
+            in one call.\r\n            </para>\r\n<para>To fetch more, you can specify
+            \\\"start\\\" with the last returned entry’s Id of the current call.</para>"
+          operationId: FaceV1.0PersongroupsGet
+          consumes: []
+          produces:
+          - application/json
+          - text/json
+          parameters:
+          - name: start
+            in: query
+            description: "(string, optional) is a user-provided PersonGroupId value that
+              returned entries have larger ids\r\nby string comparison."
+            required: false
+            type: string
+          - name: top
+            in: query
+            description: "(int, optional) specifies the number of entries to return. A
+              maximal of 1000 entries can be returned\r\nin one call."
+            required: false
+            type: string
+          - name: returnRecognitionModel
+            in: query
+            description: Whether to return recognition model. The default value is false.
+            required: false
+            type: boolean
+            default: false
+          responses:
+            '200':
+              description: Success
+              schema:
+                uniqueItems: false
+                type: array
+                items:
+                  "$ref": "#/definitions/PersonGroupResponse"
+              examples:
+                application/json:
+                - personGroupId: f92f6f1b-3258-4444-8fa2-c2df505cc7ac
+                  recognitionModel: recognition_01
+                  name: person-group-name1
+                  userData: User-provided data attached to the person group.
+                - personGroupId: c76f7f13-0ed3-4d00-8a3e-2ad3d78f6c37
+                  recognitionModel: recognition_02
+                  name: person-group-name2
+                  userData: User-provided data attached to the person group.
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+      "/face/v1.0/persongroups/{personGroupId}/train":
+        post:
+          tags:
+          - PersonGroup
+          summary: Submit a PersonGroup training task.
+          description: "<para>Training is a crucial step that only a trained PersonGroup
+            can be used by Face - Identify.</para>\r\n<para>\r\n            The training
+            task is an asynchronous task. Training time depends on the number of person
+            entries, and their\r\n            faces in a PersonGroup.\r\n            </para>\r\n<para>\r\n
+            \           It could be several seconds to minutes. To check training status,
+            please use PersonGroup - Get Training Status.\r\n            </para>"
+          operationId: FaceV1.0PersongroupsByPersonGroupIdTrainPost
+          consumes: []
+          produces: []
+          parameters:
+          - name: personGroupId
+            in: path
+            description: The PersonGroup ID.
+            required: true
+            type: string
+          responses:
+            '202':
+              description: Success
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+      "/face/v1.0/persongroups/{personGroupId}/persons":
+        get:
+          tags:
+          - PersonGroupPerson
+          summary: List all persons’ information in the specified person group, including
+            personId, name, userData and persistedFaceIds of registered person faces.
+          operationId: FaceV1.0PersongroupsByPersonGroupIdPersonsGet
+          consumes: []
+          produces:
+          - application/json
+          - text/json
+          parameters:
+          - name: personGroupId
+            in: path
+            description: The person group ID.
+            required: true
+            type: string
+          - name: start
+            in: query
+            description: List persons from the least personId greater than the "start".
+            required: false
+            type: string
+          - name: top
+            in: query
+            description: The number of persons to list, ranging in [1, 1000]. Default
+              is 1000.
+            required: false
+            type: string
+          responses:
+            '200':
+              description: Success
+              schema:
+                uniqueItems: false
+                type: array
+                items:
+                  "$ref": "#/definitions/PersonResponse"
+              examples:
+                application/json:
+                - personId: 25985303-c537-4467-b41d-bdb45cd95ca1
+                  persistedFaceIds:
+                  - 015839fb-fbd9-4f79-ace9-7675fc2f1dd9
+                  - fce92aed-d578-4d2e-8114-068f8af4492e
+                  - b64d5e15-8257-4af2-b20a-5a750f8940e7
+                  name: person-name1
+                  userData: User-provided data attached to the person.
+                - personId: 2ae4935b-9659-44c3-977f-61fac20d0538
+                  persistedFaceIds:
+                  - 30ea1073-cc9e-4652-b1e3-d08fb7b95315
+                  - fbd2a038-dbff-452c-8e79-2ee81b1aa84e
+                  name: person-name2
+                  userData: User-provided data attached to the person.
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+        post:
+          tags:
+          - PersonGroupPerson
+          summary: Create a new person in a specified person group.
+          operationId: FaceV1.0PersongroupsByPersonGroupIdPersonsPost
+          consumes:
+          - application/json-patch+json
+          - application/json
+          - text/json
+          - application/*+json
+          produces:
+          - application/json
+          - text/json
+          parameters:
+          - name: personGroupId
+            in: path
+            description: The person group ID.
+            required: true
+            type: string
+          - name: nameAndUserData
+            in: body
+            description: person group's name and userData.
+            required: false
+            schema:
+              "$ref": "#/definitions/NameAndUserDataContract"
+          responses:
+            '200':
+              description: Success
+              schema:
+                "$ref": "#/definitions/PersonResponse"
+              examples:
+                application/json:
+                  personId: 25985303-c537-4467-b41d-bdb45cd95ca1
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+      "/face/v1.0/persongroups/{personGroupId}/persons/{personId}":
+        get:
+          tags:
+          - PersonGroupPerson
+          summary: Retrieve a person's name and userData, and the persisted faceIds representing
+            the registered person face image.
+          operationId: FaceV1.0PersongroupsByPersonGroupIdPersonsByPersonIdGet
+          consumes: []
+          produces:
+          - application/json
+          - text/json
+          parameters:
+          - name: personGroupId
+            in: path
+            description: The person group ID.
+            required: true
+            type: string
+          - name: personId
+            in: path
+            description: The person ID.
+            required: true
+            type: string
+          responses:
+            '200':
+              description: Success
+              schema:
+                "$ref": "#/definitions/PersonResponse"
+              examples:
+                application/json:
+                  personId: 25985303-c537-4467-b41d-bdb45cd95ca1
+                  persistedFaceIds:
+                  - 015839fb-fbd9-4f79-ace9-7675fc2f1dd9
+                  - fce92aed-d578-4d2e-8114-068f8af4492e
+                  - b64d5e15-8257-4af2-b20a-5a750f8940e7
+                  name: person-name
+                  userData: User-provided data attached to the person.
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+        delete:
+          tags:
+          - PersonGroupPerson
+          summary: Delete an existing person from a person group. All stored person data,
+            and face images in the person entry will be deleted.
+          operationId: FaceV1.0PersongroupsByPersonGroupIdPersonsByPersonIdDelete
+          consumes: []
+          produces: []
+          parameters:
+          - name: personGroupId
+            in: path
+            description: The person group ID.
+            required: true
+            type: string
+          - name: personId
+            in: path
+            description: The person ID.
+            required: true
+            type: string
+          responses:
+            '200':
+              description: Success
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+        patch:
+          tags:
+          - PersonGroupPerson
+          summary: Update name or userData of a person.
+          operationId: FaceV1.0PersongroupsByPersonGroupIdPersonsByPersonIdPatch
+          consumes:
+          - application/json-patch+json
+          - application/json
+          - text/json
+          - application/*+json
+          produces: []
+          parameters:
+          - name: personGroupId
+            in: path
+            description: The person group ID.
+            required: true
+            type: string
+          - name: personId
+            in: path
+            description: The person ID.
+            required: true
+            type: string
+          - name: nameAndUserData
+            in: body
+            description: person group's name and userData.
+            required: false
+            schema:
+              "$ref": "#/definitions/NameAndUserDataContract"
+          responses:
+            '200':
+              description: Success
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+      "/face/v1.0/persongroups/{personGroupId}/persons/{personId}/persistedfaces":
+        post:
+          tags:
+          - PersonGroupPersonFace
+          summary: Add a face image to a person into a person group for face identification
+            or verification.
+          operationId: FaceV1.0PersongroupsByPersonGroupIdPersonsByPersonIdPersistedfacesPost
+          consumes:
+          - multipart/form-data
+          produces:
+          - application/json
+          - text/json
+          parameters:
+          - name: personGroupId
+            in: path
+            description: The person group ID.
+            required: true
+            type: string
+          - name: personId
+            in: path
+            description: The person ID.
+            required: true
+            type: string
+          - name: userData
+            in: query
+            description: User-specified data about the target face to add for any purpose.
+            required: false
+            type: string
+          - name: targetFace
+            in: query
+            description: A face rectangle to specify the target face to be added to a
+              person, in the format of "targetFace=left,top,width,height".
+            required: false
+            type: string
+          - name: form
+            in: formData
+            description: Upload image as form data.
+            required: false
+            type: file
+          responses:
+            '200':
+              description: Success
+              schema:
+                "$ref": "#/definitions/PersistedFaceResponse"
+              examples:
+                application/json:
+                  persistedFaceId: 43897a75-8d6f-42cf-885e-74832febb055
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+      "/face/v1.0/persongroups/{personGroupId}/persons/{personId}/persistedfaces/{persistedFaceId}":
+        get:
+          tags:
+          - PersonGroupPersonFace
+          summary: Retrieve person face information. The persisted person face is specified
+            by its personGroupId, personId and persistedFaceId.
+          operationId: FaceV1.0PersongroupsByPersonGroupIdPersonsByPersonIdPersistedfacesByPersistedFaceIdGet
+          consumes: []
+          produces:
+          - application/json
+          - text/json
+          parameters:
+          - name: personGroupId
+            in: path
+            description: The person group ID.
+            required: true
+            type: string
+          - name: personId
+            in: path
+            description: The person ID.
+            required: true
+            type: string
+          - name: persistedFaceId
+            in: path
+            description: The persisted face ID.
+            required: true
+            type: string
+          responses:
+            '200':
+              description: Success
+              schema:
+                "$ref": "#/definitions/PersistedFaceResponse"
+              examples:
+                application/json:
+                  persistedFaceId: 015839fb-fbd9-4f79-ace9-7675fc2f1dd9
+                  userData: User-provided data attached to the person face.
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+        delete:
+          tags:
+          - PersonGroupPersonFace
+          summary: Delete a face from a person in a person group.
+          operationId: FaceV1.0PersongroupsByPersonGroupIdPersonsByPersonIdPersistedfacesByPersistedFaceIdDelete
+          consumes: []
+          produces: []
+          parameters:
+          - name: personGroupId
+            in: path
+            description: The person group ID.
+            required: true
+            type: string
+          - name: personId
+            in: path
+            description: The person ID.
+            required: true
+            type: string
+          - name: persistedFaceId
+            in: path
+            description: The persisted face ID.
+            required: true
+            type: string
+          responses:
+            '200':
+              description: Success
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+        patch:
+          tags:
+          - PersonGroupPersonFace
+          summary: Update a person persisted face's userData field.
+          operationId: FaceV1.0PersongroupsByPersonGroupIdPersonsByPersonIdPersistedfacesByPersistedFaceIdPatch
+          consumes:
+          - application/json-patch+json
+          - application/json
+          - text/json
+          - application/*+json
+          produces: []
+          parameters:
+          - name: personGroupId
+            in: path
+            description: The person group ID.
+            required: true
+            type: string
+          - name: personId
+            in: path
+            description: The person ID.
+            required: true
+            type: string
+          - name: persistedFaceId
+            in: path
+            description: The persisted face ID.
+            required: true
+            type: string
+          - name: userDataContract
+            in: body
+            description: The user data.
+            required: false
+            schema:
+              "$ref": "#/definitions/UserDataContract"
+          responses:
+            '200':
+              description: Success
+            default:
+              description: Response entity accompanying non-successful responses containing
+                additional details about the error.
+              schema:
+                "$ref": "#/definitions/ErrorResponse"
+              examples:
+                application/json:
+                  error:
+                    code: BadArgument
+                    innerError:
+                      requestId: 00000000-0000-0000-0000-000000000000
+                    message: Request body is invalid.
+      "/status":
+        get:
+          tags:
+          - Status
+          operationId: StatusGet
+          consumes: []
+          produces:
+          - application/json
+          - text/json
+          parameters: []
+          responses:
+            '200':
+              description: Success
+              schema:
+                "$ref": "#/definitions/ContainerStatus"
+    definitions:
+      DetectedFace:
+        description: Describes a face and the parameters that have been detected.
+        type: object
+        properties:
+          faceId:
+            format: uuid
+            description: Unique id of the detected face. To return this, it requires "returnFaceId"
+              query parameter to be true.
+            type: string
+          faceRectangle:
+            "$ref": "#/definitions/FaceRectangle"
+            description: Rectangle area for the face located within an image.
+          faceLandmarks:
+            "$ref": "#/definitions/FaceLandmarks"
+            description: "Array of 27-point face landmarks pointing to the important positions
+              of face components.\r\nTo return this, it requires \"returnFaceLandmarks\"
+              query parameter to be true."
+          faceAttributes:
+            "$ref": "#/definitions/FaceAttributes"
+            description: "Face attributes such as estimated gender, age, accessories,
+              etc.\r\nTo return face attributes, the \"faceAttributes\" query parameter
+              must be set."
+          recognitionModel:
+            description: Face recognition model.
+            enum:
+            - recognition_01
+            - recognition_02
+            type: string
+      FaceRectangle:
+        description: Rectangle area for the face located within an image.
+        type: object
+        properties:
+          top:
+            format: int32
+            type: integer
+          left:
+            format: int32
+            type: integer
+          width:
+            format: int32
+            type: integer
+          height:
+            format: int32
+            type: integer
+      FaceLandmarks:
+        description: Indicates the location, i.e. (x, y) coordinates of prominent face
+          landmarks.
+        type: object
+        properties:
+          pupilLeft:
+            "$ref": "#/definitions/Point"
+          pupilRight:
+            "$ref": "#/definitions/Point"
+          noseTip:
+            "$ref": "#/definitions/Point"
+          mouthLeft:
+            "$ref": "#/definitions/Point"
+          mouthRight:
+            "$ref": "#/definitions/Point"
+          eyebrowLeftOuter:
+            "$ref": "#/definitions/Point"
+          eyebrowLeftInner:
+            "$ref": "#/definitions/Point"
+          eyeLeftOuter:
+            "$ref": "#/definitions/Point"
+          eyeLeftTop:
+            "$ref": "#/definitions/Point"
+          eyeLeftBottom:
+            "$ref": "#/definitions/Point"
+          eyeLeftInner:
+            "$ref": "#/definitions/Point"
+          eyebrowRightInner:
+            "$ref": "#/definitions/Point"
+          eyebrowRightOuter:
+            "$ref": "#/definitions/Point"
+          eyeRightInner:
+            "$ref": "#/definitions/Point"
+          eyeRightTop:
+            "$ref": "#/definitions/Point"
+          eyeRightBottom:
+            "$ref": "#/definitions/Point"
+          eyeRightOuter:
+            "$ref": "#/definitions/Point"
+          noseRootLeft:
+            "$ref": "#/definitions/Point"
+          noseRootRight:
+            "$ref": "#/definitions/Point"
+          noseLeftAlarTop:
+            "$ref": "#/definitions/Point"
+          noseRightAlarTop:
+            "$ref": "#/definitions/Point"
+          noseLeftAlarOutTip:
+            "$ref": "#/definitions/Point"
+          noseRightAlarOutTip:
+            "$ref": "#/definitions/Point"
+          upperLipTop:
+            "$ref": "#/definitions/Point"
+          upperLipBottom:
+            "$ref": "#/definitions/Point"
+          underLipTop:
+            "$ref": "#/definitions/Point"
+          underLipBottom:
+            "$ref": "#/definitions/Point"
+      FaceAttributes:
+        description: Provides a set of face attributes describing various properties of
+          the face.
+        type: object
+        properties:
+          smile:
+            format: float
+            description: Smile intensity, a number between [0, 1].
+            type: number
+          headPose:
+            "$ref": "#/definitions/HeadPose"
+            description: 3-D roll, yaw, and pitch angles for face direction. Note, Pitch
+              value is a reserved field and will always return 0.
+          gender:
+            description: Estimated gender.
+            enum:
+            - male
+            - female
+            - genderless
+            type: string
+          age:
+            format: float
+            description: An estimated "visual age" number in years. It is how old a person
+              looks like rather than the actual biological age.
+            type: number
+          facialHair:
+            "$ref": "#/definitions/FacialHair"
+            description: 'Length of three facial hair areas: moustache, beard and sideburns.
+              The length is a number between [0, 1]. 0 for no facial hair in this area,
+              1 for long or very thick facial hairs in this area.'
+          glasses:
+            description: Type of glasses detected.
+            type: string
+          emotion:
+            "$ref": "#/definitions/Emotion"
+            description: Emotion intensity, including neutral, anger, contempt, disgust,
+              fear, happiness, sadness and surprise.
+          blur:
+            "$ref": "#/definitions/Blur"
+            description: Whether face is blurry or not. Level returns 'Low', 'Medium'
+              or 'High'. Value returns a number between [0, 1], the larger the blurrier.
+          exposure:
+            "$ref": "#/definitions/Exposure"
+            description: Face exposure level.
+          noise:
+            "$ref": "#/definitions/Noise"
+            description: Noise level of face pixels.
+          makeup:
+            "$ref": "#/definitions/Makeup"
+            description: Whether eye, lip areas are made-up or not.
+          accessories:
+            description: Accessories around face, including 'headwear', 'glasses' and
+              'mask'. Empty array means no accessories detected.
+            uniqueItems: false
+            type: array
+            items:
+              "$ref": "#/definitions/Accessory"
+          occlusion:
+            "$ref": "#/definitions/Occlusion"
+            description: Whether the face is obscured.
+          hair:
+            "$ref": "#/definitions/Hair"
+            description: Hair values indicating whether the hair is visible, bald, and
+              hair color if hair is visible.
+      Point:
+        type: object
+        properties:
+          x:
+            format: float
+            type: number
+          y:
+            format: float
+            type: number
+      HeadPose:
+        description: 3-D roll/yaw/pitch angles for face direction. Note, Pitch value is
+          a reserved field and will always return 0.
+        type: object
+        properties:
+          pitch:
+            format: float
+            type: number
+          roll:
+            format: float
+            type: number
+          yaw:
+            format: float
+            type: number
+      FacialHair:
+        description: Indicates the kind of amount of facial hair.
+        type: object
+        properties:
+          moustache:
+            format: float
+            description: "Gets or sets facial hair on upper lip. This value is in range
+              [0, 1].\r\n[0, 0.25]   indicates no mustache.\r\n[0.25, 0.5] indicates stubble
+              moustache.\r\n[0.5, 0.75] indicates medium moustache.\r\n[0.75, 1]   indicates
+              long moustache."
+            type: number
+          beard:
+            format: float
+            description: "Gets or sets facial hair on chin. This value is in range [0,
+              1].\r\n[0, 0.25]   indicates no beard.\r\n[0.25, 0.5] indicates stubble
+              beard.\r\n[0.5, 0.75] indicates medium beard.\r\n[0.75, 1]   indicates long
+              beard."
+            type: number
+          sideburns:
+            format: float
+            description: "Gets or sets facial hair on cheeks. This value is in range [0,
+              1].\r\n[0, 0.25]   indicates no sideburns.\r\n[0.25, 0.5] indicates stubble
+              sideburns.\r\n[0.5, 0.75] indicates medium sideburns.\r\n[0.75, 1]   indicates
+              long sideburns."
+            type: number
+      Emotion:
+        description: Type of emotion detected.
+        type: object
+        properties:
+          anger:
+            format: float
+            type: number
+          contempt:
+            format: float
+            type: number
+          disgust:
+            format: float
+            type: number
+          fear:
+            format: float
+            type: number
+          happiness:
+            format: float
+            type: number
+          neutral:
+            format: float
+            type: number
+          sadness:
+            format: float
+            type: number
+          surprise:
+            format: float
+            type: number
+      Blur:
+        description: Amount of blur detected.
+        type: object
+        properties:
+          blurLevel:
+            description: Level of blur detected.
+            enum:
+            - low
+            - medium
+            - high
+            type: string
+          value:
+            format: float
+            description: Value returns a number between [0,1], the larger the blurrier.
+            type: number
+      Exposure:
+        description: Exposure level detected.
+        type: object
+        properties:
+          exposureLevel:
+            description: Level of exposure detected.
+            enum:
+            - unknown
+            - goodExposure
+            - underExposure
+            - overExposure
+            type: string
+          value:
+            format: float
+            description: Value returns a number between [0, 1], the larger the more the
+              picture has been exposed.
+            type: number
+      Noise:
+        description: Noise level of face pixels.
+        type: object
+        properties:
+          noiseLevel:
+            description: Level of noise detected.
+            enum:
+            - low
+            - medium
+            - high
+            type: string
+          value:
+            format: float
+            description: Value returns a number between [0, 1], the larger the noisier.
+            type: number
+      Makeup:
+        description: Whether eye and lip areas carry makeup.
+        type: object
+        properties:
+          eyeMakeup:
+            type: boolean
+          lipMakeup:
+            type: boolean
+      Accessory:
+        description: "Indicates accessories around face, including 'headwear', 'glasses'
+          and 'mask'.\r\nNote this is after a face is detected. Large mask could result
+          in face not being detected."
+        type: object
+        properties:
+          type:
+            description: Type of accessory.
+            enum:
+            - headwear
+            - glasses
+            - mask
+            type: string
+          confidence:
+            format: float
+            description: The level of confidence in the accessory type.
+            type: number
+      Occlusion:
+        description: Indicates whether particular face feature are visible or covered.
+        type: object
+        properties:
+          foreheadOccluded:
+            type: boolean
+          eyeOccluded:
+            type: boolean
+          mouthOccluded:
+            type: boolean
+      Hair:
+        description: Parameters describing hair including color and whether it is visible.
+        type: object
+        properties:
+          bald:
+            format: float
+            type: number
+          invisible:
+            type: boolean
+          hairColor:
+            uniqueItems: false
+            type: array
+            items:
+              "$ref": "#/definitions/HairColor"
+            readOnly: true
+      HairColor:
+        description: Hair color detected.
+        type: object
+        properties:
+          color:
+            description: A particular hair color.
+            enum:
+            - unknown
+            - white
+            - gray
+            - blond
+            - brown
+            - red
+            - black
+            - other
+            type: string
+          confidence:
+            format: float
+            description: The confidence of that particular color between [0, 1], the larger
+              the more confident.
+            type: number
+      ErrorResponse:
+        type: object
+        properties:
+          error:
+            "$ref": "#/definitions/ErrorInformation"
+      ErrorInformation:
+        type: object
+        properties:
+          code:
+            type: string
+          innerError:
+            "$ref": "#/definitions/InnerError"
+          message:
+            type: string
+      InnerError:
+        type: object
+        properties:
+          requestId:
+            type: string
+      ImageRequest:
+        type: object
+        properties:
+          url:
+            type: string
+      FindSimilarRequest:
+        description: "Request of search a given face's similar-looking faces, from a faceId
+          array or a large face list.\r\nFaceId array contains the faces created by Face
+          - Detect, which will expire 24 hours after creation.\r\nAnd a \\\"largeFaceListId\\\"
+          is created by LargeFaceList - Create containing persistedFaceIds that will not
+          expire.\r\nFind similar has two working modes, \\\"matchPerson\\\" and \\\"matchFace\\\".
+          \\\"matchPerson\\\" is the default mode\r\nthat it tries to find faces of the
+          same person as possible by using internal same-person thresholds.\r\nIt is useful
+          to find a known person's other photos. Note that an empty list will be returned
+          if no faces pass the internal thresholds.\r\n\\\"matchFace\\\" mode ignores
+          same-person thresholds and returns ranked similar faces anyway, even the similarity
+          is low.\r\nIt can be used in the cases like searching celebrity-looking faces."
+        type: object
+        properties:
+          faceId:
+            description: "FaceId of the query face. User needs to call Face - Detect first
+              to get a valid faceId.\r\nNote that this faceId is not persisted and will
+              expire 24 hours after the detection call."
+            type: string
+          faceIds:
+            description: "An array of candidate faceIds. All of them are created by Face
+              - Detect and the faceIds\r\nwill expire 24 hours after the detection call.
+              The number of faceIds is limited to 1000.\r\nParameter faceListId, largeFaceListId
+              and faceIds should not be provided at the same time."
+            uniqueItems: false
+            type: array
+            items:
+              type: string
+          faceListId:
+            description: "An existing user-specified unique candidate face list, created
+              in FaceList - Create.\r\nFace list contains a set of persistedFaceIds which
+              are persisted and will never expire.\r\nParameter faceListId, largeFaceListId
+              and faceIds should not be provided at the same time."
+            type: string
+          largeFaceListId:
+            description: "An existing user-specified unique candidate large face list,
+              created in LargeFaceList - Create.\r\nLarge face list contains a set of
+              persistedFaceIds which are persisted and will never expire.\r\nParameter
+              faceListId, largeFaceListId and faceIds should not be provided at the same
+              time."
+            type: string
+          maxNumOfCandidatesReturned:
+            format: int32
+            description: "Optional parameter.\r\nThe number of top similar faces returned.\r\nThe
+              valid range is [1, 1000].It defaults to 20."
+            type: integer
+          mode:
+            description: "Optional parameter.\r\nSimilar face searching mode. It can be
+              \"matchPerson\" or \"matchFace\". It defaults to \"matchPerson\"."
+            type: string
+        example:
+          faceId: c5c24a82-6845-4031-9d5d-978df9175426
+          largeFaceListId: sample_list
+          maxNumOfCandidatesReturned: 10
+          mode: matchPerson
+      FindSimilarResult:
+        type: object
+        properties:
+          faceId:
+            description: "FaceId of candidate face when find by faceIds. faceId is created
+              by Face - Detect\r\nand will expire 24 hours after the detection call."
+            type: string
+          persistedFaceId:
+            description: "PersistedFaceId of candidate face when find by faceListId or
+              largeFaceListId.\r\nPersistedFaceId in face list/large face list is persisted
+              and will not expire."
+            type: string
+          confidence:
+            format: float
+            description: "Similarity confidence of the candidate face.\r\nThe higher confidence,
+              the more similar. Range between [0,1]."
+            type: number
+      GroupRequest:
+        description: "Divide candidate faces into groups based on face similarity.\r\nThe
+          output is one or more disjointed face groups and a messyGroup.\r\nA face group
+          contains faces that have similar looking, often of the same person.\r\nFace
+          groups are ranked by group size, i.e.number of faces.\r\nNotice that faces belonging
+          to a same person might be split into several groups in the result.\r\nMessyGroup
+          is a special face group containing faces that\r\ncannot find any similar counterpart
+          face from original faces.\r\nThe messyGroup will not appear in the result if
+          all faces found their counterparts.\r\nGroup API needs at least 2 candidate
+          faces and 1000 at most.\r\nWe suggest to try Face - Verify when you only have
+          2 candidate faces."
+        type: object
+        properties:
+          faceIds:
+            description: Array of candidate faceId created by Face - Detect. The maximum
+              is 1000 faces.
+            uniqueItems: false
+            type: array
+            items:
+              type: string
+        example:
+          faceIds:
+          - c5c24a82-6845-4031-9d5d-978df9175426
+          - 015839fb-fbd9-4f79-ace9-7675fc2f1dd9
+          - 65d083d4-9447-47d1-af30-b626144bf0fb
+          - fce92aed-d578-4d2e-8114-068f8af4492e
+          - 30ea1073-cc9e-4652-b1e3-d08fb7b95315
+          - be386ab3-af91-4104-9e6d-4dae4c9fddb7
+          - fbd2a038-dbff-452c-8e79-2ee81b1aa84e
+          - b64d5e15-8257-4af2-b20a-5a750f8940e7
+      GroupResponse:
+        type: object
+        properties:
+          groups:
+            description: A partition of the original faces based on face similarity. Groups
+              are ranked by number of faces.
+            uniqueItems: false
+            type: array
+            items:
+              uniqueItems: false
+              type: array
+              items:
+                type: string
+          messyGroup:
+            description: Face ids array of faces that cannot find any similar faces from
+              original faces.
+            uniqueItems: false
+            type: array
+            items:
+              type: string
+      IdentificationRequest:
+        type: object
+        properties:
+          confidenceThreshold:
+            format: float
+            type: number
+          faceIds:
+            uniqueItems: false
+            type: array
+            items:
+              type: string
+          largePersonGroupId:
+            type: string
+          maxNumOfCandidatesReturned:
+            format: int32
+            type: integer
+          personGroupId:
+            type: string
+        example:
+          confidenceThreshold: 0.5
+          faceIds:
+          - c5c24a82-6845-4031-9d5d-978df9175426
+          - 65d083d4-9447-47d1-af30-b626144bf0fb
+          largePersonGroupId: sample_group
+          maxNumOfCandidatesReturned: 1
+      IdentificationResult:
+        type: object
+        properties:
+          faceId:
+            type: string
+          candidates:
+            uniqueItems: false
+            type: array
+            items:
+              "$ref": "#/definitions/Candidate"
+      Candidate:
+        type: object
+        properties:
+          personId:
+            type: string
+          confidence:
+            format: float
+            type: number
+      VerificationRequest:
+        description: "Request of verify whether two faces belong to a same person or whether
+          one face belongs to a person.\r\nFor face to face verification, Microsoft.CloudAI.Containers.ControllerContracts.VerificationRequest.FaceId1
+          and Microsoft.CloudAI.Containers.ControllerContracts.VerificationRequest.FaceId2
+          are required as faces to compare.\r\nFor face to person verification, uses Microsoft.CloudAI.Containers.ControllerContracts.VerificationRequest.FaceId
+          as target face id, while using Microsoft.CloudAI.Containers.ControllerContracts.VerificationRequest.LargePersonGroupId\r\nand
+          Microsoft.CloudAI.Containers.ControllerContracts.VerificationRequest.PersonId
+          to specify the person inside large person group."
+        type: object
+        properties:
+          faceId:
+            description: The ID of the target face to compare in face to person verification.
+            type: string
+          faceId1:
+            description: The ID of the first face to compare in face to face verification.
+            type: string
+          faceId2:
+            description: The ID of the second face to compare in face to face verification.
+            type: string
+          largePersonGroupId:
+            description: The large person group ID containing the target person, in face
+              to person verification.
+            type: string
+          personGroupId:
+            description: The person group ID containing the target person, in face to
+              person verification.
+            type: string
+          personId:
+            description: The target person ID in face to person verification.
+            type: string
+        example:
+          faceId: c5c24a82-6845-4031-9d5d-978df9175426
+          largePersonGroupId: sample_group
+          personId: 815df99c-598f-4926-930a-a734b3fd651c
+      VerificationResponse:
+        description: The response to verify request.
+        type: object
+        properties:
+          confidence:
+            format: float
+            description: "A number indicates the similarity confidence of whether two
+              faces belong to the same person,\r\nor whether the face belongs to the person.
+              By default, isIdentical is set to True\r\nif similarity confidence is greater
+              than or equal to 0.5. This is useful for advanced users to\r\noverride \"isIdentical\"
+              and fine-tune the result on their own data."
+            type: number
+          isIdentical:
+            description: True if the two faces belong to the same person or the face belongs
+              to the person, otherwise false.
+            type: boolean
+      NameAndUserDataWithRecognitionModelContract:
+        description: Base class containing user-specified name, data and RecognitionModel.
+        type: object
+        properties:
+          recognitionModel:
+            type: string
+          name:
+            description: User-specified name.
+            type: string
+          userData:
+            description: User-specified data.
+            type: string
+        example:
+          recognitionModel: Recognition_02
+          name: User-provided name.
+          userData: User-provided data.
+      FaceListResponse:
+        description: Response to the query of face list.
+        type: object
+        properties:
+          faceListId:
+            description: User-specified id of the face list.
+            type: string
+          persistedFaces:
+            description: Persisted faces in the face list.
+            uniqueItems: false
+            type: array
+            items:
+              "$ref": "#/definitions/PersistedFaceResponse"
+          recognitionModel:
+            description: Recognition model type.
+            enum:
+            - recognition_01
+            - recognition_02
+            type: string
+          name:
+            description: User-specified name.
+            type: string
+          userData:
+            description: User-specified data.
+            type: string
+      PersistedFaceResponse:
+        description: Response to the query of the persisted face of person group person
+          or face list.
+        type: object
+        properties:
+          persistedFaceId:
+            format: uuid
+            description: Id of the persisted face.
+            type: string
+          userData:
+            description: User-specified data.
+            type: string
+      NameAndUserDataContract:
+        description: Base class containing user-specified name and data.
+        type: object
+        properties:
+          name:
+            description: User-specified name.
+            type: string
+          userData:
+            description: User-specified data.
+            type: string
+        example:
+          name: User-provided name.
+          userData: User-provided data.
+      LargeFaceListResponse:
+        description: Response to the query of large face list.
+        type: object
+        properties:
+          largeFaceListId:
+            description: User-specified id of the large face list.
+            type: string
+          recognitionModel:
+            description: Recognition model type.
+            enum:
+            - recognition_01
+            - recognition_02
+            type: string
+          name:
+            description: User-specified name.
+            type: string
+          userData:
+            description: User-specified data.
+            type: string
+      TrainingStatus:
+        description: Training status of the collection (person group or face list).
+        type: object
+        properties:
+          status:
+            enum:
+            - notStarted
+            - running
+            - succeeded
+            - failed
+            type: string
+          createdDateTime:
+            format: date-time
+            description: Time when the collection was created.
+            type: string
+          lastActionDateTime:
+            format: date-time
+            description: Time when the collection was last modified.
+            type: string
+          message:
+            description: Failure message when training failed (omitted when training succeed).
+            type: string
+          lastSuccessfulTrainingDateTime:
+            format: date-time
+            description: Time when the collection was last successfully trained.
+            type: string
+      UserDataContract:
+        description: Base class containing user-specified data.
+        type: object
+        properties:
+          userData:
+            description: User-specified data.
+            type: string
+        example:
+          userData: User-provided data.
+      LargePersonGroupResponse:
+        description: Response to the query of large person group.
+        type: object
+        properties:
+          largePersonGroupId:
+            description: User-specified id of the large person group.
+            type: string
+          recognitionModel:
+            description: Recognition model type.
+            enum:
+            - recognition_01
+            - recognition_02
+            type: string
+          name:
+            description: User-specified name.
+            type: string
+          userData:
+            description: User-specified data.
+            type: string
+      PersonResponse:
+        description: Response to the query of person of person group.
+        type: object
+        properties:
+          personId:
+            format: uuid
+            description: Id of the person.
+            type: string
+          persistedFaceIds:
+            description: Id list of the person's persisted faces.
+            uniqueItems: false
+            type: array
+            items:
+              format: uuid
+              type: string
+          name:
+            description: User-specified name.
+            type: string
+          userData:
+            description: User-specified data.
+            type: string
+      PersonGroupResponse:
+        description: Response to the query of person group.
+        type: object
+        properties:
+          personGroupId:
+            description: User-specified id of the person group.
+            type: string
+          recognitionModel:
+            description: Recognition model type.
+            enum:
+            - recognition_01
+            - recognition_02
+            type: string
+          name:
+            description: User-specified name.
+            type: string
+          userData:
+            description: User-specified data.
+            type: string
+      ContainerStatus:
+        type: object
+        properties:
+          service:
+            type: string
+          apiStatus:
+            type: string
+          apiStatusMessage:
+            type: string
+    tags:
+    - name: Face
+      description: Core API for detecting, identifying, and grouping faces.
+         
+     

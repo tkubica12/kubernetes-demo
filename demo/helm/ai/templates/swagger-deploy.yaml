@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: swagger
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: swagger
+  template:
+    metadata:
+      labels:
+        app: swagger
+    spec:
+      nodeSelector:
+        "beta.kubernetes.io/os": linux
+      containers:
+      - name: swagger
+        image: swaggerapi/swagger-ui:v3.30.0
+        ports:
+        - containerPort: 8080
+          name: http
+        env:
+        - name: BASE_URL
+          value: /
+        - name: SWAGGER_JSON
+          value: /apis/swagger.yaml
+        volumeMounts:
+        - name: swagger-volume
+          mountPath: /apis
+      volumes:
+        - name: swagger-volume
+          configMap:
+            name: swagger
+            items:
+              - key: swagger
+                path: swagger.yaml

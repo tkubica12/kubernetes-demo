@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: customvision-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: customvision-api
+  template:
+    metadata:
+      labels:
+        app: customvision-api
+    spec:
+      containers:
+      - name: customvision-api
+        image: tkubica/plysaci:latest
+        ports:
+        - containerPort: 80
+          name: http

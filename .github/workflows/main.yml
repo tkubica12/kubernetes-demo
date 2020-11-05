@@ -93,6 +93,9 @@ jobs:
         ARM_TENANT_ID: ${{ secrets.tenant_id }}
         INGRESS_CRT: ${{ secrets.ingress_crt_b64 }}
         INGRESS_KEY: ${{ secrets.ingress_key_b64 }}
+        FACE_REGISTRY: ${{ secrets.face_registry_b64 }}
+        FACE_API_ENDPOINT: ${{ secrets.face_api_endpoint }}
+        FACE_API_KEY: ${{ secrets.face_api_key }}
       run: |
         helm upgrade -i baseconfig ./helm/cluster \
           --set upn=admin@tomaskubicaoffice.onmicrosoft.com \
@@ -107,7 +110,10 @@ jobs:
           --set linkerdhost=linkerd.i.cloud.tomaskubica.net \
           --set istioBaseUrl=istio.cloud.tomaskubica.net \
           --set ingressCrt=${INGRESS_CRT} \
-          --set ingressKey=${INGRESS_KEY}
+          --set ingressKey=${INGRESS_KEY} \
+          --set face-registry-b64=${FACE_REGISTRY} \
+          --set face_api_endpoint=${FACE_API_ENDPOINT} \
+          --set face_api_key=${FACE_API_KEY}
 
     # - name: Appliction Insights codeless injector
     #   working-directory: ./demo

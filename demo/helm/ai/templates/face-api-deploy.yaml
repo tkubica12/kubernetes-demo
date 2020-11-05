@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: face-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: face-api
+  template:
+    metadata:
+      labels:
+        app: face-api
+    spec:
+      containers:
+      - name: face-api
+        image: containerpreview.azurecr.io/microsoft/cognitive-services-face:latest
+        ports:
+        - containerPort: 5000
+          name: http
+        env:
+        - name: Eula
+          value: accept
+        - name: Billing
+          valueFrom:
+            secretKeyRef:
+              name: face-api
+              key: endpoint
+        - name: ApiKey
+          valueFrom:
+            secretKeyRef:
+              name: face-api
+              key: key
+      imagePullSecrets:
+      - name: face-registry
