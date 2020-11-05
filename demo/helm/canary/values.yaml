@@ -1,7 +1,7 @@
 replicaCount: 3
 ingress:
   canary:
-    host: canary.nginx.i.cloud.tomaskubica.in
+    host: canary.nginx.i.tomaskubica.net
     imagetag: 3.2.0
     ui:
       color: #34577b
@@ -10,7 +10,7 @@ ingress:
       unhealthy: false
       unready: false
   ab:
-    host: ab.nginx.i.cloud.tomaskubica.in
+    host: ab.nginx.i.tomaskubica.net
     imagetag: 3.2.0
     ui:
       color: #34577b
