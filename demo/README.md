@@ -538,3 +538,15 @@ Some components deployed in this demo also access Azure resources via Managed Id
 Some components are using standard passwords/connection_strings until managed identity is supported. This includes:
 - Some DAPR components
 - PostgreSQL connection
+
+## Hybrid services
+Demonstration of deploying Azure services in any Kubernetes environment.
+
+### Azure Arc for Data Services
+Environment ready, description TBD
+
+### AI - cognitive services
+Environment ready, description TBD
+
+### Azure API Management - gateway in Kubernetes
+Environment ready, description TBD

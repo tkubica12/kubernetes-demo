@@ -243,6 +243,22 @@ jobs:
       run: |
         helm upgrade -i ai ./helm/ai --set baseUrl=ai.i.tomaskubica.net
 
+    - name: Deploy API Management demo
+      working-directory: ./demo
+      env:
+        KUBECONFIG: "./kube_config"
+        ARM_SUBSCRIPTION_ID: ${{ secrets.subscription_id }}
+        ARM_CLIENT_ID: ${{ secrets.client_id }}
+        ARM_CLIENT_SECRET: ${{ secrets.client_secret }}
+        ARM_TENANT_ID: ${{ secrets.tenant_id }}
+      run: |
+        export url="https://management.azure.com/subscriptions/$ARM_SUBSCRIPTION_ID/resourceGroups/$(terraform output resource_group)/providers/Microsoft.ApiManagement/service/$(terraform output apim_name)/gateways/myLocalGateway/generateToken?api-version=2019-12-01"
+        export token="GatewayKey $(az rest -u $url -m post -b '{"keyType": "primary", "expiry": "'$(date -d "+10 days" -Iseconds)'"}' --query value -o tsv)"
+        export endpoint="$(terraform output apim_mgmt_url)$(terraform output apim_id)?api-version=2019-12-01"
+        helm upgrade -i apim ./helm/apim \
+          --set apim.endpoint="$endpoint" \
+          --set apim.token="$token"
+
     - name: Deploy Grafana+Prometheus
       working-directory: ./demo
       env:

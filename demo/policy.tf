@@ -26,7 +26,8 @@ locals {
       "arc",
       "sql",
       "psql",
-      "openservicemesh"
+      "openservicemesh",
+      "apim"
       ]
   }
 }
@@ -102,7 +103,8 @@ resource "azurerm_policy_assignment" "kube-resource-limits" {
       "arc",
       "sql",
       "psql",
-      "openservicemesh"
+      "openservicemesh",
+      "apim"
       ]
   }
 }
@@ -147,7 +149,8 @@ resource "azurerm_policy_assignment" "kube-mandatory-labels" {
       "arc",
       "sql",
       "psql",
-      "openservicemesh"
+      "openservicemesh",
+      "apim"
       ]
   }
 }
@@ -190,7 +193,8 @@ resource "azurerm_policy_assignment" "kube-only-acr" {
       "arc",
       "sql",
       "psql",
-      "openservicemesh"
+      "openservicemesh",
+      "apim"
       ]
   }
 }

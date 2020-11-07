@@ -1,8 +1,9 @@
 # Kubernetes in Azure
 This repo contains my Kubernetes demo in Azure.
 
-# Recently added (June 2020)
+# Recently added (November 2020)
 - Complex [demo environment](demo/README.md) using Terraform, GitHub Actions and featuring many scenarios including Azure Monitor, Azure Arc for Kubernetes, Linkerd, Istio, DAPR, KEDA, Flagger, Managed identity, distributed tracing, App Gw Ingress and more
+- Added hybrid scenarios to demo environment - Arc for Data Services, API Management, AI - cognitive services
 
 # Table of Contents
 - [Deploying and operating Kubernetes on Azure (provisioning, scaling, VM-less cluster)](docs/aks.md)

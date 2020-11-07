@@ -134,4 +134,20 @@ output "ingressContributor_resource_id" {
   value = azurerm_user_assigned_identity.ingress.id
 }
 
+output "apim_name" {
+  value = azurerm_api_management.demo.name
+}
+
+output "apim_gw_name" {
+  value = azurerm_template_deployment.demo.outputs["gatewayId"]
+}
+
+output "apim_mgmt_url" {
+  value = azurerm_api_management.demo.management_api_url
+}
+
+output "apim_id" {
+  value = azurerm_api_management.demo.id
+}
+
 

@@ -1,0 +1,4 @@
+apiVersion: v1
+description: Azure API Management demo
+name: apim
+version: 0.1.0

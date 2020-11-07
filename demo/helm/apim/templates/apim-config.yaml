@@ -1,0 +1,6 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: apim-config
+data:
+  config.service.endpoint: {{ .Values.apim.endpoint }}

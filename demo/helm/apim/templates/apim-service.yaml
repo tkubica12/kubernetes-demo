@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: apim
+#   annotations:
+    # service.beta.kubernetes.io/azure-dns-label-name: apigw
+spec:
+  type: ClusterIP
+  # externalTrafficPolicy: Local
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8080
+  - name: https
+    port: 443
+    targetPort: 8081
+  selector:
+    app: apim
