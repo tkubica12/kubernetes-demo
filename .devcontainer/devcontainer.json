@@ -1,7 +1,7 @@
 {
-    "name": "terraform-codespaces",
+    "name": "tomas-codespaces",
     "settings": {
-      "terminal.integrated.shell.linux": "/bin/zsh"
+      "terminal.integrated.shell.linux": "/bin/bash"
     },
     "extensions": [
       "eamodio.gitlens",
@@ -9,5 +9,5 @@
       "hashicorp.terraform",
       "ms-azuretools.vscode-docker"
     ],
-    "postCreateCommand": "/bin/bash ./.devcontainer/post-install.sh"
+    "postCreateCommand": "/bin/bash ./.devcontainer/install.sh"
   }
