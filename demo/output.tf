@@ -135,19 +135,19 @@ output "ingressContributor_resource_id" {
 }
 
 output "apim_name" {
-  value = azurerm_api_management.demo.name
+  value = "apim-${var.env}-${random_string.prefix.result}"
 }
 
-output "apim_gw_name" {
+output "apim_gw_id" {
   value = azurerm_template_deployment.demo.outputs["gatewayId"]
 }
 
 output "apim_mgmt_url" {
-  value = azurerm_api_management.demo.management_api_url
+  value = azurerm_template_deployment.demo.outputs["apim_mgmt_url"]
 }
 
 output "apim_id" {
-  value = azurerm_api_management.demo.id
+  value = azurerm_template_deployment.demo.outputs["apim_id"]
 }
 
 
