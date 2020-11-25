@@ -9,7 +9,7 @@ spec:
     serviceAccount: sa-mssql-controller
   docker:
     imagePullPolicy: Always
-    imageTag: public-preview-sep-2020
+    imageTag: public-preview-oct-2020
     registry: mcr.microsoft.com
     repository: arcdata
   security:

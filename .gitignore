@@ -49,3 +49,4 @@ demo/intro/PROD/*
 demo/intro/TEST/*
 __pycache__/
 pythonenv3.8
+.debug
