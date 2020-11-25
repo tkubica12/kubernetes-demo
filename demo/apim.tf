@@ -36,6 +36,9 @@ resource "azurerm_template_deployment" "demo" {
             "type": "Microsoft.ApiManagement/service/gateways",
             "apiVersion": "2019-12-01",
             "name": "[concat(parameters('apimName'), '/myLocalGateway')]",
+            "dependsOn": [
+              "[resourceId('Microsoft.ApiManagement/service', parameters('apimName'))]"
+            ],
             "properties": {
                 "locationData": {
                     "name": "Prague"
