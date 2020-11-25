@@ -179,9 +179,9 @@ jobs:
       env:
         KUBECONFIG: "./kube_config"
       run: |
-        helm repo add stable https://kubernetes-charts.storage.googleapis.com/
+        helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx        
         helm repo update
-        helm upgrade -i ingress-nginx stable/nginx-ingress -n ingress \
+        helm upgrade -i ingress-nginx ingress-nginx/ingress-nginx -n ingress \
           --set controller.service.annotations."service\.beta\.kubernetes\.io\/azure-dns-label-name"=tomasclouddemo1616 \
           --set controller.podAnnotations."prometheus\.io/scrape"=true \
           --set controller.podAnnotations."prometheus\.io/port"=10254 \
@@ -272,15 +272,17 @@ jobs:
         ARM_CLIENT_SECRET: ${{ secrets.client_secret }}
         ARM_TENANT_ID: ${{ secrets.tenant_id }}
       run: |
-        helm repo add stable https://kubernetes-charts.storage.googleapis.com
+        helm repo add grafana https://grafana.github.io/helm-charts
+        helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+        helm repo add stable https://charts.helm.sh/stable
         helm repo update
-        helm upgrade -i grafana stable/grafana -n grafana -f helm/cluster/grafana-values.yaml \
+        helm upgrade -i grafana grafana/grafana -n grafana -f helm/cluster/grafana-values.yaml \
           --set subscriptionId=$GRAFANA_SUBSCRIPTION_ID \
           --set clientId=$GRAFANA_CLIENT_ID \
           --set clientSecret=$GRAFANA_CLIENT_SECRET \
           --set tenantId=$GRAFANA_TENANT_ID \
           --set workspaceId=$(terraform output workspace_id)
-        helm upgrade -i prometheus stable/prometheus -n prometheus -f helm/cluster/prometheus-values.yaml
+        helm upgrade -i prometheus prometheus-community/prometheus -n prometheus -f helm/cluster/prometheus-values.yaml
     
     - name: Build apps
       working-directory: ./demo
