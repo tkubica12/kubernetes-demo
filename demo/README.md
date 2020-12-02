@@ -263,6 +263,16 @@ kubectl port-forward $(kubectl get pods --selector app=bookthief -n osm-demo --n
 # Bookbuyer on 9020
 kubectl port-forward $(kubectl get pods --selector app=bookbuyer -n osm-demo --no-headers | grep 'Running' | awk '{print $1}') -n osm-demo 9020:80 &
 
+# Bookwarehouse on 9030
+kubectl port-forward $(kubectl get pods --selector app=bookwarehouse -n osm-demo --no-headers | grep 'Running' | awk '{print $1}') -n osm-demo 9030:80 &
+
+# Grafana on 9040
+kubectl port-forward $(kubectl get pods --selector app=osm-grafana -n osm-system --no-headers | grep 'Running' | awk '{print $1}') -n osm-system 9040:3000 &
+# Jaeger on 9041
+kubectl port-forward $(kubectl get pods --selector app=jaeger -n osm-system --no-headers | grep 'Running' | awk '{print $1}') -n osm-system 9041:16686 &
+# Prometheus on 9042
+kubectl port-forward $(kubectl get pods --selector app=osm-prometheus -n osm-system --no-headers | grep 'Running' | awk '{print $1}') -n osm-system 9042:7070 &
+
 # Stop forwarding
 killall kubectl
 ```
