@@ -86,7 +86,16 @@ metadata:
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: openservicemesh
+  name: osm-system
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: osm-demo
+  annotations:
+    openservicemesh.io/sidecar-injection: enabled
+  labels:
+    openservicemesh.io/monitored-by: osm
 ---
 apiVersion: v1
 kind: Namespace

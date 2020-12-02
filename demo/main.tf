@@ -15,7 +15,7 @@ variable "admin_group_id" {}
 
 # Configure the Azure and AAD provider
 provider "azurerm" {
-  version = "=2.33.0"
+  version = "=2.38.0"
   features {}
 }
 

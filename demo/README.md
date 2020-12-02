@@ -235,6 +235,72 @@ Telemetry and logs are also gathered to Azure Monitor.
 ## Windows nodes
 Basic IIS instance is accessible at iis.cloud.tomaskubica.net and runs in windows namespace.
 
+## Open Service Mesh
+
+### Bookstore demo
+Bookstore sample application is deployed in osm-demo namespace based on official OSM demo. Demo steps are prepared as flaggs in Helm Chart.
+
+```bash
+helm upgrade -i osm-bookstore ./helm/bookstore -n osm-demo \
+  --set namespace=osm-demo \
+  --set thief=false \
+  --set weight.v1=100 \
+  --set weight.v2=0 
+```
+
+Use port-forwarding to access services.
+
+```bash
+# Bookstore-v1 on 9001
+kubectl port-forward $(kubectl get pods --selector app=bookstore-v1 -n osm-demo --no-headers | grep 'Running' | awk '{print $1}') -n osm-demo 9001:80 &
+
+# Bookstore-v2 on 9002
+kubectl port-forward $(kubectl get pods --selector app=bookstore-v1 -n osm-demo --no-headers | grep 'Running' | awk '{print $1}') -n osm-demo 9002:80 &
+
+# Bookthief on 9010
+kubectl port-forward $(kubectl get pods --selector app=bookthief -n osm-demo --no-headers | grep 'Running' | awk '{print $1}') -n osm-demo 9010:80 &
+
+# Bookbuyer on 9020
+kubectl port-forward $(kubectl get pods --selector app=bookbuyer -n osm-demo --no-headers | grep 'Running' | awk '{print $1}') -n osm-demo 9020:80 &
+
+# Stop forwarding
+killall kubectl
+```
+
+Demonstrate:
+- Bookstore counters get incremented because TrafficTarget is configured for Bookbuyer to talk to Bookstore (note specific headers etc.)
+- Bookbuyer UI shows incrementing counters
+- Bookthief counters are not incrementing as default policy is deny all and traffic has not been permitted
+- Show TrafficTarget CRD
+
+Upgrade Helm chart and switch flag to allow traffic from Bookthief to Bookbuyer.
+
+```bash
+helm upgrade -i osm-bookstore ./helm/bookstore -n osm-demo \
+  --set namespace=osm-demo \
+  --set thief=true \
+  --set weight.v1=100 \
+  --set weight.v2=0 
+```
+
+Demonstrate:
+- Show TrafficTarget CRD
+- Show Bookthief counter being incremented
+
+Upgrade Helm Chart to send 10% of traffic to v2.
+
+```bash
+helm upgrade -i osm-bookstore ./helm/bookstore -n osm-demo \
+  --set namespace=osm-demo \
+  --set thief=true \
+  --set weight.v1=90 \
+  --set weight.v2=10 
+```
+
+Demonstrate:
+- Show Bookbuyer counter to see v2 being slowly incremented
+
+
 ## Linkerd Service Mesh
 Todo application is deployed in linkerd-demo namespace and can be accessed at [http://linkerd.cloud.tomaskubica.net](http://linkerd.cloud.tomaskubica.net)
 

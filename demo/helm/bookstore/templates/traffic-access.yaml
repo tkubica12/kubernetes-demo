@@ -1,0 +1,47 @@
+kind: TrafficTarget
+apiVersion: access.smi-spec.io/v1alpha2
+metadata:
+  name: bookstore-v1
+  namespace: {{ .Values.namespace }}
+spec:
+  destination:
+    kind: ServiceAccount
+    name: bookstore-v1
+    namespace: {{ .Values.namespace }}
+  rules:
+  - kind: HTTPRouteGroup
+    name: bookstore-service-routes
+    matches:
+    - buy-a-book
+    - books-bought
+  sources:
+  - kind: ServiceAccount
+    name: bookbuyer
+    namespace: {{ .Values.namespace }}
+{{ if .Values.thief }}
+  - kind: ServiceAccount
+    name: bookthief
+    namespace: {{ .Values.namespace }}
+{{ end }}
+---
+apiVersion: specs.smi-spec.io/v1alpha3
+kind: HTTPRouteGroup
+metadata:
+  name: bookstore-service-routes
+  namespace: {{ .Values.namespace }}
+spec:
+  matches:
+  - name: books-bought
+    pathRegex: /books-bought
+    methods:
+    - GET
+    headers:
+    - host: "bookstore.{{ .Values.namespace }}"
+    - "user-agent": ".*-http-client/*.*"
+    - "client-app": "bookbuyer"
+  - name: buy-a-book
+    pathRegex: ".*a-book.*new"
+    methods:
+    - GET
+    headers:
+    - host: "bookstore.{{ .Values.namespace }}"

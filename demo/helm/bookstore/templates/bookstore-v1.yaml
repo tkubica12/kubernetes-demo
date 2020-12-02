@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: bookstore
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: bookstore
+spec:
+  ports:
+  - port: 80
+    name: bookstore-port
+  selector:
+    app: bookstore
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bookstore-v1
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: bookstore
+    version: v1
+spec:
+  ports:
+  - port: 80
+    name: bookstore-port
+  selector:
+    app: bookstore-v1
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: bookstore-v1
+  namespace: {{ .Values.namespace }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bookstore-v1
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bookstore-v1
+  template:
+    metadata:
+      labels:
+        app: bookstore-v1
+    spec:
+      serviceAccountName: bookstore-v1
+      containers:
+        - name: bookstore
+          image: openservicemesh/bookstore:v0.2.0
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+              name: web
+          command: ["/bookstore"]
+          args: ["--path", "./", "--port", "80"]
+          env:
+            - name: BOOKWAREHOUSE_NAMESPACE
+              value: {{ .Values.namespace }}
+            - name: IDENTITY
+              value: bookstore-v1

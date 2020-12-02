@@ -1,0 +1,12 @@
+apiVersion: split.smi-spec.io/v1alpha2
+kind: TrafficSplit
+metadata:
+  name: bookstore-split
+  namespace: {{ .Values.namespace }}
+spec:
+  service: bookstore.{{ .Values.namespace }} # <root-service>.<namespace>
+  backends:
+  - service: bookstore-v1
+    weight: {{ .Values.weight.v1 }}
+  - service: bookstore-v2
+    weight: {{ .Values.weight.v2 }}

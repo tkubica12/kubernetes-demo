@@ -1,0 +1,30 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: azure/application-gateway
+  name: bookstore-ingress
+  namespace: {{ .Values.namespace }}
+spec:
+  rules:
+    - host: bookstore.{{ .Values.appbasehost }}
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: bookstore
+              servicePort: 80
+    - host: bookstore-v1.{{ .Values.appbasehost }}
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: bookstore-v1
+              servicePort: 80
+    - host: bookstore-v2.{{ .Values.appbasehost }}
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: bookstore-v2
+              servicePort: 80
