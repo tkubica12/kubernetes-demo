@@ -3,7 +3,7 @@ resource "azurerm_template_deployment" "demo" {
   resource_group_name = azurerm_resource_group.demo.name
   deployment_mode     = "Incremental"
   parameters = {
-    "apimName" = "apim-${var.env}-${random_string.prefix.result}"
+    "apimName" = "apimgmt-${var.env}-${random_string.prefix.result}"
   }
 
   template_body = <<TEMPLATE
